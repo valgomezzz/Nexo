@@ -2,23 +2,77 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Los usuarios autenticados pueden consultar perfiles
+
+    // Funciones auxiliares de autenticación y rol
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function userRole() {
+      return getUserData().rol;
+    }
+
+    function isEstudiante() {
+      return isAuthenticated() && userRole() == 'ESTUDIANTE';
+    }
+
+    function isDocente() {
+      return isAuthenticated() && userRole() == 'DOCENTE';
+    }
+
+    function isDireccionOrAdmin() {
+      return isAuthenticated() && (userRole() == 'DIRECCION' || userRole() == 'ADMIN');
+    }
+
+    // 1. Colección de Usuarios:
+    // Cualquier usuario con sesión iniciada puede leer los datos de perfil
     match /users/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
     }
 
-    // Las asignaturas pueden ser leídas por cualquier usuario autenticado
+    // 2. Colección de Asignaturas:
+    // Los estudiantes y docentes pueden consultar las materias
     match /subjects/{subjectId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null;
+      allow read: if isAuthenticated();
+      allow write: if isDireccionOrAdmin();
     }
 
-    // Reportes de dificultades académicas
+    // 3. Colección de Reportes de Dificultades Académicas:
     match /reports/{reportId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null;
+      // LECTURA:
+      // - Estudiante: únicamente sus propios reportes
+      // - Docente: únicamente reportes dirigidos a asignaturas a su cargo
+      // - Dirección / Administración: todos los reportes para métricas globales
+      allow read: if isAuthenticated() && (
+        resource.data.studentUid == request.auth.uid ||
+        resource.data.professorUid == request.auth.uid ||
+        isDireccionOrAdmin()
+      );
+
+      // CREACIÓN:
+      // Solo un estudiante puede crear reportes y debe registrarse como emisor
+      allow create: if isEstudiante() &&
+        request.resource.data.studentUid == request.auth.uid &&
+        request.resource.data.estado == 'PENDIENTE';
+
+      // ACTUALIZACIÓN DE ESTADO:
+      // Solo el docente asignado a esa materia (o dirección) puede cambiar el estado
+      allow update: if isAuthenticated() && (
+        (isDocente() && resource.data.professorUid == request.auth.uid) ||
+        isDireccionOrAdmin()
+      );
+
+      // Prohibido eliminar reportes para trazabilidad y auditoría
+      allow delete: if false;
     }
   }
 }
