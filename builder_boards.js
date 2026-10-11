@@ -2,11 +2,15 @@ const fs = require('fs');
 const zlib = require('zlib');
 const crypto = require('crypto');
 
-// Read the base CSS and fonts from unpacked student page
-const studentHtml = fs.readFileSync('inner_unpacked_5b6f151c-2097-488a-a07e-3581cf63cf23.html', 'utf8');
-const headMatch = studentHtml.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
-let headContent = headMatch ? headMatch[1] : '';
-headContent = headContent.replace(/<title>[\s\S]*?<\/title>/gi, '');
+const landingContent = fs.readFileSync('Nexo · Landing page.html', 'utf8');
+const rootManifest = JSON.parse(landingContent.match(/<script type="__bundler\/manifest">([\s\S]*?)<\/script>/)[1]);
+
+// Extract Board 3 (Estudiante - Mis asignaturas) which contains the complete font bundle & helmet
+const b3Raw = zlib.gunzipSync(Buffer.from(rootManifest['5b6f151c-2097-488a-a07e-3581cf63cf23'].data, 'base64')).toString('utf8');
+const b3TplStr = b3Raw.match(/<script type="__bundler\/template">([\s\S]*?)<\/script>/)[1];
+const b3Template = JSON.parse(b3TplStr);
+const helmetMatch = b3Template.match(/<helmet>([\s\S]*?)<\/helmet>/i);
+const b3Helmet = helmetMatch ? helmetMatch[1] : '';
 
 // Extra utility styles to complement the existing design system
 const extraStyles = `
@@ -37,19 +41,31 @@ const extraStyles = `
 .timeline-dot{width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #E7DFDB;flex:none}
 </style>
 `;
-headContent += extraStyles;
 
 function createPage(title, bodyInner) {
-  return `<!DOCTYPE html>
-<html lang="es">
-<head>
-${headContent}
+  const innerTemplate = `<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8">
 <title>${title}</title>
 </head>
 <body>
+<x-dc>
+<helmet>
+${b3Helmet}
+${extraStyles}
+</helmet>
 ${bodyInner}
-</body>
-</html>`;
+</x-dc>
+</body></html>`;
+
+  let outer = b3Raw;
+  outer = outer.replace(/<title>[\s\S]*?<\/title>/i, `<title>${title}</title>`);
+  outer = outer.replace(/<div id="__bundler_placeholder">[\s\S]*?<\/div>/i, `<div id="__bundler_placeholder">Loading ${title}...</div>`);
+  outer = outer.replace(
+    /<script type="__bundler\/template">[\s\S]*?<\/script>/,
+    `<script type="__bundler/template">\n${JSON.stringify(innerTemplate)}\n  </script>`
+  );
+  return outer;
 }
 
 function createDocentDock(activePage = 'reports', pendingCount = 3) {
@@ -725,8 +741,12 @@ if (manifestMatch) {
   }
   const pageOrder = [...ORIGINAL_5];
 
-  let template = fs.readFileSync('unpacked_template.html', 'utf8');
-  template = template.replace(/<\/body>[\s\S]*?<\/html>/i, '').trim();
+  const templateMatch = originalLanding.match(/<script type="__bundler\/template">([\s\S]*?)<\/script>/);
+  let rawTemplate = JSON.parse(templateMatch[1]);
+  const boardSections = rawTemplate.match(/<section class="board"[\s\S]*?<\/section>/g) || [];
+  const first5Sections = boardSections.slice(0, 5).join('\n');
+  const templateHead = rawTemplate.split(/<section class="board"/i)[0];
+  let template = templateHead + first5Sections;
 
   for (const b of boards) {
     pageOrder.push(b.id);
