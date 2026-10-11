@@ -47,6 +47,7 @@ function createPage(title, bodyInner) {
 <html lang="es"><head>
 <meta charset="utf-8">
 <title>${title}</title>
+<script>if (window.parent && window.parent.NexoAPI) window.NexoAPI = window.parent.NexoAPI;</script>
 </head>
 <body>
 <x-dc>
@@ -796,7 +797,15 @@ if (manifestMatch) {
     `<script type="__bundler/page_order">\n${JSON.stringify(pageOrder)}\n  </script>`
   );
 
+  // Conectar con el backend en la cabecera
+  if (!updatedLanding.includes('nexo-api.js')) {
+    updatedLanding = updatedLanding.replace(
+      '</head>',
+      '  <script type="module" src="nexo-api.js"></script>\n</head>'
+    );
+  }
   fs.writeFileSync('Nexo · Landing page.html', updatedLanding, 'utf8');
+  fs.writeFileSync('index.html', updatedLanding, 'utf8');
   console.log('SUCCESS: Updated "Nexo · Landing page.html" with all Docente and Dirección boards!');
 } else {
   console.error('Failed to parse originalLanding tags');
