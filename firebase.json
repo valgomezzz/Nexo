@@ -4,11 +4,19 @@
   },
   "hosting": {
     "public": ".",
-    "ignore": ["firebase.json", "firestore.rules", "backend/**", "**/.*", "*.md"],
+    "ignore": [
+      "firebase.json",
+      "firestore.rules",
+      "backend/**",
+      "**/.*",
+      "*.md"
+    ],
     "cleanUrls": true,
     "rewrites": [
-      { "source": "/api/**", "run": { "serviceId": "api", "region": "us-central1" } },
-      { "source": "/", "destination": "/Nexo.html" }
+      {
+        "source": "**",
+        "destination": "/Nexo.html"
+      }
     ]
   }
 }
