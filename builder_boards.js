@@ -47,7 +47,7 @@ function createPage(title, bodyInner) {
 <html lang="es"><head>
 <meta charset="utf-8">
 <title>${title}</title>
-<script>if (window.parent && window.parent.NexoAPI) window.NexoAPI = window.parent.NexoAPI;</script>
+
 </head>
 <body>
 <x-dc>
