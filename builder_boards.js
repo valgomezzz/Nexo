@@ -104,7 +104,7 @@ function createDock({ nav, done, total, caption, ini, name, avatarBg }) {
 </div>
 <div style="position:relative;width:228px;flex:1 0 auto;display:flex;flex-direction:column;gap:24px">
 <div style="display:flex;align-items:center;justify-content:space-between"><a href="#" aria-label="Nexo" style="display:flex"><svg width="44" height="44" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="10" fill="#832F2F"/><circle cx="12.5" cy="10.5" r="3.2" fill="#fff"/><circle cx="23.5" cy="10.5" r="3.2" fill="#A2CDAB"/><path d="M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-<button sc-camel-on-click="{{toggle}}" aria-label="Ocultar panel" style="width:38px;height:38px;border-radius:50%;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:#fff;color:#832F2F;box-shadow:inset 0 1px 0 #fff,0 8px 16px -8px rgba(64,32,32,.4)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button></div>
+<button sc-camel-on-click="{{toggle}}" aria-label="Desplegar menú" title="Desplegar menú" style="width:38px;height:38px;border-radius:50%;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:#fff;color:#832F2F;box-shadow:inset 0 1px 0 #fff,0 8px 16px -8px rgba(64,32,32,.4)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div>
 <nav aria-label="Principal" style="display:flex;flex-direction:column;gap:8px">
 ${nav.map(([label, icon, on]) => `<a class="nv ${on ? 'on' : ''}" href="#">${ico(icon)}${label}</a>`).join('\n')}
 </nav>
@@ -117,8 +117,7 @@ ${nav.map(([label, icon, on]) => `<a class="nv ${on ? 'on' : ''}" href="#">${ico
 <a class="out" href="#" aria-label="Cerrar sesión" title="Cerrar sesión" style="width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></a>
 </div>
 </div>
-</aside>
-<sc-if value="{{closed}}" hint-placeholder-val="{{false}}"><button class="z" sc-camel-on-click="{{toggle}}" aria-label="Mostrar panel" style="position:absolute;left:16px;top:24px;z-index:5;width:48px;height:48px;border-radius:50%;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#832F2F;background:linear-gradient(180deg,#fff,#F6EFEC);box-shadow:inset 0 1px 0 #fff,0 16px 28px -10px rgba(64,32,32,.5)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></sc-if>`;
+</aside>`;
 }
 
 function createDocentDock(active = 'reports') {
@@ -141,7 +140,7 @@ const DOCK_SCRIPT = `<script type="text/x-dc" data-dc-script="" data-props="{&qu
 class Component extends DCLogic {
 renderVals() {
 const open = !(this.state && this.state.open === false);
-return { closed: !open, toggle: () => this.setState({ open: !open }),
+return { closed: !open, reopenStyle: open ? 'display:none' : 'display:flex', toggle: () => this.setState({ open: !open }),
 dockStyle: open ? 'flex:0 0 268px;opacity:1' : 'flex:0 0 0px;padding-left:0;padding-right:0;opacity:0;pointer-events:none;border-right-width:0' };
 }
 }
@@ -741,6 +740,24 @@ if (manifestMatch) {
   for (const id of ORIGINAL_5) {
     if (manifest[id]) cleanManifest[id] = manifest[id];
   }
+  
+  // Clean Board 3 (Estudiante) so that the arrow is replaced with the menu icon and the floating button over the logo is removed
+  const b3Id = '5b6f151c-2097-488a-a07e-3581cf63cf23';
+  if (cleanManifest[b3Id]) {
+    let b3Raw = zlib.gunzipSync(Buffer.from(cleanManifest[b3Id].data, 'base64')).toString('utf8');
+    const tplMatch = b3Raw.match(/<script type="__bundler\/template">([\s\S]*?)<\/script>/);
+    if (tplMatch) {
+      let innerHtml = JSON.parse(tplMatch[1]);
+      // Replace arrow with hamburger menu icon
+      innerHtml = innerHtml.replace(/<path d="m15 18-6-6 6-6"><\/path>/g, '<path d="M4 6h16M4 12h16M4 18h16"><\/path>');
+      innerHtml = innerHtml.replace(/aria-label="Ocultar panel"/g, 'aria-label="Desplegar menú" title="Desplegar menú"');
+      // Remove the floating button over the logo
+      innerHtml = innerHtml.replace(/<sc-if value="{{closed}}" hint-placeholder-val="{{false}}"><button class="z" sc-camel-on-click="{{toggle}}" aria-label="Mostrar panel"[\s\S]*?<\/button><\/sc-if>/g, '');
+      b3Raw = b3Raw.replace(tplMatch[0], '<script type="__bundler/template">\n' + JSON.stringify(innerHtml).replace(/<\//g, '<\\/') + '\n  </script>');
+    }
+    cleanManifest[b3Id].data = zlib.gzipSync(Buffer.from(b3Raw, 'utf8')).toString('base64');
+  }
+
   const pageOrder = [...ORIGINAL_5];
 
   const templateMatch = originalLanding.match(/<script type="__bundler\/template">([\s\S]*?)<\/script>/);
