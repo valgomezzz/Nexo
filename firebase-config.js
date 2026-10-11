@@ -14,3 +14,12 @@ export const FIREBASE_CONFIG = {
   appId: "1:935100505506:web:03a22fb21e7dbbdff0e6fb",
   measurementId: "G-2874T2BZVR"
 };
+
+/**
+ * URL base del backend en Java.
+ * Cuando se ejecuta `mvn compile exec:java`, atiende en http://localhost:8080/api
+ */
+export const API_BASE = (typeof location !== 'undefined' && (location.hostname === 'localhost' || location.hostname === '127.0.0.1'))
+  ? 'http://localhost:8080/api'
+  : '/api';
+

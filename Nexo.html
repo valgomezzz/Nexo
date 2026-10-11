@@ -1331,10 +1331,11 @@ document.addEventListener('submit', async (e) => {
 async function initApp() {
   document.documentElement.setAttribute('data-theme', AppState.theme);
 
-  // Actualizar estado de Firebase en UI
+  // Actualizar estado de Backend en UI
   const fbText = document.getElementById('fbStatusText');
   if (fbText) {
-    fbText.textContent = NexoAPI.isFirebaseActive ? `Firestore: ${NexoAPI.projectId}` : 'Nexo Firebase';
+    const status = await NexoAPI.checkStatus();
+    fbText.textContent = status.java ? 'Java 17 Backend (8080)' : (NexoAPI.isFirebaseActive ? `Firestore: ${NexoAPI.projectId}` : 'Nexo Backend');
   }
 
   // Cargar asignaturas y reportes
