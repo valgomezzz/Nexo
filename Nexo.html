@@ -573,10 +573,54 @@ try { savedTheme = localStorage.getItem('nexo-tema') || 'claro'; } catch (e) {}
 const state = {
   tema: savedTheme, themeOpen: false, screen: 'login', loginRole: 'est', loginUser: '', loginPass: '',
   step: 1, subj: null, moods: {}, comments: {}, detalle: '', sentAt: '', reported: { 'Cálculo Diferencial': '10 sep' },
-  rows: DOC_ROWS.map((r) => ({ ...r })), fA: 'Todas', fE: 'todos', menuFor: null, loadingId: null, flash: null, toast: null,
-  dSubj: DIR_SUBJ[0].n, dGroup: 'G1'
+  rows: DOC_ROWS.map((r) => ({ ...r, id: String(r.id) })), fA: 'Todas', fE: 'todos', menuFor: null, loadingId: null, flash: null, toast: null,
+  dSubj: DIR_SUBJ[0].n, dGroup: 'G1', loginError: '', loginBusy: false
 };
 const set = (patch) => { Object.assign(state, patch); render(); };
+
+/* =========================================================
+   CONEXIÓN CON EL BACKEND (Firebase Auth + API en Java)
+   Si firebase-config.js no está configurado, se usan los datos de ejemplo.
+   ========================================================= */
+const API = () => (window.NexoAPI && window.NexoAPI.enabled ? window.NexoAPI : null);
+const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const fill = (arr, items) => arr.splice(0, arr.length, ...items);
+let ALL_REPORTS = [];
+function toRow(r) {
+  const d = new Date(r.createdAt);
+  return { id: r.id, d: String(d.getDate()).padStart(2, '0'), m: MESES[d.getMonth()], asig: r.asignatura, grupo: r.grupo,
+    titulo: r.titulo, cat: r.categoria, est: r.estado, txt: r.detalle,
+    mood: Math.min(r.moods.metodologia, r.moods.contenido, r.moods.ritmo) };
+}
+async function loadData(me) {
+  const api = API();
+  const role = me.rol === 'adm' ? 'dir' : me.rol;
+  USERS[role] = { ...USERS[role], name: me.nombre, first: me.primerNombre, ini: me.iniciales };
+  const [subs, reps] = await Promise.all([api.subjects(), api.reports()]);
+  ALL_REPORTS = reps.map(toRow);
+  if (role === 'est') {
+    fill(EST_SUBJ, subs.map((s) => ({ id: s.id, n: s.nombre, ab: s.abreviatura, prof: s.profesor, g: s.grupo })));
+    const reported = {};
+    [...ALL_REPORTS].reverse().forEach((r) => { reported[r.asig] = `${Number(r.d)} ${r.m}`; });
+    state.reported = reported;
+    return role;
+  }
+  const st = await api.stats();
+  fill(DOC_SCORES, st.valoraciones.map((v) => [v.nombre, v.promedio]));
+  fill(DOC_WEEKS, st.porSemana.map((w) => [w.semana, w.total]));
+  fill(CATS, st.porCategoria.map((c) => [c.nombre, c.porcentaje]));
+  if (role === 'doc') {
+    fill(DOC_SUBJ, [...new Map(subs.map((s) => [s.nombre, [s.nombre, s.abreviatura]])).values()]);
+    state.rows = ALL_REPORTS.map((r) => ({ ...r }));
+  } else {
+    fill(DIR_SUBJ, st.porAsignatura.filter((a) => a.pendientes + a.enRevision + a.atendidos > 0).map((a) => ({
+      n: a.nombre, p: a.pendientes, r: a.enRevision, o: a.atendidos,
+      groups: a.grupos.map((g) => ({ g: 'G' + ((g.grupo || '').match(/\d+/) || ['?'])[0], grupo: g.grupo, p: g.profesor, t: g.total, pe: g.pendientes }))
+    })));
+    state.dSubj = DIR_SUBJ[0] ? DIR_SUBJ[0].n : '';
+  }
+  return role;
+}
 const roleOf = (sc) => sc.slice(0, 3);
 
 /* =========================================================
@@ -657,7 +701,8 @@ function viewLogin() {
           <span class="input">${icon('mail')}<input type="text" id="loginUser" value="${esc(state.loginUser)}" placeholder="ejemplo@javeriana.edu.co" autocomplete="username"></span></label>
         <label class="field">Contraseña
           <span class="input">${icon('lock')}<input type="password" id="loginPass" value="${esc(state.loginPass)}" placeholder="Tu contraseña" autocomplete="current-password"></span></label>
-        <button type="submit" class="btn btn-primary" style="min-height:54px;font-size:16px">Ingresar</button>
+        ${state.loginError ? `<p role="alert" style="color:var(--red);font-size:14px;font-weight:600">${esc(state.loginError)}</p>` : ''}
+        <button type="submit" class="btn btn-primary" style="min-height:54px;font-size:16px" ${state.loginBusy ? 'disabled' : ''}>${state.loginBusy ? 'Ingresando…' : 'Ingresar'}</button>
         <p class="muted" style="font-size:13px;text-align:center">¿Olvidaste tu contraseña? <a href="#" style="color:var(--pr-tx);font-weight:600">Recupérala aquí</a></p>
       </form>
     </section>
@@ -916,6 +961,8 @@ function viewDocStats() {
 
 /* ---------- DIRECCIÓN ---------- */
 function viewDirPanel() {
+  if (!DIR_SUBJ.length) return `<header class="page-head"><div><h1 class="display">Panorama semanal</h1></div></header>
+    <section class="panel"><div class="empty">${face(2)}<h2 class="display" style="font-size:24px">Sin reportes registrados</h2></div></section>`;
   const P_ = DIR_SUBJ.reduce((a, x) => a + x.p, 0), R_ = DIR_SUBJ.reduce((a, x) => a + x.r, 0), O_ = DIR_SUBJ.reduce((a, x) => a + x.o, 0);
   const T = P_ + R_ + O_;
   const sorted = [...DIR_SUBJ].sort((a, b) => b.p / (b.p + b.r + b.o) - a.p / (a.p + a.r + a.o));
@@ -1006,7 +1053,7 @@ const ACTIONS = {
   themeToggle: () => set({ themeOpen: !state.themeOpen, menuFor: null }),
   loginRole: (k) => set({ loginRole: k }),
   go: (sc) => { set({ screen: sc, menuFor: null }); window.scrollTo(0, 0); },
-  logout: () => set({ screen: 'login', menuFor: null, toast: null }),
+  logout: () => { if (API()) API().logout(); set({ screen: 'login', menuFor: null, toast: null, loginError: '' }); },
   closeToast: () => set({ toast: null }),
   newReport: () => { set({ screen: 'est-wizard', step: 1, subj: null, moods: {}, comments: {}, detalle: '' }); window.scrollTo(0, 0); },
   openSubj: (n) => { set({ screen: 'est-wizard', step: 2, subj: n, moods: {}, comments: {}, detalle: '' }); window.scrollTo(0, 0); },
@@ -1016,27 +1063,52 @@ const ACTIONS = {
   next: () => {
     if (!canNext()) return;
     if (state.step < 5) { set({ step: state.step + 1 }); window.scrollTo(0, 0); return; }
-    const d = new Date(), pad = (x) => String(x).padStart(2, '0');
-    const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-    const h = d.getHours() % 12 || 12, ap = d.getHours() >= 12 ? 'p. m.' : 'a. m.';
-    set({ screen: 'est-ok', sentAt: `${d.getDate()} ${meses[d.getMonth()]}, ${h}:${pad(d.getMinutes())} ${ap}`,
-      reported: { ...state.reported, [state.subj]: `${d.getDate()} ${meses[d.getMonth()]}` } });
-    window.scrollTo(0, 0);
+    const finish = (iso) => {
+      const d = iso ? new Date(iso) : new Date(), pad = (x) => String(x).padStart(2, '0');
+      const h = d.getHours() % 12 || 12, ap = d.getHours() >= 12 ? 'p. m.' : 'a. m.';
+      set({ screen: 'est-ok', toast: null, sentAt: `${d.getDate()} ${MESES[d.getMonth()]}, ${h}:${pad(d.getMinutes())} ${ap}`,
+        reported: { ...state.reported, [state.subj]: `${d.getDate()} ${MESES[d.getMonth()]}` } });
+      window.scrollTo(0, 0);
+    };
+    const api = API();
+    if (!api) return finish();
+    const subj = EST_SUBJ.find((x) => x.n === state.subj);
+    const btn = document.getElementById('nextBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
+    api.createReport({
+      subjectId: subj && subj.id,
+      moods: { metodologia: state.moods[2], contenido: state.moods[3], ritmo: state.moods[4] },
+      comments: { metodologia: state.comments[2] || '', contenido: state.comments[3] || '', ritmo: state.comments[4] || '' },
+      detalle: state.detalle
+    }).then((r) => finish(r.createdAt)).catch((e) => set({ toast: e.message }));
   },
-  toggleMenu: (id) => set({ menuFor: state.menuFor === Number(id) ? null : Number(id) }),
+  toggleMenu: (id) => set({ menuFor: state.menuFor === id ? null : id }),
   setEstado: (arg) => {
-    const [id, k] = arg.split(':'); const n = Number(id);
-    set({ menuFor: null, loadingId: n });
-    setTimeout(() => {
-      set({ rows: state.rows.map((r) => (r.id === n ? { ...r, est: k } : r)), loadingId: null, flash: n, toast: `Reporte marcado como “${EST_LABEL[k].toLowerCase()}”` });
+    const [id, k] = arg.split(':');
+    set({ menuFor: null, loadingId: id });
+    const apply = () => {
+      set({ rows: state.rows.map((r) => (r.id === id ? { ...r, est: k } : r)), loadingId: null, flash: id, toast: `Reporte marcado como “${EST_LABEL[k].toLowerCase()}”` });
       setTimeout(() => set({ flash: null, toast: null }), 3200);
-    }, 650);
+    };
+    const api = API();
+    if (!api) return setTimeout(apply, 650);
+    api.setStatus(id, k).then(apply).catch((e) => {
+      set({ loadingId: null, toast: e.message });
+      setTimeout(() => set({ toast: null }), 3200);
+    });
   },
   fE: (k) => set({ fE: k, menuFor: null }),
   clearFilters: () => set({ fA: 'Todas', fE: 'todos' }),
   docOpen: (n) => { set({ screen: 'doc-panel', fA: n, fE: 'todos' }); window.scrollTo(0, 0); },
   dirSubj: (n) => { set({ screen: 'dir-asig', dSubj: n }); window.scrollTo(0, 0); },
-  dirGroup: (g) => { set({ screen: 'dir-grupo', dGroup: g }); window.scrollTo(0, 0); }
+  dirGroup: (g) => {
+    if (API()) {
+      const cur = DIR_SUBJ.find((x) => x.n === state.dSubj);
+      const grp = cur && cur.groups.find((x) => x.g === g);
+      fill(GROUP_REPORTS, ALL_REPORTS.filter((r) => r.asig === state.dSubj && (!grp || r.grupo === grp.grupo)));
+    }
+    set({ screen: 'dir-grupo', dGroup: g }); window.scrollTo(0, 0);
+  }
 };
 
 /* Rebote: recuerda qué botón se tocó y, después de redibujar, lo anima */
@@ -1087,10 +1159,26 @@ app.addEventListener('submit', (e) => {
   if (e.target.id !== 'loginForm') return;
   bounce(e.submitter);
   e.preventDefault();
-  setTimeout(() => {
-    // Prototipo: no se valida nada, siempre deja entrar con el rol elegido
-    set({ screen: HOME[state.loginRole], loginPass: '' });
-    window.scrollTo(0, 0);
+  setTimeout(async () => {
+    const api = API();
+    if (!api) {
+      // Modo prototipo (sin Firebase configurado): entra con el rol elegido
+      set({ screen: HOME[state.loginRole], loginPass: '' });
+      window.scrollTo(0, 0);
+      return;
+    }
+    const email = state.loginUser.trim();
+    if (!/@javeriana\.edu\.co$/i.test(email)) return set({ loginError: 'Usa tu correo institucional (@javeriana.edu.co).' });
+    if (!state.loginPass) return set({ loginError: 'Escribe tu contraseña.' });
+    set({ loginBusy: true, loginError: '' });
+    try {
+      const me = await api.login(email, state.loginPass);
+      const role = await loadData(me); // el rol lo decide el servidor, no el botón elegido
+      set({ screen: HOME[role], loginPass: '', loginBusy: false });
+      window.scrollTo(0, 0);
+    } catch (err) {
+      set({ loginBusy: false, loginError: err.message });
+    }
   }, BOUNCE_WAIT);
 });
 app.addEventListener('change', (e) => { if (e.target.id === 'fA') set({ fA: e.target.value, menuFor: null }); });
@@ -1104,6 +1192,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && (state.m
 
 render();
 </script>
+<script type="module" src="nexo-api.js"></script>
 <style>.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}</style>
 </body>
 </html>
