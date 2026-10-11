@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="jave">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nexo · Sistema de Feedback Académico PUJ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..800,0..100,0..1&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<style>
+/* =========================================================
+   SISTEMA DE DISEÑO NEXO (PUJ) - PALETAS Y TEMAS
+   ========================================================= */
+:root[data-theme="jave"] {
+  --bg:#EEF2F8; --sf:#FFFFFF; --sf2:#F3F6FB; --bd:#D5DEEB; --bd2:#C2CFE2; --tx:#132135; --mu:#4F5E77;
+  --dock:#132135; --dock-tx:#CEDBEE; --dock-mu:#8A9BB7; --dock-bd:#22344F; --dock-hover:#1A2B45;
+  --nav-on-bg:#E6B979; --nav-on-tx:#132135;
+  --pr:#355E96; --pr-hover:#2A4E80; --on-pr:#FFFFFF; --pr-soft:#E3EBF6; --pr-tx:#2A4E80;
+  --ac:#E6B979; --on-ac:#132135; --ac-soft:#F8EDDB; --ac-tx:#7A5218;
+  --neutral:#CEDBEE; --mint:#9FB6D8;
+  --pend:#D9952B; --rev:#867ED3; --ok:#3DA56A;
+  --pend-bg:#FDF4E7; --pend-tx:#8C580F; --rev-bg:#EFEBF9; --rev-tx:#4C448C; --ok-bg:#E4F5EB; --ok-tx:#1E6B3E;
+  --red:#D03B34; --amb:#D9952B; --grn:#3DA56A; --on-grn:#FFFFFF;
+  --sh:inset 0 1px 0 rgba(255,255,255,.9), 0 2px 4px rgba(19,33,53,.06), 0 8px 18px -6px rgba(19,33,53,.12);
+  --sh-lift:inset 0 1px 0 rgba(255,255,255,.9), 0 4px 8px rgba(19,33,53,.08), 0 18px 36px -10px rgba(19,33,53,.2);
+  --hero-bg:#132135; --hero-tx:#FFFFFF; --hero-mu:#CEDBEE; --hero-ac:#E6B979; --hero-line:rgba(230,185,121,.25);
+  --sw-track:#E3EBF6; --sw-on:#E6B979; --sw-on-tx:#132135; --sw-off:#4F5E77;
+  --av-bg:#355E96; --av-tx:#FFFFFF; --in-bg:#FFFFFF; --focus:rgba(53,94,150,.28);
+  --toast-bg:#132135; --toast-tx:#FFFFFF;
+  --hl-bg:#FFFFFF; --hl-fg:#132135; --hl-ac:#E6B979;
+  --font-display:'Fraunces',Georgia,serif;
+}
+
+:root[data-theme="claro"] {
+  --bg:#F7F4F2; --sf:#FFFFFF; --sf2:#F3EEEB; --bd:#E7DFDB; --bd2:#D9CEC9; --tx:#2B1E1F; --mu:#6B5E60;
+  --dock:#FFFFFF; --dock-tx:#3D2F31; --dock-mu:#7E7072; --dock-bd:#EEE7E4; --dock-hover:#F6EFEC;
+  --nav-on-bg:#832F2F; --nav-on-tx:#FFFFFF;
+  --pr:#832F2F; --pr-hover:#6E2626; --on-pr:#FFFFFF; --pr-soft:#F6EAEA; --pr-tx:#832F2F;
+  --ac:#B295B0; --on-ac:#2B1E1F; --ac-soft:#F1E9F0; --ac-tx:#62405F;
+  --neutral:#B1BEC4; --mint:#A2CDAB;
+  --pend:#D9952B; --rev:#B295B0; --ok:#6DAF7E;
+  --pend-bg:#FBEBD3; --pend-tx:#85500C; --rev-bg:#ECE3EB; --rev-tx:#62405F; --ok-bg:#E1F1E5; --ok-tx:#2A6A3D;
+  --red:#B3403A; --amb:#C98418; --grn:#4B9862; --on-grn:#FFFFFF;
+  --sh:inset 0 1px 0 rgba(255,255,255,.9), 0 1px 2px rgba(64,32,32,.06), 0 6px 14px -6px rgba(64,32,32,.12);
+  --sh-lift:inset 0 1px 0 rgba(255,255,255,.9), 0 2px 4px rgba(64,32,32,.08), 0 14px 28px -10px rgba(64,32,32,.2);
+  --hero-bg:#832F2F; --hero-tx:#FFFFFF; --hero-mu:#F1D9D9; --hero-ac:#A2CDAB; --hero-line:rgba(255,255,255,.22);
+  --sw-track:#F2ECE9; --sw-on:#FFFFFF; --sw-on-tx:#2B1E1F; --sw-off:#6B5E60;
+  --av-bg:#832F2F; --av-tx:#FFFFFF; --in-bg:#FFFFFF; --focus:rgba(131,47,47,.25);
+  --toast-bg:#2B1E1F; --toast-tx:#FFFFFF;
+  --hl-bg:#FFFFFF; --hl-fg:#832F2F; --hl-ac:#A2CDAB;
+  --font-display:'Fraunces',Georgia,serif;
+}
+
+:root[data-theme="oscuro"] {
+  --bg:#010F23; --sf:#071A36; --sf2:#0C2346; --bd:#173260; --bd2:#22427A; --tx:#EAF2FF; --mu:#97ABCB;
+  --dock:#000A19; --dock-tx:#D3E1F7; --dock-mu:#7E93B6; --dock-bd:#10234A; --dock-hover:#0A1C38;
+  --nav-on-bg:#0461E9; --nav-on-tx:#FFFFFF;
+  --pr:#0461E9; --pr-hover:#2E7BF0; --on-pr:#FFFFFF; --pr-soft:#0B2A5E; --pr-tx:#BED8FE;
+  --ac:#867ED3; --on-ac:#0A0B2A; --ac-soft:#1E2154; --ac-tx:#CFCAFB;
+  --neutral:#BED8FE; --mint:#3DD68C;
+  --pend:#FFB547; --rev:#867ED3; --ok:#3DD68C;
+  --pend-bg:#3A2A0C; --pend-tx:#FFC768; --rev-bg:#25225E; --rev-tx:#CFCAFB; --ok-bg:#0E3423; --ok-tx:#86E2A8;
+  --red:#FF6B6B; --amb:#FFB547; --grn:#3DD68C; --on-grn:#01210F;
+  --sh:inset 0 1px 0 rgba(190,216,254,.08), 0 1px 2px rgba(0,0,0,.4), 0 8px 18px -8px rgba(0,0,0,.5);
+  --sh-lift:inset 0 1px 0 rgba(190,216,254,.12), 0 2px 4px rgba(0,0,0,.45), 0 16px 32px -10px rgba(0,0,0,.6);
+  --hero-bg:#000A19; --hero-tx:#EAF2FF; --hero-mu:#97ABCB; --hero-ac:#0461E9; --hero-line:rgba(190,216,254,.16);
+  --sw-track:#0C1E3C; --sw-on:#0461E9; --sw-on-tx:#FFFFFF; --sw-off:#97ABCB;
+  --av-bg:#0461E9; --av-tx:#FFFFFF; --in-bg:#04142C; --focus:rgba(4,97,233,.45);
+  --toast-bg:#BED8FE; --toast-tx:#010F23;
+  --hl-bg:#EAF2FF; --hl-fg:#000A19; --hl-ac:#0461E9;
+  --font-display:'Fraunces',Georgia,serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--tx);
+  min-height: 100vh;
+  line-height: 1.5;
+  transition: background .25s ease, color .25s ease;
+  overflow-x: hidden;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  letter-spacing: -0.02em;
+}
+
+/* -------------------------------------------------------------
+   NAVBAR SUPERIOR & DEMO QUICK-BAR
+   ------------------------------------------------------------- */
+.app-header {
+  position: sticky; top: 0; z-index: 900;
+  background: var(--sf);
+  border-bottom: 1px solid var(--bd);
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+.header-inner {
+  max-width: 1280px; margin: 0 auto;
+  padding: 12px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.brand {
+  display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: none; color: inherit;
+}
+.brand-name { font-size: 24px; font-weight: 700; color: var(--tx); }
+.brand-sub { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mu); margin-left: 2px; }
+
+.header-actions { display: flex; align-items: center; gap: 12px; }
+
+/* Status pill de Firebase */
+.fb-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 999px;
+  background: var(--sf2); border: 1px solid var(--bd);
+  font-size: 12px; font-weight: 600; color: var(--mu);
+}
+.fb-dot { width: 8px; height: 8px; border-radius: 50%; background: #3DA56A; box-shadow: 0 0 6px #3DA56A; }
+
+/* Selector de temas */
+.theme-switch {
+  display: flex; background: var(--sw-track); padding: 3px; border-radius: 999px; gap: 2px;
+}
+.theme-btn {
+  border: 0; background: transparent; padding: 4px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; color: var(--sw-off); cursor: pointer; transition: all .2s;
+}
+.theme-btn.active {
+  background: var(--sw-on); color: var(--sw-on-tx); box-shadow: 0 1px 3px rgba(0,0,0,.15);
+}
+
+/* Barra de navegación de pantallas de demostración */
+.demo-screens-bar {
+  background: var(--sf2);
+  border-bottom: 1px solid var(--bd);
+  padding: 6px 20px;
+  overflow-x: auto;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+}
+.demo-bar-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--mu); margin-right: 6px; flex-shrink: 0;
+}
+.screen-tag {
+  display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--bd); background: var(--sf); color: var(--tx); cursor: pointer; text-decoration: none;
+  transition: all .15s; flex-shrink: 0;
+}
+.screen-tag:hover { border-color: var(--pr); color: var(--pr-tx); transform: translateY(-1px); }
+.screen-tag.active { background: var(--pr); color: var(--on-pr); border-color: var(--pr); }
+
+/* -------------------------------------------------------------
+   PANTALLA 1: LANDING PAGE
+   ------------------------------------------------------------- */
+.landing-hero {
+  position: relative; background: var(--hero-bg); color: var(--hero-tx);
+  overflow: hidden; padding: 60px 24px 80px; min-height: 82vh;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.landing-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
+  pointer-events: none;
+}
+.landing-container {
+  max-width: 1200px; margin: 0 auto; width: 100%; position: relative; z-index: 10;
+}
+.landing-flex {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 48px;
+}
+.landing-content { flex: 1 1 520px; }
+.landing-title {
+  font-size: clamp(38px, 5vw, 64px); line-height: 1.08; font-weight: 700; margin-bottom: 20px;
+}
+.landing-lead {
+  font-size: clamp(20px, 2.2vw, 26px); color: var(--hero-mu); font-weight: 500; margin-bottom: 36px;
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 0 26px; border-radius: 999px;
+  font-size: 16px; font-weight: 700; cursor: pointer; border: 0;
+  text-decoration: none; transition: transform .2s, box-shadow .2s;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn-primary {
+  background: var(--pr); color: var(--on-pr);
+  box-shadow: 0 10px 24px -8px rgba(0,0,0,.3);
+}
+.btn-primary:hover { background: var(--pr-hover); }
+.btn-accent {
+  background: var(--hero-ac); color: #132135;
+  box-shadow: 0 10px 24px -8px rgba(230,185,121,.4);
+}
+.btn-white {
+  background: #FFFFFF; color: var(--tx);
+  box-shadow: 0 8px 20px -6px rgba(0,0,0,.25);
+}
+.btn-secondary {
+  background: var(--sf2); color: var(--tx); border: 1.5px solid var(--bd);
+}
+.btn-secondary:hover { background: var(--sf); border-color: var(--pr); }
+
+/* Logo 3D Animado */
+.stage-3d {
+  width: 380px; height: 380px; position: relative; flex: 0 0 auto;
+  perspective: 1200px; margin: 0 auto;
+}
+.orbit-ring {
+  position: absolute; border-radius: 50%; border: 1.5px dashed rgba(255,255,255,.28);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  animation: spin-orbit linear infinite;
+}
+.orbit-ring.r1 { width: 340px; height: 340px; animation-duration: 32s; }
+.orbit-ring.r2 { width: 260px; height: 260px; animation-duration: 22s; animation-direction: reverse; border-style: solid; border-color: var(--hero-ac); opacity: .45; }
+.orbit-ring i {
+  position: absolute; top: -6px; left: 50%; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--hero-ac); box-shadow: 0 0 16px var(--hero-ac);
+}
+@keyframes spin-orbit { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+.logo-core {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  animation: float-3d 6s ease-in-out infinite;
+}
+@keyframes float-3d { 0%, 100% { transform: translate(-50%, -50%) translateY(0); } 50% { transform: translate(-50%, -50%) translateY(-14px); } }
+
+/* Pasos interactivos (HU-02) */
+.flow-steps {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;
+  margin-top: 50px; padding-top: 40px; border-top: 1px solid var(--hero-line);
+}
+.step-card {
+  display: flex; align-items: flex-start; gap: 16px;
+}
+.step-num {
+  width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,.1);
+  border: 2px solid var(--hero-ac); display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700; color: var(--hero-ac); flex-shrink: 0;
+}
+.step-info h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.step-info p { font-size: 14px; color: var(--hero-mu); line-height: 1.4; }
+
+/* -------------------------------------------------------------
+   PANTALLA 2: INICIAR SESIÓN (HU-01)
+   ------------------------------------------------------------- */
+.login-view {
+  min-height: calc(100vh - 110px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 20px;
+}
+.login-card {
+  max-width: 460px; width: 100%;
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 24px;
+  padding: 38px 32px; box-shadow: var(--sh-lift);
+}
+.login-header { margin-bottom: 24px; text-align: left; }
+.login-header h2 { font-size: 32px; font-weight: 700; }
+.login-header p { color: var(--mu); font-size: 15px; margin-top: 4px; }
+
+.roles-selector {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 22px;
+}
+.role-chip {
+  padding: 10px 8px; border-radius: 12px; border: 1.5px solid var(--bd);
+  background: var(--sf2); color: var(--mu); font-size: 13px; font-weight: 700;
+  cursor: pointer; text-align: center; transition: all .2s;
+}
+.role-chip.selected {
+  background: var(--pr); border-color: var(--pr); color: var(--on-pr);
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+
+.form-group { margin-bottom: 18px; }
+.form-group label {
+  display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--tx);
+}
+.input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--in-bg); border: 1.5px solid var(--bd); border-radius: 12px;
+  padding: 0 14px; min-height: 48px; transition: border-color .2s, box-shadow .2s;
+}
+.input-wrap:focus-within {
+  border-color: var(--pr); box-shadow: 0 0 0 3px var(--focus);
+}
+.input-wrap input, .input-wrap select, .input-wrap textarea {
+  width: 100%; border: 0; outline: 0; background: transparent; font-size: 15px;
+  color: var(--tx); font-family: inherit;
+}
+.demo-logins {
+  margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--bd);
+}
+.demo-logins-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--mu); margin-bottom: 8px; }
+.demo-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.demo-pill {
+  border: 1px solid var(--bd); background: var(--sf2); color: var(--tx);
+  padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.demo-pill:hover { border-color: var(--pr); }
+
+/* -------------------------------------------------------------
+   PANEL COMÚN: CONTENEDOR, TABS Y TARJETAS
+   ------------------------------------------------------------- */
+.panel-view {
+  max-width: 1240px; margin: 0 auto; padding: 36px 24px 60px;
+}
+.panel-top {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 16px; margin-bottom: 32px;
+}
+.panel-title h1 { font-size: 32px; font-weight: 700; }
+.panel-title p { color: var(--mu); font-size: 15px; margin-top: 2px; }
+
+/* Grid de asignaturas (HU-01, HU-02) */
+.subject-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;
+}
+.subject-card {
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 18px;
+  padding: 24px; box-shadow: var(--sh); transition: transform .2s, box-shadow .2s;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 18px;
+}
+.subject-card:hover { transform: translateY(-3px); box-shadow: var(--sh-lift); }
+.subj-code {
+  display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 700;
+  background: var(--pr-soft); color: var(--pr-tx); margin-bottom: 8px;
+}
+.subj-name { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.subj-prof { font-size: 14px; color: var(--mu); }
+
+/* -------------------------------------------------------------
+   PANTALLA 4: ESTUDIANTE · NUEVO REPORTE (HU-02)
+   ------------------------------------------------------------- */
+.wizard-box {
+  max-width: 760px; margin: 0 auto;
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 24px;
+  padding: 36px; box-shadow: var(--sh-lift);
+}
+.mood-group { margin-bottom: 24px; }
+.mood-label { font-weight: 600; font-size: 15px; margin-bottom: 8px; display: block; }
+.mood-pills { display: flex; gap: 10px; }
+.mood-pill {
+  flex: 1; padding: 12px 10px; border-radius: 14px; border: 1.5px solid var(--bd);
+  background: var(--sf2); font-size: 14px; font-weight: 600; cursor: pointer; text-align: center;
+  transition: all .15s;
+}
+.mood-pill.active {
+  background: var(--pr); border-color: var(--pr); color: var(--on-pr);
+}
+
+.char-counter {
+  display: flex; justify-content: space-between; font-size: 12px; color: var(--mu); margin-top: 6px;
+}
+.char-counter.valid { color: #3DA56A; font-weight: 600; }
+
+/* -------------------------------------------------------------
+   PANTALLA 5: ESTUDIANTE · REPORTE ENVIADO (HU-02)
+   ------------------------------------------------------------- */
+.success-card {
+  max-width: 580px; margin: 40px auto; text-align: center;
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 24px;
+  padding: 48px 32px; box-shadow: var(--sh-lift);
+}
+.success-icon {
+  width: 80px; height: 80px; border-radius: 50%; background: #E4F5EB; color: #1E6B3E;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 38px; margin-bottom: 20px;
+}
+.success-title { font-size: 32px; font-weight: 700; margin-bottom: 10px; }
+.success-desc { color: var(--mu); font-size: 16px; margin-bottom: 28px; }
+.receipt-box {
+  background: var(--sf2); border: 1px solid var(--bd); border-radius: 14px;
+  padding: 18px; text-align: left; margin-bottom: 30px; font-size: 14px;
+}
+.receipt-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.receipt-row:last-child { margin-bottom: 0; }
+.receipt-label { color: var(--mu); font-weight: 600; }
+.receipt-val { font-weight: 700; }
+
+/* -------------------------------------------------------------
+   PANTALLA 6: DOCENTE · REPORTES RECIBIDOS (HU-03)
+   ------------------------------------------------------------- */
+.tabs-row {
+  display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px;
+}
+.tab-btn {
+  padding: 8px 18px; border-radius: 10px; border: 1.5px solid var(--bd);
+  background: var(--sf); font-size: 14px; font-weight: 600; color: var(--mu);
+  cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all .15s;
+}
+.tab-btn.active {
+  background: var(--pr); border-color: var(--pr); color: var(--on-pr);
+}
+.tab-badge {
+  padding: 1px 7px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  background: rgba(0,0,0,.08); color: inherit;
+}
+.tab-btn.active .tab-badge { background: rgba(255,255,255,.25); }
+
+.reports-list { display: flex; flex-direction: column; gap: 16px; }
+.report-card {
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 18px;
+  padding: 22px 26px; box-shadow: var(--sh); transition: transform .2s;
+}
+.report-card:hover { transform: translateY(-2px); }
+.report-card-top {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start;
+  gap: 12px; margin-bottom: 12px;
+}
+.rep-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.badge {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;
+  border-radius: 999px; font-size: 12px; font-weight: 700;
+}
+.badge-pend { background: var(--pend-bg); color: var(--pend-tx); }
+.badge-rev { background: var(--rev-bg); color: var(--rev-tx); }
+.badge-ok { background: var(--ok-bg); color: var(--ok-tx); }
+.badge-cat { background: var(--sf2); color: var(--tx); border: 1px solid var(--bd); }
+
+.report-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--tx); }
+.report-body { font-size: 15px; color: var(--mu); margin-bottom: 16px; line-height: 1.5; }
+
+.status-changer {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding-top: 14px; border-top: 1px solid var(--bd);
+}
+.status-changer-label { font-size: 13px; font-weight: 700; color: var(--mu); margin-right: 4px; }
+.status-pill-btn {
+  border: 1px solid var(--bd); background: var(--sf2); color: var(--tx);
+  padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all .15s;
+}
+.status-pill-btn:hover { border-color: var(--pr); }
+.status-pill-btn.current {
+  background: var(--pr); border-color: var(--pr); color: var(--on-pr); font-weight: 700;
+}
+
+/* -------------------------------------------------------------
+   PANTALLA 7: DOCENTE · ESTADÍSTICAS Y MÉTRICAS (HU-04)
+   ------------------------------------------------------------- */
+.stats-cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 30px;
+}
+.metric-card {
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 18px;
+  padding: 22px; box-shadow: var(--sh);
+}
+.metric-label { font-size: 13px; font-weight: 700; color: var(--mu); text-transform: uppercase; margin-bottom: 6px; }
+.metric-num { font-size: 38px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+.metric-sub { font-size: 13px; color: var(--mu); }
+
+.charts-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px;
+}
+.chart-box {
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 18px;
+  padding: 24px; box-shadow: var(--sh);
+}
+.chart-title { font-size: 18px; font-weight: 700; margin-bottom: 18px; }
+.bar-item { margin-bottom: 14px; }
+.bar-label-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.bar-track { height: 10px; background: var(--sf2); border-radius: 999px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 999px; transition: width .4s ease; }
+
+/* Toast flotante */
+.toast-notice {
+  position: fixed; bottom: 24px; right: 24px; z-index: 10000;
+  background: var(--toast-bg); color: var(--toast-tx);
+  padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25); display: flex; align-items: center; gap: 8px;
+  animation: slide-up .25s ease-out;
+}
+@keyframes slide-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ENCABEZADO SUPERIOR -->
+<header class="app-header">
+  <div class="header-inner">
+    <a href="#" class="brand" data-screen="landing">
+      <svg width="34" height="34" viewBox="0 0 36 36" aria-hidden="true">
+        <rect width="36" height="36" rx="10" fill="var(--pr)"></rect>
+        <circle cx="12.5" cy="10.5" r="3.2" fill="var(--on-pr)"></circle>
+        <circle cx="23.5" cy="10.5" r="3.2" fill="var(--ac)"></circle>
+        <path d="M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18" stroke="var(--on-pr)" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <div>
+        <span class="brand-name display">nexo</span>
+        <span class="brand-sub">PUJ</span>
+      </div>
+    </a>
+
+    <div class="header-actions">
+      <!-- Indicador de conexión Firebase -->
+      <div class="fb-badge" title="Conectado directamente a Firebase Authentication y Cloud Firestore">
+        <span class="fb-dot"></span>
+        <span id="fbStatusText">Firebase BaaS</span>
+      </div>
+
+      <!-- Selector de tema -->
+      <div class="theme-switch" role="group" aria-label="Cambiar tema">
+        <button class="theme-btn active" data-theme-val="jave" title="Tema Javeriana">Jave</button>
+        <button class="theme-btn" data-theme-val="claro" title="Tema Claro">Claro</button>
+        <button class="theme-btn" data-theme-val="oscuro" title="Tema Oscuro">Oscuro</button>
+      </div>
+
+      <!-- Botón dinámico según sesión -->
+      <div id="headerAuthSlot"></div>
+    </div>
+  </div>
+
+  <!-- Barra de navegación rápida de las 10 pantallas (para evaluación) -->
+  <div class="demo-screens-bar">
+    <span class="demo-bar-title">Pantallas (10):</span>
+    <button class="screen-tag active" data-screen="landing">1. Landing</button>
+    <button class="screen-tag" data-screen="login">2. Login</button>
+    <button class="screen-tag" data-screen="est-asig">3. Estudiante: Asignaturas</button>
+    <button class="screen-tag" data-screen="est-nuevo">4. Estudiante: Nuevo Reporte</button>
+    <button class="screen-tag" data-screen="est-enviado">5. Estudiante: Reporte Enviado</button>
+    <button class="screen-tag" data-screen="doc-reportes">6. Docente: Reportes</button>
+    <button class="screen-tag" data-screen="doc-stats">7. Docente: Estadísticas</button>
+    <button class="screen-tag" data-screen="doc-asig">8. Docente: Asignaturas</button>
+    <button class="screen-tag" data-screen="dir-semanal">9. Dirección: Panorama</button>
+    <button class="screen-tag" data-screen="dir-grupo">10. Dirección: Detalle Grupo</button>
+  </div>
+</header>
+
+<!-- CONTENEDOR PRINCIPAL DE PANTALLAS -->
+<main id="appRoot"></main>
+
+<!-- CONTENEDOR PARA TOAST NOTIFICATIONS -->
+<div id="toastContainer"></div>
+
+<!-- LÓGICA DE LA APLICACIÓN & CONEXIÓN CON FIREBASE -->
+<script type="module">
+import { NexoAPI, ROL_MAP, EST_MAP, EST_LABELS } from './nexo-api.js';
+
+// Estado global de la vista
+const AppState = {
+  currentScreen: 'landing', // 'landing', 'login', 'est-asig', 'est-nuevo', 'est-enviado', 'doc-reportes', 'doc-stats', 'doc-asig', 'dir-semanal', 'dir-grupo'
+  theme: localStorage.getItem('nexo_theme') || 'jave',
+  user: null, // Perfil del usuario activo
+  selectedRole: 'est', // 'est', 'doc', 'dir'
+  loginEmail: 'estudiante@javeriana.edu.co',
+  loginPass: 'clave123',
+  loginLoading: false,
+  loginError: '',
+  
+  // Datos del nuevo reporte
+  newReportSubjectId: 'subj-poo',
+  newReportMoods: { metodologia: 2, contenido: 2, ritmo: 2 },
+  newReportDetail: '',
+  lastCreatedReport: null,
+  
+  // Filtros docentes
+  docFilterState: 'todos', // 'todos', 'pend', 'rev', 'ok'
+  docFilterSubject: 'todos',
+  
+  // Asignaturas y reportes cargados
+  subjects: [],
+  reports: []
+};
+
+// ===============================================================
+// RENDERIZADO DE LAS 10 PANTALLAS
+// ===============================================================
+
+// 1. PANTALLA 1: LANDING PAGE
+function renderLanding() {
+  return `
+  <section class="landing-hero">
+    <div class="landing-grid"></div>
+    <div class="landing-container">
+      <div class="landing-flex">
+        <div class="landing-content">
+          <h1 class="landing-title display">Tu voz académica, escuchada a tiempo.</h1>
+          <p class="landing-lead display">Dilo hoy. Mejora mañana.</p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap">
+            <button class="btn btn-accent" data-screen="login" style="font-size:17px;min-height:52px;padding:0 32px">
+              Ingresar al portal
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+            <button class="btn btn-white" data-screen="doc-reportes">
+              Ver panel docente
+            </button>
+          </div>
+        </div>
+
+        <div class="stage-3d">
+          <div class="orbit-ring r1"><i></i></div>
+          <div class="orbit-ring r2"></div>
+          <div class="logo-core">
+            <svg width="150" height="150" viewBox="0 0 36 36">
+              <rect width="36" height="36" rx="10" fill="var(--hl-bg)"></rect>
+              <circle cx="12.5" cy="10.5" r="3.2" fill="var(--hl-fg)"></circle>
+              <circle cx="23.5" cy="10.5" r="3.2" fill="var(--hl-ac)"></circle>
+              <path d="M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18" stroke="var(--hl-fg)" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-steps">
+        <div class="step-card">
+          <div class="step-num display">1</div>
+          <div class="step-info">
+            <h3 class="display">Elige la materia</h3>
+            <p>Selecciona el curso o laboratorio sobre el que quieres retroalimentar.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num display">2</div>
+          <div class="step-info">
+            <h3 class="display">Cuéntanos</h3>
+            <p>Describe con claridad las dificultades en metodología, contenido o ritmo.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num display">3</div>
+          <div class="step-info">
+            <h3 class="display">Envía y listo</h3>
+            <p>El docente lo recibe de inmediato en su panel y actualiza su estado.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+
+// 2. PANTALLA 2: INICIAR SESIÓN (HU-01)
+function renderLogin() {
+  return `
+  <section class="login-view">
+    <div class="login-card">
+      <div class="login-header">
+        <h2 class="display">Iniciar sesión</h2>
+        <p>Accede con tus credenciales institucionales PUJ.</p>
+      </div>
+
+      <div class="roles-selector">
+        <button type="button" class="role-chip ${AppState.selectedRole === 'est' ? 'selected' : ''}" data-role="est">Estudiante</button>
+        <button type="button" class="role-chip ${AppState.selectedRole === 'doc' ? 'selected' : ''}" data-role="doc">Docente</button>
+        <button type="button" class="role-chip ${AppState.selectedRole === 'dir' ? 'selected' : ''}" data-role="dir">Dirección</button>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="inputEmail">Correo institucional</label>
+          <div class="input-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--mu)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input type="email" id="inputEmail" value="${AppState.loginEmail}" placeholder="ejemplo@javeriana.edu.co" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputPassword">Contraseña</label>
+          <div class="input-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--mu)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" id="inputPassword" value="${AppState.loginPass}" placeholder="Tu contraseña" required>
+          </div>
+        </div>
+
+        ${AppState.loginError ? `<p style="color:var(--red);font-size:13px;font-weight:600;margin-bottom:14px">${AppState.loginError}</p>` : ''}
+
+        <button type="submit" class="btn btn-primary" style="width:100%;min-height:50px" ${AppState.loginLoading ? 'disabled' : ''}>
+          ${AppState.loginLoading ? 'Conectando con Firebase…' : 'Ingresar'}
+        </button>
+      </form>
+
+      <div class="demo-logins">
+        <div class="demo-logins-title">Acceso rápido con cuentas de prueba:</div>
+        <div class="demo-buttons">
+          <button class="demo-pill" data-demo-user="est">👤 Estudiante (Ana Ruiz)</button>
+          <button class="demo-pill" data-demo-user="doc">👨‍🏫 Docente (Dr. Mendoza)</button>
+          <button class="demo-pill" data-demo-user="dir">🏛️ Dirección (Dra. Gómez)</button>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+
+// 3. PANTALLA 3: ESTUDIANTE · MIS ASIGNATURAS (HU-01, HU-02)
+function renderEstAsig() {
+  const user = AppState.user || { nombre: 'Ana María Ruiz', email: 'estudiante@javeriana.edu.co' };
+  return `
+  <section class="panel-view">
+    <div class="panel-top">
+      <div class="panel-title">
+        <h1 class="display">Mis asignaturas inscritas</h1>
+        <p>Semestre 2026-2 · Selecciona una asignatura para reportar dificultades o inquietudes.</p>
+      </div>
+      <button class="btn btn-primary" data-screen="est-nuevo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Nuevo reporte
+      </button>
+    </div>
+
+    <div class="subject-grid">
+      ${AppState.subjects.map(s => `
+        <div class="subject-card">
+          <div>
+            <span class="subj-code">${s.codigo || 'PUJ'} · ${s.grupo || 'G1'}</span>
+            <h3 class="subj-name">${s.nombre}</h3>
+            <p class="subj-prof">Docente: <strong>${s.profesor}</strong></p>
+          </div>
+          <button class="btn btn-secondary" data-action="crear-reporte-asig" data-subj-id="${s.id}" style="width:100%">
+            Crear reporte sobre esta materia
+          </button>
+        </div>
+      `).join('')}
+    </div>
+  </section>`;
+}
+
+// 4. PANTALLA 4: ESTUDIANTE · NUEVO REPORTE (HU-02)
+function renderEstNuevo() {
+  const currentChars = (AppState.newReportDetail || '').length;
+  const isValidLength = currentChars >= 20;
+
+  return `
+  <section class="panel-view">
+    <div class="panel-top" style="justify-content:center;text-align:center;margin-bottom:20px">
+      <div class="panel-title">
+        <h1 class="display">Crear reporte de dificultad</h1>
+        <p>Tu reporte ayuda al docente a ajustar el ritmo y metodología del curso.</p>
+      </div>
+    </div>
+
+    <div class="wizard-box">
+      <form id="newReportForm">
+        <div class="form-group">
+          <label for="selectSubject">Asignatura</label>
+          <div class="input-wrap">
+            <select id="selectSubject">
+              ${AppState.subjects.map(s => `
+                <option value="${s.id}" ${s.id === AppState.newReportSubjectId ? 'selected' : ''}>${s.nombre} (${s.profesor})</option>
+              `).join('')}
+            </select>
+          </div>
+        </div>
+
+        <div class="mood-group">
+          <label class="mood-label">1. Metodología de clase</label>
+          <div class="mood-pills">
+            <button type="button" class="mood-pill ${AppState.newReportMoods.metodologia === 1 ? 'active' : ''}" data-mood="metodologia" data-val="1">Difícil de seguir</button>
+            <button type="button" class="mood-pill ${AppState.newReportMoods.metodologia === 2 ? 'active' : ''}" data-mood="metodologia" data-val="2">Adecuada</button>
+            <button type="button" class="mood-pill ${AppState.newReportMoods.metodologia === 3 ? 'active' : ''}" data-mood="metodologia" data-val="3">Muy clara</button>
+          </div>
+        </div>
+
+        <div class="mood-group">
+          <label class="mood-label">2. Complejidad del contenido</label>
+          <div class="mood-pills">
+            <button type="button" class="mood-pill ${AppState.newReportMoods.contenido === 1 ? 'active' : ''}" data-mood="contenido" data-val="1">Muy complejo</button>
+            <button type="button" class="mood-pill ${AppState.newReportMoods.contenido === 2 ? 'active' : ''}" data-mood="contenido" data-val="2">Nivel esperado</button>
+            <button type="button" class="mood-pill ${AppState.newReportMoods.contenido === 3 ? 'active' : ''}" data-mood="contenido" data-val="3">Manejable</button>
+          </div>
+        </div>
+
+        <div class="mood-group">
+          <label class="mood-label">3. Ritmo de las sesiones</label>
+          <div class="mood-pills">
+            <button type="button" class="mood-pill ${AppState.newReportMoods.ritmo === 1 ? 'active' : ''}" data-mood="ritmo" data-val="1">Demasiado rápido</button>
+            <button type="button" class="mood-pill ${AppState.newReportMoods.ritmo === 2 ? 'active' : ''}" data-mood="ritmo" data-val="2">Equilibrado</button>
+            <button type="button" class="mood-pill ${AppState.newReportMoods.ritmo === 3 ? 'active' : ''}" data-mood="ritmo" data-val="3">Tranquilo</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reportDetail">Descripción detallada de la dificultad</label>
+          <div class="input-wrap" style="align-items:flex-start;padding:12px">
+            <textarea id="reportDetail" rows="4" placeholder="Explica con ejemplos concretos qué tema o actividad representó una dificultad..." required>${AppState.newReportDetail}</textarea>
+          </div>
+          <div class="char-counter ${isValidLength ? 'valid' : ''}">
+            <span>${isValidLength ? '✓ Longitud válida' : 'Mínimo 20 caracteres requeridos (Criterio HU-02)'}</span>
+            <span>${currentChars} / 20</span>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:28px">
+          <button type="button" class="btn btn-secondary" data-screen="est-asig" style="flex:1">Cancelar</button>
+          <button type="submit" class="btn btn-primary" style="flex:2" ${!isValidLength ? 'disabled' : ''}>
+            Enviar reporte a Firebase
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>`;
+}
+
+// 5. PANTALLA 5: ESTUDIANTE · REPORTE ENVIADO (HU-02)
+function renderEstEnviado() {
+  const rep = AppState.lastCreatedReport || {
+    id: 'rep-001',
+    asignatura: 'Programación Orientada a Objetos',
+    createdAt: new Date().toISOString(),
+    estado: 'pend'
+  };
+
+  const fechaFormat = new Date(rep.createdAt).toLocaleString('es-CO', {
+    dateStyle: 'medium', timeStyle: 'short'
+  });
+
+  return `
+  <section class="panel-view">
+    <div class="success-card">
+      <div class="success-icon">✓</div>
+      <h1 class="success-title display">¡Reporte enviado exitosamente!</h1>
+      <p class="success-desc">Tu observación fue registrada en Cloud Firestore y asignada al docente para seguimiento.</p>
+
+      <div class="receipt-box">
+        <div class="receipt-row">
+          <span class="receipt-label">Folio del reporte:</span>
+          <span class="receipt-val">${rep.id}</span>
+        </div>
+        <div class="receipt-row">
+          <span class="receipt-label">Asignatura:</span>
+          <span class="receipt-val">${rep.asignatura}</span>
+        </div>
+        <div class="receipt-row">
+          <span class="receipt-label">Fecha y hora:</span>
+          <span class="receipt-val">${fechaFormat}</span>
+        </div>
+        <div class="receipt-row">
+          <span class="receipt-label">Estado inicial:</span>
+          <span class="badge badge-pend">Pendiente</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;justify-content:center">
+        <button class="btn btn-primary" data-screen="est-asig">Volver a mis asignaturas</button>
+        <button class="btn btn-secondary" data-screen="est-nuevo">Crear otro reporte</button>
+      </div>
+    </div>
+  </section>`;
+}
+
+// 6. PANTALLA 6: DOCENTE · REPORTES RECIBIDOS (HU-03)
+function renderDocReportes() {
+  const filtered = AppState.reports.filter(r => {
+    const matchState = AppState.docFilterState === 'todos' || r.estado === AppState.docFilterState;
+    const matchSubj = AppState.docFilterSubject === 'todos' || r.subjectId === AppState.docFilterSubject;
+    return matchState && matchSubj;
+  });
+
+  const countTodos = AppState.reports.length;
+  const countPend = AppState.reports.filter(r => r.estado === 'pend').length;
+  const countRev = AppState.reports.filter(r => r.estado === 'rev').length;
+  const countOk = AppState.reports.filter(r => r.estado === 'ok').length;
+
+  return `
+  <section class="panel-view">
+    <div class="panel-top">
+      <div class="panel-title">
+        <h1 class="display">Reportes académicos recibidos</h1>
+        <p>Monitoreo en tiempo real de dificultades reportadas por los estudiantes.</p>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-secondary" data-screen="doc-stats">Ver estadísticas</button>
+        <button class="btn btn-secondary" data-screen="doc-asig">Mis cursos</button>
+      </div>
+    </div>
+
+    <!-- Pestañas de estado (HU-03) -->
+    <div class="tabs-row">
+      <button class="tab-btn ${AppState.docFilterState === 'todos' ? 'active' : ''}" data-doc-filter="todos">
+        Todos <span class="tab-badge">${countTodos}</span>
+      </button>
+      <button class="tab-btn ${AppState.docFilterState === 'pend' ? 'active' : ''}" data-doc-filter="pend">
+        Pendientes <span class="tab-badge">${countPend}</span>
+      </button>
+      <button class="tab-btn ${AppState.docFilterState === 'rev' ? 'active' : ''}" data-doc-filter="rev">
+        En revisión <span class="tab-badge">${countRev}</span>
+      </button>
+      <button class="tab-btn ${AppState.docFilterState === 'ok' ? 'active' : ''}" data-doc-filter="ok">
+        Atendidos <span class="tab-badge">${countOk}</span>
+      </button>
+    </div>
+
+    <!-- Lista de reportes -->
+    <div class="reports-list">
+      ${filtered.length === 0 ? `
+        <div style="background:var(--sf);border:1px solid var(--bd);border-radius:18px;padding:48px;text-align:center">
+          <p style="font-size:18px;font-weight:600;color:var(--mu)">Sin reportes registrados con este filtro.</p>
+        </div>
+      ` : filtered.map(r => `
+        <div class="report-card">
+          <div class="report-card-top">
+            <div class="rep-meta">
+              <span class="badge ${r.estado === 'pend' ? 'badge-pend' : r.estado === 'rev' ? 'badge-rev' : 'badge-ok'}">
+                ● ${EST_LABELS[r.estado] || r.estado}
+              </span>
+              <span class="badge badge-cat">${r.categoria || 'Metodología'}</span>
+              <span style="font-size:13px;font-weight:600;color:var(--mu)">${r.asignatura} (${r.grupo || 'G1'})</span>
+            </div>
+            <span style="font-size:12px;color:var(--mu)">${new Date(r.createdAt).toLocaleDateString('es-CO')}</span>
+          </div>
+
+          <h3 class="report-title">${r.titulo}</h3>
+          <p class="report-body">${r.detalle}</p>
+
+          <!-- Modificación reactiva del estado (HU-03) -->
+          <div class="status-changer">
+            <span class="status-changer-label">Cambiar estado en Firestore:</span>
+            <button class="status-pill-btn ${r.estado === 'pend' ? 'current' : ''}" data-action="set-status" data-id="${r.id}" data-new-status="pend">Pendiente</button>
+            <button class="status-pill-btn ${r.estado === 'rev' ? 'current' : ''}" data-action="set-status" data-id="${r.id}" data-new-status="rev">En revisión</button>
+            <button class="status-pill-btn ${r.estado === 'ok' ? 'current' : ''}" data-action="set-status" data-id="${r.id}" data-new-status="ok">Atendido</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </section>`;
+}
+
+// 7. PANTALLA 7: DOCENTE · ESTADÍSTICAS Y MÉTRICAS (HU-04)
+function renderDocStats() {
+  const total = AppState.reports.length;
+  const pend = AppState.reports.filter(r => r.estado === 'pend').length;
+  const rev = AppState.reports.filter(r => r.estado === 'rev').length;
+  const ok = AppState.reports.filter(r => r.estado === 'ok').length;
+  const tasa = total > 0 ? Math.round((ok / total) * 100) : 0;
+
+  const catMet = AppState.reports.filter(r => r.categoria === 'Metodología').length;
+  const catCon = AppState.reports.filter(r => r.categoria === 'Contenido').length;
+  const catRit = AppState.reports.filter(r => r.categoria === 'Ritmo').length;
+
+  const pctMet = total > 0 ? Math.round((catMet / total) * 100) : 0;
+  const pctCon = total > 0 ? Math.round((catCon / total) * 100) : 0;
+  const pctRit = total > 0 ? Math.round((catRit / total) * 100) : 0;
+
+  return `
+  <section class="panel-view">
+    <div class="panel-top">
+      <div class="panel-title">
+        <h1 class="display">Métricas y analítica consolidada</h1>
+        <p>Recálculo automático y reactivo ante cualquier actualización en Firestore.</p>
+      </div>
+      <button class="btn btn-secondary" data-screen="doc-reportes">Volver a reportes</button>
+    </div>
+
+    <!-- Bloque de contadores numéricos (HU-04) -->
+    <div class="stats-cards-grid">
+      <div class="metric-card">
+        <div class="metric-label">Total Recibidos</div>
+        <div class="metric-num display">${total}</div>
+        <div class="metric-sub">Todas las materias a cargo</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label" style="color:var(--pend)">Pendientes</div>
+        <div class="metric-num display" style="color:var(--pend)">${pend}</div>
+        <div class="metric-sub">Por revisar</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label" style="color:var(--rev)">En Revisión</div>
+        <div class="metric-num display" style="color:var(--rev)">${rev}</div>
+        <div class="metric-sub">En ajuste pedagógico</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label" style="color:var(--ok)">Atendidos</div>
+        <div class="metric-num display" style="color:var(--ok)">${ok}</div>
+        <div class="metric-sub">${tasa}% resueltos</div>
+      </div>
+    </div>
+
+    <!-- Gráficos dinámicos -->
+    <div class="charts-row">
+      <div class="chart-box">
+        <h3 class="chart-title">Distribución por categoría de dificultad</h3>
+        <div class="bar-item">
+          <div class="bar-label-row"><span>Metodología de clase</span> <span>${catMet} (${pctMet}%)</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pctMet}%;background:var(--pr)"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span>Complejidad de contenido</span> <span>${catCon} (${pctCon}%)</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pctCon}%;background:var(--ac)"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span>Ritmo de avance</span> <span>${catRit} (${pctRit}%)</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pctRit}%;background:#E6B979"></div></div>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <h3 class="chart-title">Estado de atención general</h3>
+        <div class="bar-item">
+          <div class="bar-label-row"><span>Atendidos y resueltos</span> <span>${ok}</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${tasa}%;background:#3DA56A"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span>En proceso de ajuste</span> <span>${rev}</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${total > 0 ? (rev/total)*100 : 0}%;background:#867ED3"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span>Pendientes por abrir</span> <span>${pend}</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${total > 0 ? (pend/total)*100 : 0}%;background:#D9952B"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+
+// 8. PANTALLA 8: DOCENTE · MIS ASIGNATURAS
+function renderDocAsig() {
+  return `
+  <section class="panel-view">
+    <div class="panel-top">
+      <div class="panel-title">
+        <h1 class="display">Docente · Mis cursos asignados</h1>
+        <p>Pontificia Universidad Javeriana · Facultad de Ingeniería.</p>
+      </div>
+      <button class="btn btn-primary" data-screen="doc-reportes">Ver todos los reportes</button>
+    </div>
+
+    <div class="subject-grid">
+      ${AppState.subjects.map(s => {
+        const count = AppState.reports.filter(r => r.subjectId === s.id).length;
+        return `
+        <div class="subject-card">
+          <div>
+            <span class="subj-code">${s.codigo} · ${s.grupo}</span>
+            <h3 class="subj-name">${s.nombre}</h3>
+            <p class="subj-prof">Estudiantes matriculados: <strong>28</strong></p>
+            <p style="margin-top:8px;font-size:13px;color:var(--mu)">Reportes recibidos en el semestre: <strong>${count}</strong></p>
+          </div>
+          <button class="btn btn-secondary" data-screen="doc-reportes">Filtrar reportes de este curso</button>
+        </div>`;
+      }).join('')}
+    </div>
+  </section>`;
+}
+
+// 9. PANTALLA 9: DIRECCIÓN · PANORAMA SEMANAL
+function renderDirSemanal() {
+  return `
+  <section class="panel-view">
+    <div class="panel-top">
+      <div class="panel-title">
+        <h1 class="display">Dirección · Panorama general del programa</h1>
+        <p>Consolidado estratégico de seguimiento docente y alertas tempranas.</p>
+      </div>
+      <button class="btn btn-primary" data-screen="dir-grupo">Ver detalle de grupo</button>
+    </div>
+
+    <div class="stats-cards-grid">
+      <div class="metric-card">
+        <div class="metric-label">Reportes Semestrales</div>
+        <div class="metric-num display">${AppState.reports.length}</div>
+        <div class="metric-sub">5 asignaturas monitoreadas</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Tasa de Respuesta</div>
+        <div class="metric-num display" style="color:var(--ok)">88%</div>
+        <div class="metric-sub">Tiempo promedio: 1.8 días</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Cursos con Alertas</div>
+        <div class="metric-num display" style="color:var(--pend)">2</div>
+        <div class="metric-sub">POO & Estructuras de Datos</div>
+      </div>
+    </div>
+  </section>`;
+}
+
+// 10. PANTALLA 10: DIRECCIÓN · DETALLE DE GRUPO
+function renderDirGrupo() {
+  return `
+  <section class="panel-view">
+    <div class="panel-top">
+      <div class="panel-title">
+        <h1 class="display">Dirección · Detalle de Grupo G1 (POO)</h1>
+        <p>Docente a cargo: Dr. Carlos Mendoza · 32 estudiantes activos.</p>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-secondary" data-screen="dir-semanal">Volver al panorama</button>
+        <button class="btn btn-primary" onclick="alert('Notificación enviada al docente via correo institucional.')">Contactar docente</button>
+      </div>
+    </div>
+
+    <div class="chart-box" style="margin-bottom:24px">
+      <h3 class="chart-title">Desglose de dificultades en el grupo</h3>
+      <div class="bar-item">
+        <div class="bar-label-row"><span>Laboratorios extensos (Metodología)</span> <span>5 reportes</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:65%;background:var(--pr)"></div></div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label-row"><span>Sintaxis y compiladores (Contenido)</span> <span>3 reportes</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--ac)"></div></div>
+      </div>
+    </div>
+  </section>`;
+}
+
+// ===============================================================
+// ROUTER & DISPATCHER PRINCIPAL
+// ===============================================================
+function renderApp() {
+  const root = document.getElementById('appRoot');
+  const authSlot = document.getElementById('headerAuthSlot');
+
+  // Actualizar slot del usuario en el navbar
+  if (AppState.user) {
+    authSlot.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--pr);color:var(--on-pr);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">
+          ${AppState.user.iniciales || 'PU'}
+        </div>
+        <span style="font-size:13px;font-weight:600;display:none;sm:inline">${AppState.user.primerNombre || 'Usuario'}</span>
+        <button class="btn btn-secondary" id="logoutBtn" style="padding:4px 12px;min-height:32px;font-size:12px">Salir</button>
+      </div>`;
+  } else {
+    authSlot.innerHTML = `
+      <button class="btn btn-primary" data-screen="login" style="padding:6px 16px;min-height:36px;font-size:13px">
+        Iniciar sesión
+      </button>`;
+  }
+
+  // Actualizar clase activa en la barra de pantallas
+  document.querySelectorAll('.screen-tag').forEach(tag => {
+    tag.classList.toggle('active', tag.dataset.screen === AppState.currentScreen);
+  });
+
+  // Renderizar pantalla correspondiente
+  switch (AppState.currentScreen) {
+    case 'landing': root.innerHTML = renderLanding(); break;
+    case 'login': root.innerHTML = renderLogin(); break;
+    case 'est-asig': root.innerHTML = renderEstAsig(); break;
+    case 'est-nuevo': root.innerHTML = renderEstNuevo(); break;
+    case 'est-enviado': root.innerHTML = renderEstEnviado(); break;
+    case 'doc-reportes': root.innerHTML = renderDocReportes(); break;
+    case 'doc-stats': root.innerHTML = renderDocStats(); break;
+    case 'doc-asig': root.innerHTML = renderDocAsig(); break;
+    case 'dir-semanal': root.innerHTML = renderDirSemanal(); break;
+    case 'dir-grupo': root.innerHTML = renderDirGrupo(); break;
+    default: root.innerHTML = renderLanding();
+  }
+
+  window.scrollTo(0, 0);
+}
+
+// ===============================================================
+// EVENT HANDLERS & VINCULACIÓN CON BACKEND (NexoAPI)
+// ===============================================================
+
+function showToast(msg) {
+  const c = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = 'toast-notice';
+  el.innerHTML = `<span>⚡</span> <span>${msg}</span>`;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// Navegación con delegación de eventos
+document.addEventListener('click', async (e) => {
+  // Cambio de pantalla
+  const navBtn = e.target.closest('[data-screen]');
+  if (navBtn) {
+    e.preventDefault();
+    AppState.currentScreen = navBtn.dataset.screen;
+    renderApp();
+    return;
+  }
+
+  // Cambio de tema
+  const themeBtn = e.target.closest('[data-theme-val]');
+  if (themeBtn) {
+    const val = themeBtn.dataset.themeVal;
+    AppState.theme = val;
+    document.documentElement.setAttribute('data-theme', val);
+    localStorage.setItem('nexo_theme', val);
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.themeVal === val));
+    return;
+  }
+
+  // Cerrar sesión
+  if (e.target.id === 'logoutBtn') {
+    await NexoAPI.logout();
+    AppState.user = null;
+    AppState.currentScreen = 'landing';
+    showToast('Sesión cerrada correctamente.');
+    renderApp();
+    return;
+  }
+
+  // Selección de rol en Login
+  const roleBtn = e.target.closest('[data-role]');
+  if (roleBtn) {
+    AppState.selectedRole = roleBtn.dataset.role;
+    renderApp();
+    return;
+  }
+
+  // Cuentas de demostración en Login
+  const demoBtn = e.target.closest('[data-demo-user]');
+  if (demoBtn) {
+    const u = demoBtn.dataset.demoUser;
+    AppState.selectedRole = u;
+    if (u === 'est') { AppState.loginEmail = 'estudiante@javeriana.edu.co'; }
+    if (u === 'doc') { AppState.loginEmail = 'profesor@javeriana.edu.co'; }
+    if (u === 'dir') { AppState.loginEmail = 'direccion@javeriana.edu.co'; }
+    AppState.loginPass = 'clave123';
+    renderApp();
+    return;
+  }
+
+  // Selección de materia para nuevo reporte
+  const crearAsigBtn = e.target.closest('[data-action="crear-reporte-asig"]');
+  if (crearAsigBtn) {
+    AppState.newReportSubjectId = crearAsigBtn.dataset.subjId;
+    AppState.currentScreen = 'est-nuevo';
+    renderApp();
+    return;
+  }
+
+  // Selección de mood en nuevo reporte
+  const moodBtn = e.target.closest('[data-mood]');
+  if (moodBtn) {
+    const cat = moodBtn.dataset.mood;
+    const val = Number(moodBtn.dataset.val);
+    AppState.newReportMoods[cat] = val;
+    renderApp();
+    return;
+  }
+
+  // Filtros de estado en panel docente
+  const docFilterBtn = e.target.closest('[data-doc-filter]');
+  if (docFilterBtn) {
+    AppState.docFilterState = docFilterBtn.dataset.docFilter;
+    renderApp();
+    return;
+  }
+
+  // Cambio reactivo de estado en reporte (HU-03)
+  const statusBtn = e.target.closest('[data-action="set-status"]');
+  if (statusBtn) {
+    const repId = statusBtn.dataset.id;
+    const newStatus = statusBtn.dataset.newStatus;
+    try {
+      await NexoAPI.setStatus(repId, newStatus);
+      showToast(`Estado actualizado a: ${EST_LABELS[newStatus] || newStatus}`);
+      // El suscriptor onSnapshot de Firebase actualizará los datos automáticamente
+    } catch (err) {
+      alert('Error actualizando estado: ' + err.message);
+    }
+    return;
+  }
+});
+
+// Manejo de input de texto con validación en tiempo real (HU-02)
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'reportDetail') {
+    AppState.newReportDetail = e.target.value;
+    const counter = document.querySelector('.char-counter');
+    const submitBtn = document.querySelector('#newReportForm button[type="submit"]');
+    if (counter && submitBtn) {
+      const len = e.target.value.length;
+      const valid = len >= 20;
+      counter.classList.toggle('valid', valid);
+      counter.innerHTML = `<span>${valid ? '✓ Longitud válida' : 'Mínimo 20 caracteres requeridos (Criterio HU-02)'}</span><span>${len} / 20</span>`;
+      submitBtn.disabled = !valid;
+    }
+  }
+  if (e.target.id === 'inputEmail') AppState.loginEmail = e.target.value;
+  if (e.target.id === 'inputPassword') AppState.loginPass = e.target.value;
+});
+
+document.addEventListener('change', (e) => {
+  if (e.target.id === 'selectSubject') {
+    AppState.newReportSubjectId = e.target.value;
+  }
+});
+
+// Envíos de formulario
+document.addEventListener('submit', async (e) => {
+  // Formulario de login
+  if (e.target.id === 'loginForm') {
+    e.preventDefault();
+    AppState.loginLoading = true;
+    AppState.loginError = '';
+    renderApp();
+
+    try {
+      const user = await NexoAPI.login(AppState.loginEmail, AppState.loginPass, AppState.selectedRole);
+      AppState.user = user;
+      AppState.loginLoading = false;
+      showToast(`¡Bienvenido(a), ${user.nombre}!`);
+
+      // Redirección según rol (HU-01)
+      if (user.rol === 'doc') {
+        AppState.currentScreen = 'doc-reportes';
+      } else if (user.rol === 'dir' || user.rol === 'adm') {
+        AppState.currentScreen = 'dir-semanal';
+      } else {
+        AppState.currentScreen = 'est-asig';
+      }
+    } catch (err) {
+      AppState.loginLoading = false;
+      AppState.loginError = err.message;
+    }
+    renderApp();
+    return;
+  }
+
+  // Formulario de nuevo reporte (HU-02)
+  if (e.target.id === 'newReportForm') {
+    e.preventDefault();
+    try {
+      const nuevo = await NexoAPI.createReport({
+        subjectId: AppState.newReportSubjectId,
+        moods: AppState.newReportMoods,
+        detalle: AppState.newReportDetail
+      });
+      AppState.lastCreatedReport = nuevo;
+      AppState.newReportDetail = '';
+      AppState.currentScreen = 'est-enviado';
+      showToast('Reporte guardado con éxito en Firebase.');
+      renderApp();
+    } catch (err) {
+      alert('Error creando reporte: ' + err.message);
+    }
+  }
+});
+
+// Inicialización de la aplicación
+async function initApp() {
+  document.documentElement.setAttribute('data-theme', AppState.theme);
+
+  // Actualizar estado de Firebase en UI
+  const fbText = document.getElementById('fbStatusText');
+  if (fbText) {
+    fbText.textContent = NexoAPI.isFirebaseActive ? `Firestore: ${NexoAPI.projectId}` : 'Nexo Firebase';
+  }
+
+  // Cargar asignaturas y reportes
+  try {
+    AppState.subjects = await NexoAPI.subjects();
+    AppState.reports = await NexoAPI.reports();
+  } catch (e) {
+    console.warn(e);
+  }
+
+  // Suscribirse a cambios en tiempo real (HU-03 / HU-04)
+  NexoAPI.subscribeReports((updatedReports) => {
+    AppState.reports = updatedReports;
+    // Si estamos en pantallas docentes que dependen de reportes, refrescamos reactivamente
+    if (['doc-reportes', 'doc-stats', 'dir-semanal'].includes(AppState.currentScreen)) {
+      renderApp();
+    }
+  });
+
+  renderApp();
+}
+
+window.addEventListener('DOMContentLoaded', initApp);
+</script>
+
+</body>
+</html>

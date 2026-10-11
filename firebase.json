@@ -7,9 +7,9 @@
     "ignore": [
       "firebase.json",
       "firestore.rules",
-      "backend/**",
       "**/.*",
-      "*.md"
+      "*.md",
+      "tablero-mockups.html"
     ],
     "cleanUrls": true,
     "rewrites": [

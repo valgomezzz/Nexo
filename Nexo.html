@@ -1,16 +1,36 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="claro">
+<html lang="es" data-theme="jave">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nexo · Reportes académicos</title>
+<title>Nexo · Sistema de Feedback Académico PUJ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..800,0..100,0..1&family=Source+Sans+3:wght@400;500;600;700&display=swap">
 <style>
 /* =========================================================
-   TEMAS — mismas paletas, mismos roles de color
+   SISTEMA DE DISEÑO NEXO (PUJ) - PALETAS Y TEMAS
    ========================================================= */
+:root[data-theme="jave"] {
+  --bg:#EEF2F8; --sf:#FFFFFF; --sf2:#F3F6FB; --bd:#D5DEEB; --bd2:#C2CFE2; --tx:#132135; --mu:#4F5E77;
+  --dock:#132135; --dock-tx:#CEDBEE; --dock-mu:#8A9BB7; --dock-bd:#22344F; --dock-hover:#1A2B45;
+  --nav-on-bg:#E6B979; --nav-on-tx:#132135;
+  --pr:#355E96; --pr-hover:#2A4E80; --on-pr:#FFFFFF; --pr-soft:#E3EBF6; --pr-tx:#2A4E80;
+  --ac:#E6B979; --on-ac:#132135; --ac-soft:#F8EDDB; --ac-tx:#7A5218;
+  --neutral:#CEDBEE; --mint:#9FB6D8;
+  --pend:#D9952B; --rev:#867ED3; --ok:#3DA56A;
+  --pend-bg:#FDF4E7; --pend-tx:#8C580F; --rev-bg:#EFEBF9; --rev-tx:#4C448C; --ok-bg:#E4F5EB; --ok-tx:#1E6B3E;
+  --red:#D03B34; --amb:#D9952B; --grn:#3DA56A; --on-grn:#FFFFFF;
+  --sh:inset 0 1px 0 rgba(255,255,255,.9), 0 2px 4px rgba(19,33,53,.06), 0 8px 18px -6px rgba(19,33,53,.12);
+  --sh-lift:inset 0 1px 0 rgba(255,255,255,.9), 0 4px 8px rgba(19,33,53,.08), 0 18px 36px -10px rgba(19,33,53,.2);
+  --hero-bg:#132135; --hero-tx:#FFFFFF; --hero-mu:#CEDBEE; --hero-ac:#E6B979; --hero-line:rgba(230,185,121,.25);
+  --sw-track:#E3EBF6; --sw-on:#E6B979; --sw-on-tx:#132135; --sw-off:#4F5E77;
+  --av-bg:#355E96; --av-tx:#FFFFFF; --in-bg:#FFFFFF; --focus:rgba(53,94,150,.28);
+  --toast-bg:#132135; --toast-tx:#FFFFFF;
+  --hl-bg:#FFFFFF; --hl-fg:#132135; --hl-ac:#E6B979;
+  --font-display:'Fraunces',Georgia,serif;
+}
+
 :root[data-theme="claro"] {
   --bg:#F7F4F2; --sf:#FFFFFF; --sf2:#F3EEEB; --bd:#E7DFDB; --bd2:#D9CEC9; --tx:#2B1E1F; --mu:#6B5E60;
   --dock:#FFFFFF; --dock-tx:#3D2F31; --dock-mu:#7E7072; --dock-bd:#EEE7E4; --dock-hover:#F6EFEC;
@@ -21,16 +41,16 @@
   --pend:#D9952B; --rev:#B295B0; --ok:#6DAF7E;
   --pend-bg:#FBEBD3; --pend-tx:#85500C; --rev-bg:#ECE3EB; --rev-tx:#62405F; --ok-bg:#E1F1E5; --ok-tx:#2A6A3D;
   --red:#B3403A; --amb:#C98418; --grn:#4B9862; --on-grn:#FFFFFF;
-  --sh:inset 0 1px 0 rgba(255,255,255,.9), 0 1px 2px rgba(64,32,32,.06), 0 6px 14px -6px rgba(64,32,32,.12), 0 28px 56px -24px rgba(64,32,32,.28);
-  --sh-lift:inset 0 1px 0 rgba(255,255,255,.9), 0 2px 4px rgba(64,32,32,.08), 0 14px 28px -10px rgba(64,32,32,.2), 0 40px 72px -28px rgba(64,32,32,.36);
-  --glow-a:rgba(131,47,47,.10); --glow-b:rgba(178,149,176,.16); --grain-o:.35;
+  --sh:inset 0 1px 0 rgba(255,255,255,.9), 0 1px 2px rgba(64,32,32,.06), 0 6px 14px -6px rgba(64,32,32,.12);
+  --sh-lift:inset 0 1px 0 rgba(255,255,255,.9), 0 2px 4px rgba(64,32,32,.08), 0 14px 28px -10px rgba(64,32,32,.2);
   --hero-bg:#832F2F; --hero-tx:#FFFFFF; --hero-mu:#F1D9D9; --hero-ac:#A2CDAB; --hero-line:rgba(255,255,255,.22);
-  --sw-track:#F2ECE9; --sw-on:#FFFFFF; --sw-on-tx:#2B1E1F; --sw-off:#6B5E60; --sw-sh:0 1px 3px rgba(64,32,32,.18);
-  --av-bg:#B1BEC4; --av-tx:#2B1E1F; --in-bg:#FFFFFF; --focus:rgba(131,47,47,.25);
+  --sw-track:#F2ECE9; --sw-on:#FFFFFF; --sw-on-tx:#2B1E1F; --sw-off:#6B5E60;
+  --av-bg:#832F2F; --av-tx:#FFFFFF; --in-bg:#FFFFFF; --focus:rgba(131,47,47,.25);
   --toast-bg:#2B1E1F; --toast-tx:#FFFFFF;
-  --lg-bg:#832F2F; --lg-fg:#FFFFFF; --lg-ac:#A2CDAB; --hl-bg:#FFFFFF; --hl-fg:#832F2F; --hl-ac:#A2CDAB; --fl-bg:#832F2F; --fl-fg:#FFFFFF; --fl-ac:#A2CDAB;
-  --font-display:'Fraunces',Georgia,serif; --display-w:600; --display-ls:-0.02em; --display-var:'SOFT' 100, 'WONK' 1;
+  --hl-bg:#FFFFFF; --hl-fg:#832F2F; --hl-ac:#A2CDAB;
+  --font-display:'Fraunces',Georgia,serif;
 }
+
 :root[data-theme="oscuro"] {
   --bg:#010F23; --sf:#071A36; --sf2:#0C2346; --bd:#173260; --bd2:#22427A; --tx:#EAF2FF; --mu:#97ABCB;
   --dock:#000A19; --dock-tx:#D3E1F7; --dock-mu:#7E93B6; --dock-bd:#10234A; --dock-hover:#0A1C38;
@@ -41,1158 +61,1304 @@
   --pend:#FFB547; --rev:#867ED3; --ok:#3DD68C;
   --pend-bg:#3A2A0C; --pend-tx:#FFC768; --rev-bg:#25225E; --rev-tx:#CFCAFB; --ok-bg:#0E3423; --ok-tx:#86E2A8;
   --red:#FF6B6B; --amb:#FFB547; --grn:#3DD68C; --on-grn:#01210F;
-  --sh:inset 0 1px 0 rgba(190,216,254,.08), 0 1px 2px rgba(0,0,0,.4), 0 8px 18px -8px rgba(0,0,0,.5), 0 30px 60px -24px rgba(0,0,0,.85);
-  --sh-lift:inset 0 1px 0 rgba(190,216,254,.12), 0 2px 4px rgba(0,0,0,.45), 0 16px 32px -10px rgba(0,0,0,.6), 0 44px 80px -28px rgba(0,0,0,.95);
-  --glow-a:rgba(4,97,233,.22); --glow-b:rgba(134,126,211,.16); --grain-o:.5;
+  --sh:inset 0 1px 0 rgba(190,216,254,.08), 0 1px 2px rgba(0,0,0,.4), 0 8px 18px -8px rgba(0,0,0,.5);
+  --sh-lift:inset 0 1px 0 rgba(190,216,254,.12), 0 2px 4px rgba(0,0,0,.45), 0 16px 32px -10px rgba(0,0,0,.6);
   --hero-bg:#000A19; --hero-tx:#EAF2FF; --hero-mu:#97ABCB; --hero-ac:#0461E9; --hero-line:rgba(190,216,254,.16);
-  --sw-track:#0C1E3C; --sw-on:#0461E9; --sw-on-tx:#FFFFFF; --sw-off:#97ABCB; --sw-sh:none;
-  --av-bg:#867ED3; --av-tx:#0A0B2A; --in-bg:#04142C; --focus:rgba(4,97,233,.45);
+  --sw-track:#0C1E3C; --sw-on:#0461E9; --sw-on-tx:#FFFFFF; --sw-off:#97ABCB;
+  --av-bg:#0461E9; --av-tx:#FFFFFF; --in-bg:#04142C; --focus:rgba(4,97,233,.45);
   --toast-bg:#BED8FE; --toast-tx:#010F23;
-  --lg-bg:#0461E9; --lg-fg:#FFFFFF; --lg-ac:#BED8FE; --hl-bg:#EAF2FF; --hl-fg:#000A19; --hl-ac:#0461E9; --fl-bg:#0461E9; --fl-fg:#FFFFFF; --fl-ac:#BED8FE;
-  --font-display:'Fraunces',Georgia,serif; --display-w:600; --display-ls:-0.02em; --display-var:'SOFT' 100, 'WONK' 1;
-}
-:root[data-theme="jave"] {
-  --bg:#EEF2F8; --sf:#FFFFFF; --sf2:#F3F6FB; --bd:#D5DEEB; --bd2:#C2CFE2; --tx:#132135; --mu:#4F5E77;
-  --dock:#132135; --dock-tx:#CEDBEE; --dock-mu:#8A9BB7; --dock-bd:#22344F; --dock-hover:#1A2B45;
-  --nav-on-bg:#E6B979; --nav-on-tx:#132135;
-  --pr:#355E96; --pr-hover:#2A4E80; --on-pr:#FFFFFF; --pr-soft:#E3EBF6; --pr-tx:#2A4E80;
-  --ac:#E6B979; --on-ac:#132135; --ac-soft:#F8EDDB; --ac-tx:#7A5218;
-  --neutral:#CEDBEE; --mint:#9FB6D8;
-  --pend:#E6B979; --rev:#355E96; --ok:#5FA77A;
-  --pend-bg:#F8EAD2; --pend-tx:#7A5218; --rev-bg:#DFE8F5; --rev-tx:#2A4E80; --ok-bg:#DFF0E5; --ok-tx:#276140;
-  --red:#C2483F; --amb:#C98D2E; --grn:#3F8F5C; --on-grn:#FFFFFF;
-  --sh:inset 0 1px 0 rgba(255,255,255,.95), 0 1px 2px rgba(19,33,53,.07), 0 6px 14px -6px rgba(19,33,53,.14), 0 28px 56px -24px rgba(19,33,53,.32);
-  --sh-lift:inset 0 1px 0 rgba(255,255,255,.95), 0 2px 4px rgba(19,33,53,.09), 0 14px 28px -10px rgba(19,33,53,.22), 0 40px 72px -28px rgba(19,33,53,.4);
-  --glow-a:rgba(53,94,150,.14); --glow-b:rgba(230,185,121,.18); --grain-o:.35;
-  --hero-bg:#132135; --hero-tx:#FFFFFF; --hero-mu:#CEDBEE; --hero-ac:#E6B979; --hero-line:rgba(206,219,238,.2);
-  --sw-track:#1E3050; --sw-on:#E6B979; --sw-on-tx:#132135; --sw-off:#CEDBEE; --sw-sh:none;
-  --av-bg:#E6B979; --av-tx:#132135; --in-bg:#FFFFFF; --focus:rgba(53,94,150,.3);
-  --toast-bg:#132135; --toast-tx:#FFFFFF;
-  --lg-bg:#E6B979; --lg-fg:#132135; --lg-ac:#FFFFFF; --hl-bg:#FFFFFF; --hl-fg:#132135; --hl-ac:#E6B979; --fl-bg:#132135; --fl-fg:#FFFFFF; --fl-ac:#E6B979;
-  --font-display:'Fraunces',Georgia,serif; --display-w:600; --display-ls:-0.015em; --display-var:'SOFT' 0, 'WONK' 0;
+  --hl-bg:#EAF2FF; --hl-fg:#000A19; --hl-ac:#0461E9;
+  --font-display:'Fraunces',Georgia,serif;
 }
 
-/* =========================================================
-   BASE
-   ========================================================= */
-*, *::before, *::after { box-sizing: border-box; }
-html, body { margin: 0; }
-body { font-family: 'Source Sans 3', system-ui, sans-serif; font-size: 16px; line-height: 1.55;
-  background-color: var(--bg); color: var(--tx); transition: background-color .35s ease, color .35s ease; -webkit-font-smoothing: antialiased;
-  background-image: radial-gradient(1100px 620px at 92% -8%, var(--glow-a), transparent 62%), radial-gradient(900px 560px at -6% 108%, var(--glow-b), transparent 60%);
-  background-attachment: fixed; }
-/* Grano sutil encima del fondo para quitar la sensación plana */
-body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: var(--grain-o); mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-#app { position: relative; z-index: 1; }
-button, input, select, textarea { font: inherit; color: inherit; }
-button { cursor: pointer; }
-:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-h1, h2, h3, p { margin: 0; }
-.display, .wordmark, .bignum strong, .legend b, .subj-mark, .wk b, .tabs .n, .doc-row .date strong, .timeline .when strong, .cat .top b { font-family: var(--font-display); font-variation-settings: var(--display-var); }
-.display { font-weight: var(--display-w); letter-spacing: var(--display-ls); }
-.muted { color: var(--mu); }
-svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
-
-.btn { min-height: 46px; padding: 0 20px; border-radius: 999px; border: 1.5px solid var(--bd2); background: transparent; color: var(--tx);
-  font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background .2s, border-color .2s, transform .1s; white-space: nowrap; }
-.btn:hover { border-color: var(--tx); }
-.btn:active { transform: translateY(1px); }
-.btn-primary { background: linear-gradient(180deg, color-mix(in srgb, var(--pr) 88%, #fff), var(--pr)); color: var(--on-pr); border-color: var(--pr);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 2px rgba(0,0,0,.18), 0 8px 18px -8px color-mix(in srgb, var(--pr) 70%, transparent); }
-.btn-primary:hover { background: var(--pr-hover); border-color: var(--pr-hover); }
-.btn-primary:disabled { background: var(--sf2); color: var(--mu); border-color: var(--bd); cursor: not-allowed; }
-.btn-ghost { border-color: transparent; color: var(--pr-tx); padding: 0 12px; }
-.btn-ghost:hover { border-color: transparent; background: var(--pr-soft); }
-
-.status { display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px 5px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 700; white-space: nowrap; border: 0; transition: box-shadow .3s; }
-.status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-.status.pend { background: var(--pend-bg); color: var(--pend-tx); }
-.status.rev  { background: var(--rev-bg);  color: var(--rev-tx); }
-.status.ok   { background: var(--ok-bg);   color: var(--ok-tx); }
-.status.flash { box-shadow: 0 0 0 4px var(--focus); }
-.tag { display: inline-block; padding: 2px 9px; border-radius: 6px; background: var(--sf2); color: var(--mu); font-size: 12px; font-weight: 600; }
-.sem { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; white-space: nowrap; }
-.sem i { width: 10px; height: 10px; border-radius: 50%; }
-.sem.alto i { background: var(--red); box-shadow: 0 0 0 4px color-mix(in srgb, var(--red) 18%, transparent); }
-.sem.medio i { background: var(--amb); box-shadow: 0 0 0 4px color-mix(in srgb, var(--amb) 18%, transparent); }
-.sem.bajo i { background: var(--grn); box-shadow: 0 0 0 4px color-mix(in srgb, var(--grn) 18%, transparent); }
-
-/* Caritas (signo de la marca) */
-.face svg { display: block; }
-
-/* =========================================================
-   INGRESO
-   ========================================================= */
-.login { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); min-height: 100vh; }
-.hero { background-color: var(--hero-bg); color: var(--hero-tx); padding: 40px 56px 32px; display: flex; flex-direction: column; gap: 28px; overflow: hidden; position: relative;
-  background-image: radial-gradient(70% 55% at 50% 72%, color-mix(in srgb, var(--hero-tx) 14%, transparent), transparent 70%),
-    radial-gradient(120% 80% at 50% 120%, rgba(0,0,0,.35), transparent 60%), linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.18));
-  box-shadow: inset -1px 0 0 rgba(255,255,255,.06), 24px 0 60px -30px rgba(0,0,0,.45); z-index: 1; }
-.hero-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-.wordmark { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 28px; letter-spacing: -0.04em; }
-.hero h1 { font-size: clamp(38px, 4.1vw, 62px); line-height: 1.04; max-width: 15ch; text-shadow: 0 2px 24px rgba(0,0,0,.18); }
-.hero .lead { margin-top: 18px; font-size: clamp(22px, 2vw, 28px); line-height: 1.3; font-weight: 500; color: var(--hero-mu); max-width: 44ch; }
-.mood-strip { display: flex; gap: 14px; align-items: flex-end; }
-.mood-strip .face { color: var(--hero-tx); opacity: .9; }
-.mood-strip .face:nth-child(1) svg { width: 46px; height: 46px; opacity: .45; }
-.mood-strip .face:nth-child(2) svg { width: 58px; height: 58px; opacity: .6; }
-.mood-strip .face:nth-child(3) svg { width: 72px; height: 72px; opacity: .75; }
-.mood-strip .face:nth-child(4) svg { width: 88px; height: 88px; }
-.mood-strip .face:nth-child(5) svg { width: 108px; height: 108px; color: var(--hero-ac); }
-/* ---------- Logo 3D giratorio (fondo animado del ingreso) ----------
-   La N se arma con capas SVG apiladas en el eje Z: así tiene grosor real al girar.
-   Los colores salen de las variables del tema (--hl-*), por eso cambia con Claro / Oscuro / JaveMode. */
-.hero { isolation: isolate; }
-.hero > * { position: relative; z-index: 2; }
-.hero > .hero-top { z-index: 5; }
-.theme-wrap { z-index: 10; }
-/* El escenario ocupa el espacio libre entre el texto y el pie: el logo queda centrado y nunca encima del texto */
-.stage3d { flex: 1; min-height: 220px; display: flex; align-items: center; justify-content: center; position: relative; }
-.pedestal { position: absolute; left: 50%; bottom: 4%; width: min(78%, 460px); aspect-ratio: 4 / 1; transform: translateX(-50%); border-radius: 50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--hero-ac) 30%, transparent), transparent);
-  box-shadow: 0 0 0 1px var(--hero-line), 0 0 0 26px color-mix(in srgb, var(--hero-tx) 3%, transparent), 0 0 0 27px var(--hero-line); }
-.logo3d { position: relative; height: min(100%, 300px); max-height: 34vh; aspect-ratio: 1; perspective: 1400px; pointer-events: none; }
-.logo3d .float { position: absolute; inset: 0; transform-style: preserve-3d; animation: float3d 7s ease-in-out infinite; }
-.logo3d .spin { position: absolute; inset: 12%; transform-style: preserve-3d; animation: spin3d 16s linear infinite; }
-.logo3d .layer { position: absolute; inset: 0; backface-visibility: visible; }
-.logo3d .layer svg { width: 100%; height: 100%; display: block; overflow: visible; }
-.logo3d .glow { position: absolute; inset: 4%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--hero-ac) 38%, transparent), transparent 65%); filter: blur(10px); animation: glow3d 7s ease-in-out infinite; }
-.logo3d .shadow { position: absolute; left: 22%; right: 22%; bottom: -2%; height: 8%; border-radius: 50%; background: rgba(0,0,0,.35); filter: blur(14px); animation: shadow3d 7s ease-in-out infinite; }
-@keyframes spin3d { from { transform: rotateX(-14deg) rotateY(0deg); } to { transform: rotateX(-14deg) rotateY(360deg); } }
-@keyframes float3d { 0%, 100% { transform: translateY(-3%); } 50% { transform: translateY(3%); } }
-@keyframes glow3d { 0%, 100% { opacity: .7; transform: scale(.94); } 50% { opacity: 1; transform: scale(1.04); } }
-@keyframes shadow3d { 0%, 100% { transform: scaleX(.86); opacity: .5; } 50% { transform: scaleX(1); opacity: .8; } }
-.hero-foot { display: flex; justify-content: center; align-items: center; gap: 24px; flex-wrap: wrap; border-top: 1px solid var(--hero-line); padding-top: 18px; }
-.hero-foot p { font-size: 14px; color: var(--hero-mu); text-align: center; }
-
-.login-side { display: flex; align-items: center; justify-content: center; padding: 48px 32px; }
-.login-form { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 22px; padding: 36px 34px; border-radius: 28px; background: var(--sf); border: 1px solid var(--bd); box-shadow: var(--sh-lift); }
-.login-form h2 { font-size: 40px; line-height: 1.05; }
-.roles { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
-.roles button { box-shadow: var(--sh); min-height: 76px; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 6px; padding: 12px 14px;
-  border-radius: 14px; border: 1.5px solid var(--bd); background: var(--sf); text-align: left; font-weight: 700; font-size: 14px; transition: border-color .2s, background .2s; }
-.roles button small { font-weight: 500; font-size: 12px; color: var(--mu); }
-.roles button:hover { border-color: var(--bd2); }
-.roles button[aria-pressed="true"] { border-color: var(--pr); background: var(--pr-soft); color: var(--pr-tx); }
-.field { display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 700; }
-.input { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 16px; border-radius: 14px; background: var(--in-bg); border: 1.5px solid var(--bd); color: var(--mu); transition: border-color .2s; }
-.input:focus-within { border-color: var(--pr); }
-.input input { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: var(--tx); font-weight: 500; font-size: 15px; }
-fieldset { border: 0; margin: 0; padding: 0; }
-legend { padding: 0; margin-bottom: 10px; font-size: 13px; font-weight: 700; }
-
-/* Selector de tema */
-.theme-wrap { position: relative; }
-.theme-btn { min-height: 40px; display: inline-flex; align-items: center; gap: 9px; padding: 0 12px 0 10px; border-radius: 999px; border: 1px solid transparent;
-  background: var(--sw-track); color: var(--sw-on-tx); font-size: 13px; font-weight: 600; transition: background .2s, box-shadow .2s; }
-.theme-btn:hover { box-shadow: 0 0 0 3px var(--focus); }
-.theme-btn svg.i { width: 14px; height: 14px; stroke-width: 2.4; opacity: .7; transition: transform .2s; }
-.theme-btn[aria-expanded="true"] svg.i { transform: rotate(180deg); }
-.hero .theme-btn { background: rgba(255,255,255,.12); color: var(--hero-tx); border-color: var(--hero-line); backdrop-filter: blur(6px); }
-.dock .theme-btn { width: 100%; background: transparent; color: var(--dock-tx); border-color: var(--dock-bd); border-radius: 14px; min-height: 46px; padding: 0 14px; }
-.dock .theme-btn:hover { background: var(--dock-hover); }
-.dock .theme-btn .lbl { flex: 1; text-align: left; }
-.theme-menu { position: absolute; z-index: 30; width: 220px; padding: 6px; border-radius: 16px; background: var(--sf); color: var(--tx); border: 1px solid var(--bd);
-  box-shadow: var(--sh-lift); animation: pop .15s ease; }
-.hero .theme-menu { right: 0; top: calc(100% + 8px); }
-.dock .theme-menu { left: 0; bottom: calc(100% + 8px); width: 100%; }
-.theme-menu p { font-size: 12px; color: var(--mu); padding: 8px 10px 4px; font-weight: 600; }
-.theme-menu button { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border: 0; border-radius: 10px; background: transparent; color: var(--tx); font-size: 14px; font-weight: 600; text-align: left; }
-.theme-menu button:hover, .theme-menu button[aria-checked="true"] { background: var(--sf2); }
-.theme-menu button .name { flex: 1; }
-.theme-menu button svg.i { width: 16px; height: 16px; stroke-width: 2.4; color: var(--pr-tx); }
-.dots { display: flex; }
-.dots span { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 0 1.5px var(--sw-track); }
-.dots span + span { margin-left: -3px; }
-.theme-menu .dots span, .dock .theme-btn .dots span { box-shadow: 0 0 0 1.5px var(--sf); }
-.dock .theme-btn .dots span { box-shadow: 0 0 0 1.5px var(--dock); }
-.hero .theme-btn .dots span { box-shadow: 0 0 0 1.5px rgba(255,255,255,.25); }
-
-/* =========================================================
-   APP
-   ========================================================= */
-.app { display: flex; min-height: 100vh; gap: 0; }
-.dock { position: sticky; top: 0; height: 100vh; flex: 0 0 264px; padding: 16px; }
-.dock-inner { box-shadow: var(--sh-lift); height: 100%; background: var(--dock); border: 1px solid var(--dock-bd); border-radius: 24px; padding: 22px 14px 16px; display: flex; flex-direction: column; gap: 26px; transition: background .35s; }
-.dock .wordmark { color: var(--dock-tx); font-size: 26px; padding: 0 8px; }
-.nav { display: flex; flex-direction: column; gap: 4px; }
-.nav button { min-height: 46px; display: flex; align-items: center; gap: 12px; padding: 0 14px; border: 0; border-radius: 14px; background: transparent; color: var(--dock-tx); font-weight: 500; font-size: 14.5px; text-align: left; transition: background .2s; }
-.nav button:hover { background: var(--dock-hover); }
-.nav button[aria-current="page"] { background: var(--nav-on-bg); color: var(--nav-on-tx); font-weight: 700; }
-.nav .count { margin-left: auto; min-width: 24px; padding: 2px 8px; border-radius: 999px; background: var(--pend); color: #1C1408; font-size: 12px; font-weight: 700; text-align: center; }
-.nav button[aria-current="page"] .count { background: var(--nav-on-tx); color: var(--nav-on-bg); }
-.dock-foot { margin-top: auto; display: flex; flex-direction: column; gap: 14px; }
-.user { display: flex; align-items: center; gap: 12px; padding: 12px 6px 0; border-top: 1px solid var(--dock-bd); }
-.avatar { width: 40px; height: 40px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--av-bg); color: var(--av-tx); font-weight: 700; font-size: 14px; }
-.user .name { font-weight: 700; font-size: 14px; color: var(--dock-tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.user .role { font-size: 12px; color: var(--dock-mu); }
-.icon-btn { width: 44px; height: 44px; flex: none; display: flex; align-items: center; justify-content: center; border: 1px solid var(--dock-bd); border-radius: 12px; background: transparent; color: var(--dock-mu); }
-.icon-btn:hover { color: var(--dock-tx); background: var(--dock-hover); }
-
-.main { flex: 1; min-width: 0; padding: 48px 56px 72px 40px; }
-.wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px; }
-.page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
-.page-head .kicker { font-size: 14px; font-weight: 600; color: var(--mu); margin-bottom: 10px; }
-.page-head h1 { font-size: clamp(34px, 3.6vw, 48px); line-height: 1.05; max-width: 22ch; }
-.page-head .sub { margin-top: 12px; font-size: 16px; color: var(--mu); max-width: 56ch; }
-.crumbs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 13px; font-weight: 600; color: var(--mu); margin-bottom: 12px; }
-.crumbs button { border: 0; background: none; padding: 4px 0; color: var(--pr-tx); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
-.panel { background: linear-gradient(180deg, color-mix(in srgb, var(--sf) 100%, #fff 0%), color-mix(in srgb, var(--sf) 96%, var(--bg))); border: 1px solid var(--bd); border-radius: 22px; box-shadow: var(--sh); }
-.row.clickable { transition: background .2s, transform .2s; }
-.panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 24px; border-bottom: 1px solid var(--bd); flex-wrap: wrap; }
-.panel-head h2 { font-size: 17px; font-weight: 700; }
-
-/* Filas (listas) */
-.rows { list-style: none; margin: 0; padding: 0; }
-.row { display: grid; align-items: center; gap: 20px; padding: 18px 24px; border-top: 1px solid var(--bd); transition: background .3s; }
-.row:first-child { border-top: 0; }
-.row.clickable { cursor: pointer; }
-.row.clickable:hover { background: var(--sf2); }
-.row .title { font-weight: 700; font-size: 16px; }
-.row .meta { font-size: 13px; color: var(--mu); margin-top: 2px; }
-.row.flash { background: var(--pr-soft); }
-.chev { color: var(--mu); }
-
-/* Estudiante */
-.prompt { box-shadow: var(--sh-lift), inset 0 1px 0 rgba(255,255,255,.12); background-image: radial-gradient(600px 300px at 85% 0%, rgba(255,255,255,.12), transparent 70%); display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 28px; align-items: center; padding: 32px 36px; border-radius: 26px; background: var(--hero-bg); color: var(--hero-tx); overflow: hidden; position: relative; }
-.prompt h2 { font-size: clamp(26px, 2.6vw, 34px); line-height: 1.1; max-width: 24ch; }
-.prompt p { margin-top: 10px; color: var(--hero-mu); max-width: 46ch; }
-.prompt .btn-primary { background: var(--hero-tx); color: var(--hero-bg); border-color: var(--hero-tx); min-height: 52px; padding: 0 26px; }
-.prompt .btn-primary:hover { opacity: .92; }
-.prompt .ring { position: absolute; right: -60px; top: -80px; width: 260px; height: 260px; border-radius: 50%; border: 1.5px solid var(--hero-line); pointer-events: none; }
-.est-row { grid-template-columns: 52px minmax(0,1fr) auto auto; }
-.subj-mark { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 18px; background: var(--pr-soft); color: var(--pr-tx); }
-.done-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ok-tx); }
-.todo-pill { font-size: 13px; font-weight: 600; color: var(--mu); }
-
-/* Reporte (modo enfocado) */
-.focus { min-height: 100vh; display: flex; flex-direction: column; }
-.focus-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 32px; }
-.focus-bar .wordmark { font-size: 22px; color: var(--tx); }
-.progress { padding: 0 32px; max-width: 880px; width: 100%; margin: 0 auto; }
-.progress .label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: var(--mu); margin-bottom: 10px; }
-.progress .label strong { color: var(--tx); }
-.segs { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 6px; }
-.segs span { height: 6px; border-radius: 6px; background: var(--bd); transition: background .3s; }
-.segs span.done { background: var(--pr); }
-.segs span.cur { background: linear-gradient(90deg, var(--pr) 50%, var(--bd) 50%); }
-.stage { flex: 1; width: 100%; max-width: 880px; margin: 0 auto; padding: 48px 32px 40px; display: flex; flex-direction: column; gap: 32px; animation: rise .35s ease; }
-@keyframes rise { from { opacity: 0; transform: translateY(10px); } }
-.stage h1 { font-size: clamp(32px, 4vw, 52px); line-height: 1.05; max-width: 20ch; }
-.stage .desc { font-size: 17px; color: var(--mu); max-width: 52ch; margin-top: 14px; }
-.subject-pick { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
-.pick { min-height: 84px; text-align: left; display: flex; align-items: center; gap: 16px; padding: 16px 18px; border-radius: 18px; border: 1.5px solid var(--bd); background: var(--sf); transition: border-color .2s, background .2s, transform .2s, box-shadow .2s; box-shadow: var(--sh); }
-.pick:hover { border-color: var(--bd2); transform: translateY(-2px); box-shadow: var(--sh-lift); }
-.pick[aria-pressed="true"] { border-color: var(--pr); background: var(--pr-soft); }
-.pick .subj-mark { width: 46px; height: 46px; font-size: 16px; border-radius: 14px; }
-.pick[aria-pressed="true"] .subj-mark { background: var(--pr); color: var(--on-pr); }
-.pick strong { display: block; font-size: 16px; }
-.pick small { display: block; font-size: 13px; color: var(--mu); }
-.scale { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; }
-.mood { min-height: 168px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 18px 8px; border-radius: 22px; border: 1.5px solid var(--bd);
-  background: var(--sf); font-weight: 600; font-size: 14px; color: var(--mu); transition: border-color .2s, background .2s, transform .2s; }
-.mood:hover { border-color: var(--bd2); color: var(--tx); transform: translateY(-3px); box-shadow: var(--sh-lift); }
-.mood { box-shadow: var(--sh); }
-.mood .face svg { width: 56px; height: 56px; transition: transform .25s cubic-bezier(.3,1.6,.5,1); }
-.mood[aria-pressed="true"] { border-color: var(--pr); background: var(--pr-soft); color: var(--pr-tx); font-weight: 700; }
-.mood[aria-pressed="true"] .face svg { transform: scale(1.22); }
-.scale-ends { display: flex; justify-content: space-between; font-size: 13px; color: var(--mu); margin-top: -18px; padding: 0 6px; }
-textarea { width: 100%; resize: vertical; padding: 16px 18px; border-radius: 16px; border: 1.5px solid var(--bd); background: var(--in-bg); color: var(--tx); font-weight: 500; font-size: 16px; line-height: 1.65; outline: none; transition: border-color .2s; }
-textarea:focus { border-color: var(--pr); }
-textarea.ok { border-color: var(--grn); }
-.wordbar { height: 6px; border-radius: 6px; background: var(--sf2); overflow: hidden; margin-top: 12px; }
-.wordbar div { height: 100%; border-radius: 6px; background: var(--amb); transition: width .25s, background .25s; }
-.wordbar.ok div { background: var(--grn); }
-.counter { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-top: 8px; }
-.stage-actions { display: flex; justify-content: space-between; gap: 12px; padding-top: 8px; }
-.stage-actions .btn { min-height: 52px; padding: 0 28px; }
-
-.success { max-width: 560px; margin: 0 auto; padding: 72px 32px; display: flex; flex-direction: column; align-items: center; gap: 28px; text-align: center; animation: rise .4s ease; }
-.success .face svg { width: 96px; height: 96px; color: var(--grn); }
-.success h1 { font-size: clamp(34px, 4vw, 48px); line-height: 1.05; }
-.ticket { width: 100%; padding: 22px 24px; border-radius: 20px; background: var(--sf); border: 1px solid var(--bd); box-shadow: var(--sh); text-align: left; display: flex; flex-direction: column; gap: 16px; }
-.ticket .tear { border-top: 1.5px dashed var(--bd2); margin: 0 -24px; }
-.ticket .line { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14px; }
-.ticket .moods-mini { display: flex; gap: 14px; flex-wrap: wrap; }
-.ticket .moods-mini span { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--mu); }
-.ticket .moods-mini svg { width: 22px; height: 22px; }
-
-/* Docente */
-.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-.tabs button { min-height: 42px; display: inline-flex; align-items: center; gap: 10px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--bd); background: var(--sf); font-weight: 600; font-size: 14px; color: var(--mu); transition: all .2s; }
-.tabs button:hover { border-color: var(--bd2); color: var(--tx); }
-.tabs button[aria-pressed="true"] { background: var(--tx); border-color: var(--tx); color: var(--bg); }
-.tabs .n { font-family: var(--font-display); font-weight: 700; font-size: 15px; }
-.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-select { min-height: 42px; padding: 0 40px 0 16px; border-radius: 999px; border: 1.5px solid var(--bd); background: var(--sf); color: var(--tx); font-weight: 600; font-size: 14px;
-  appearance: none; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
-  background-position: calc(100% - 20px) 18px, calc(100% - 15px) 18px; background-size: 5px 5px; background-repeat: no-repeat; }
-.doc-row { grid-template-columns: 92px minmax(0,1fr) auto; }
-.doc-row .date { font-size: 13px; color: var(--mu); line-height: 1.3; }
-.doc-row .date strong { display: block; font-family: var(--font-display); font-size: 22px; color: var(--tx); font-weight: 700; }
-.doc-row .tags { display: flex; gap: 8px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
-.menu-wrap { position: relative; display: inline-flex; align-items: center; gap: 10px; }
-.status-btn { cursor: pointer; padding-right: 8px; }
-.status-btn svg.i { width: 14px; height: 14px; stroke-width: 2.4; }
-.menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 5; width: 210px; padding: 6px; border-radius: 16px; background: var(--sf); border: 1px solid var(--bd); box-shadow: 0 24px 48px -16px rgba(0,0,0,.4); animation: pop .15s ease; }
-@keyframes pop { from { opacity: 0; transform: translateY(-4px); } }
-.menu p { font-size: 12px; color: var(--mu); padding: 8px 10px 4px; font-weight: 600; }
-.menu button { width: 100%; min-height: 42px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border: 0; border-radius: 10px; background: transparent; font-weight: 600; font-size: 14px; text-align: left; }
-.menu button:hover, .menu button.cur { background: var(--sf2); }
-.menu .dot { width: 9px; height: 9px; border-radius: 50%; }
-.spinner { width: 18px; height: 18px; animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.empty { padding: 64px 24px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
-.empty .face svg { width: 64px; height: 64px; color: var(--mu); }
-.course-row { grid-template-columns: 52px minmax(0,1fr) auto auto; }
-
-/* Director */
-.pulse { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; }
-.pulse .big { padding: 30px 32px; display: flex; flex-direction: column; gap: 24px; }
-.bignum { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
-.bignum strong { font-family: var(--font-display); font-weight: var(--display-w); font-size: clamp(72px, 8vw, 112px); line-height: .85; letter-spacing: -0.05em; }
-.bignum span { font-size: 18px; color: var(--mu); max-width: 24ch; }
-.stack { display: flex; height: 16px; border-radius: 999px; overflow: hidden; gap: 3px; }
-.stack i { display: block; height: 100%; }
-.stack i:first-child { border-radius: 999px 0 0 999px; }
-.stack i:last-child { border-radius: 0 999px 999px 0; }
-.stack .p { background: var(--pend); } .stack .r { background: var(--rev); } .stack .o { background: var(--ok); }
-.legend { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
-.legend div { display: flex; flex-direction: column; gap: 2px; }
-.legend b { font-family: var(--font-display); font-size: 30px; line-height: 1; font-weight: var(--display-w); letter-spacing: -0.03em; }
-.legend span { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--mu); font-weight: 600; }
-.legend span::before { content: ""; width: 9px; height: 9px; border-radius: 3px; background: var(--c); }
-.cats { padding: 28px 30px; display: flex; flex-direction: column; gap: 18px; }
-.cats h2 { font-size: 17px; font-weight: 700; }
-.cat { display: flex; flex-direction: column; gap: 8px; }
-.cat .top { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; }
-.cat .top b { font-family: var(--font-display); font-size: 18px; }
-.cat .track { height: 10px; border-radius: 999px; background: var(--sf2); overflow: hidden; }
-.cat .track i { display: block; height: 100%; border-radius: 999px; background: var(--pr); }
-.cat:nth-child(3) .track i { background: var(--ac); }
-.cat:nth-child(4) .track i { background: var(--neutral); }
-.dir-row { grid-template-columns: minmax(170px, 1.2fr) minmax(160px, 1.6fr) 64px 84px 90px 20px; }
-.dir-row .nums { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
-.dir-row .nums small { display: block; font-weight: 500; font-size: 12px; color: var(--mu); }
-.timeline .face svg { width: 26px; height: 26px; }
-.score { display: flex; align-items: center; gap: 14px; }
-.score-face svg { width: 34px; height: 34px; }
-.cat .top small { font-family: 'Source Sans 3', sans-serif; font-size: 12px; font-weight: 500; }
-.weeks { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 12px; align-items: end; min-height: 170px; }
-.wk { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px; }
-.wk i { display: block; width: 100%; max-width: 44px; border-radius: 10px 10px 4px 4px; background: var(--sf2); border: 1px solid var(--bd); }
-.wk.now i { background: var(--pr); border-color: var(--pr); }
-.wk b { font-family: var(--font-display); font-size: 16px; }
-.wk span { font-size: 12px; color: var(--mu); font-weight: 600; }
-.dir-head { display: grid; gap: 20px; padding: 12px 24px; font-size: 12.5px; font-weight: 600; color: var(--mu); border-bottom: 1px solid var(--bd); }
-.timeline { list-style: none; margin: 0; padding: 0; position: relative; }
-.timeline li { display: grid; grid-template-columns: 110px 24px minmax(0,1fr); gap: 16px; padding-bottom: 22px; }
-.timeline .when { text-align: right; font-size: 13px; color: var(--mu); padding-top: 18px; }
-.timeline .when strong { display: block; font-family: var(--font-display); font-size: 22px; color: var(--tx); line-height: 1.1; }
-.timeline .rail { position: relative; display: flex; justify-content: center; }
-.timeline .rail::before { content: ""; position: absolute; top: 0; bottom: -22px; width: 2px; background: var(--bd); }
-.timeline li:last-child .rail::before { bottom: 0; }
-.timeline .rail i { position: relative; margin-top: 24px; width: 14px; height: 14px; border-radius: 50%; border: 3px solid var(--bg); }
-.timeline .card { padding: 18px 22px; display: flex; flex-direction: column; gap: 10px; }
-.timeline .card .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-
-.toast { position: fixed; right: 24px; bottom: 24px; z-index: 20; display: flex; align-items: center; gap: 12px; padding: 14px 16px 14px 14px; border-radius: 18px;
-  background: var(--toast-bg); color: var(--toast-tx); box-shadow: 0 22px 48px -16px rgba(0,0,0,.5); font-size: 14px; font-weight: 600; animation: toastIn .3s ease; }
-.toast .ok-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--grn); color: var(--on-grn); }
-.toast button { width: 32px; height: 32px; margin-left: 6px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 10px; background: transparent; color: inherit; opacity: .75; }
-@keyframes toastIn { from { opacity: 0; transform: translateY(14px) scale(.98); } }
-
-/* ---------- Botones con rebote (bouncy) ----------
-   1) Al presionar: el botón se hunde (scale .93).
-   2) Al soltar: la clase .bounce corre un rebote con sobresalto y se asienta. */
-button, [role="button"] { -webkit-tap-highlight-color: transparent; }
-button:not(:disabled):active, [role="button"]:active { transform: scale(.93) !important; transition: transform .08s ease-out !important; }
-.btn:not(:disabled):hover, .theme-btn:hover, .tabs button:hover, .icon-btn:hover { transform: translateY(-2px); }
-.btn, .theme-btn, .tabs button, .icon-btn, .nav button, .status-btn, .small-btn, .roles button, .menu button, .theme-menu button, .crumbs button {
-  transition: transform .35s cubic-bezier(.34, 1.7, .5, 1), background .2s, border-color .2s, box-shadow .2s, color .2s; }
-@keyframes bouncy {
-  0%   { transform: scale(.93); }
-  35%  { transform: scale(1.07); }
-  58%  { transform: scale(.97); }
-  78%  { transform: scale(1.02); }
-  100% { transform: scale(1); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--tx);
+  min-height: 100vh;
+  line-height: 1.5;
+  transition: background .25s ease, color .25s ease;
+  overflow-x: hidden;
 }
-.bounce { animation: bouncy .55s cubic-bezier(.3, .7, .4, 1) both; }
-.row.bounce { animation-name: bouncyRow; }
-@keyframes bouncyRow { 0% { transform: scale(.985); } 40% { transform: scale(1.01); } 70% { transform: scale(.997); } 100% { transform: scale(1); } }
 
-/* Responsive */
-@media (max-width: 1100px) {
-  .pulse { grid-template-columns: 1fr; }
-  .dir-row { grid-template-columns: minmax(0,1fr) 36px 36px 72px 14px; gap: 10px; }
-  .dir-row .stack-cell, .dir-row .grp-cell, .dir-head { display: none; }
+.display {
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  letter-spacing: -0.02em;
 }
-@media (max-width: 900px) {
-  .login { grid-template-columns: minmax(0, 1fr); }
-  .login-side { padding: 28px 16px; }
-  .login-form { padding: 26px 20px; }
-  .hero { padding: 32px 24px; gap: 32px; }
-  .stage3d { min-height: 200px; }
-  .logo3d { height: 190px; max-height: none; }
-  .mood-strip { gap: 8px; }
-  .mood-strip .face:nth-child(1) svg { width: 34px; height: 34px; }
-  .mood-strip .face:nth-child(2) svg { width: 42px; height: 42px; }
-  .mood-strip .face:nth-child(3) svg { width: 50px; height: 50px; }
-  .mood-strip .face:nth-child(4) svg { width: 58px; height: 58px; }
-  .mood-strip .face:nth-child(5) svg { width: 68px; height: 68px; }
-  .app { flex-direction: column; }
-  .dock { position: static; height: auto; flex: none; padding: 12px 12px 0; }
-  .dock-inner { border-radius: 20px; gap: 16px; }
-  .main { padding: 28px 16px 48px; }
-  .prompt { grid-template-columns: 1fr; padding: 26px 24px; }
-  .scale { grid-template-columns: repeat(5, minmax(0,1fr)); gap: 6px; }
-  .mood { min-height: 112px; font-size: 11.5px; padding: 12px 2px; border-radius: 16px; }
-  .mood .face svg { width: 36px; height: 36px; }
-  .subject-pick { grid-template-columns: 1fr; }
-  .focus-bar, .progress, .stage { padding-left: 16px; padding-right: 16px; }
-  .est-row, .course-row { grid-template-columns: 44px minmax(0,1fr) auto; }
-  .est-row .status-cell, .course-row .chip-cell { display: none; }
-  .doc-row { grid-template-columns: 1fr; gap: 10px; }
-  .doc-row .date strong { display: inline; font-size: 15px; margin-right: 6px; }
-  .timeline li { grid-template-columns: 0 18px minmax(0,1fr); gap: 10px; }
-  .timeline .when { display: none; }
-  .row { padding: 16px 18px; }
-  .legend b { font-size: 24px; }
+
+/* -------------------------------------------------------------
+   NAVBAR SUPERIOR & DEMO QUICK-BAR
+   ------------------------------------------------------------- */
+.app-header {
+  position: sticky; top: 0; z-index: 900;
+  background: var(--sf);
+  border-bottom: 1px solid var(--bd);
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
-@media (prefers-reduced-motion: reduce) {
-  *:not(.spin) { transition: none !important; animation: none !important; }
-  /* Si la persona pidió menos movimiento, el logo sigue girando pero muy despacio */
-  .logo3d .spin { animation-duration: 60s !important; }
+.header-inner {
+  max-width: 1280px; margin: 0 auto;
+  padding: 12px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
 }
+.brand {
+  display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: none; color: inherit;
+}
+.brand-name { font-size: 24px; font-weight: 700; color: var(--tx); }
+.brand-sub { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mu); margin-left: 2px; }
+
+.header-actions { display: flex; align-items: center; gap: 12px; }
+
+/* Status pill de Firebase */
+.fb-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 999px;
+  background: var(--sf2); border: 1px solid var(--bd);
+  font-size: 12px; font-weight: 600; color: var(--mu);
+}
+.fb-dot { width: 8px; height: 8px; border-radius: 50%; background: #3DA56A; box-shadow: 0 0 6px #3DA56A; }
+
+/* Selector de temas */
+.theme-switch {
+  display: flex; background: var(--sw-track); padding: 3px; border-radius: 999px; gap: 2px;
+}
+.theme-btn {
+  border: 0; background: transparent; padding: 4px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; color: var(--sw-off); cursor: pointer; transition: all .2s;
+}
+.theme-btn.active {
+  background: var(--sw-on); color: var(--sw-on-tx); box-shadow: 0 1px 3px rgba(0,0,0,.15);
+}
+
+/* Barra de navegación de pantallas de demostración */
+.demo-screens-bar {
+  background: var(--sf2);
+  border-bottom: 1px solid var(--bd);
+  padding: 6px 20px;
+  overflow-x: auto;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+}
+.demo-bar-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--mu); margin-right: 6px; flex-shrink: 0;
+}
+.screen-tag {
+  display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--bd); background: var(--sf); color: var(--tx); cursor: pointer; text-decoration: none;
+  transition: all .15s; flex-shrink: 0;
+}
+.screen-tag:hover { border-color: var(--pr); color: var(--pr-tx); transform: translateY(-1px); }
+.screen-tag.active { background: var(--pr); color: var(--on-pr); border-color: var(--pr); }
+
+/* -------------------------------------------------------------
+   PANTALLA 1: LANDING PAGE
+   ------------------------------------------------------------- */
+.landing-hero {
+  position: relative; background: var(--hero-bg); color: var(--hero-tx);
+  overflow: hidden; padding: 60px 24px 80px; min-height: 82vh;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.landing-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
+  pointer-events: none;
+}
+.landing-container {
+  max-width: 1200px; margin: 0 auto; width: 100%; position: relative; z-index: 10;
+}
+.landing-flex {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 48px;
+}
+.landing-content { flex: 1 1 520px; }
+.landing-title {
+  font-size: clamp(38px, 5vw, 64px); line-height: 1.08; font-weight: 700; margin-bottom: 20px;
+}
+.landing-lead {
+  font-size: clamp(20px, 2.2vw, 26px); color: var(--hero-mu); font-weight: 500; margin-bottom: 36px;
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 0 26px; border-radius: 999px;
+  font-size: 16px; font-weight: 700; cursor: pointer; border: 0;
+  text-decoration: none; transition: transform .2s, box-shadow .2s;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn-primary {
+  background: var(--pr); color: var(--on-pr);
+  box-shadow: 0 10px 24px -8px rgba(0,0,0,.3);
+}
+.btn-primary:hover { background: var(--pr-hover); }
+.btn-accent {
+  background: var(--hero-ac); color: #132135;
+  box-shadow: 0 10px 24px -8px rgba(230,185,121,.4);
+}
+.btn-white {
+  background: #FFFFFF; color: var(--tx);
+  box-shadow: 0 8px 20px -6px rgba(0,0,0,.25);
+}
+.btn-secondary {
+  background: var(--sf2); color: var(--tx); border: 1.5px solid var(--bd);
+}
+.btn-secondary:hover { background: var(--sf); border-color: var(--pr); }
+
+/* Logo 3D Animado */
+.stage-3d {
+  width: 380px; height: 380px; position: relative; flex: 0 0 auto;
+  perspective: 1200px; margin: 0 auto;
+}
+.orbit-ring {
+  position: absolute; border-radius: 50%; border: 1.5px dashed rgba(255,255,255,.28);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  animation: spin-orbit linear infinite;
+}
+.orbit-ring.r1 { width: 340px; height: 340px; animation-duration: 32s; }
+.orbit-ring.r2 { width: 260px; height: 260px; animation-duration: 22s; animation-direction: reverse; border-style: solid; border-color: var(--hero-ac); opacity: .45; }
+.orbit-ring i {
+  position: absolute; top: -6px; left: 50%; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--hero-ac); box-shadow: 0 0 16px var(--hero-ac);
+}
+@keyframes spin-orbit { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+.logo-core {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  animation: float-3d 6s ease-in-out infinite;
+}
+@keyframes float-3d { 0%, 100% { transform: translate(-50%, -50%) translateY(0); } 50% { transform: translate(-50%, -50%) translateY(-14px); } }
+
+/* Pasos interactivos (HU-02) */
+.flow-steps {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;
+  margin-top: 50px; padding-top: 40px; border-top: 1px solid var(--hero-line);
+}
+.step-card {
+  display: flex; align-items: flex-start; gap: 16px;
+}
+.step-num {
+  width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,.1);
+  border: 2px solid var(--hero-ac); display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700; color: var(--hero-ac); flex-shrink: 0;
+}
+.step-info h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.step-info p { font-size: 14px; color: var(--hero-mu); line-height: 1.4; }
+
+/* -------------------------------------------------------------
+   PANTALLA 2: INICIAR SESIÓN (HU-01)
+   ------------------------------------------------------------- */
+.login-view {
+  min-height: calc(100vh - 110px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 20px;
+}
+.login-card {
+  max-width: 460px; width: 100%;
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 24px;
+  padding: 38px 32px; box-shadow: var(--sh-lift);
+}
+.login-header { margin-bottom: 24px; text-align: left; }
+.login-header h2 { font-size: 32px; font-weight: 700; }
+.login-header p { color: var(--mu); font-size: 15px; margin-top: 4px; }
+
+.roles-selector {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 22px;
+}
+.role-chip {
+  padding: 10px 8px; border-radius: 12px; border: 1.5px solid var(--bd);
+  background: var(--sf2); color: var(--mu); font-size: 13px; font-weight: 700;
+  cursor: pointer; text-align: center; transition: all .2s;
+}
+.role-chip.selected {
+  background: var(--pr); border-color: var(--pr); color: var(--on-pr);
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+
+.form-group { margin-bottom: 18px; }
+.form-group label {
+  display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--tx);
+}
+.input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--in-bg); border: 1.5px solid var(--bd); border-radius: 12px;
+  padding: 0 14px; min-height: 48px; transition: border-color .2s, box-shadow .2s;
+}
+.input-wrap:focus-within {
+  border-color: var(--pr); box-shadow: 0 0 0 3px var(--focus);
+}
+.input-wrap input, .input-wrap select, .input-wrap textarea {
+  width: 100%; border: 0; outline: 0; background: transparent; font-size: 15px;
+  color: var(--tx); font-family: inherit;
+}
+.demo-logins {
+  margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--bd);
+}
+.demo-logins-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--mu); margin-bottom: 8px; }
+.demo-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.demo-pill {
+  border: 1px solid var(--bd); background: var(--sf2); color: var(--tx);
+  padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.demo-pill:hover { border-color: var(--pr); }
+
+/* -------------------------------------------------------------
+   PANEL COMÚN: CONTENEDOR, TABS Y TARJETAS
+   ------------------------------------------------------------- */
+.panel-view {
+  max-width: 1240px; margin: 0 auto; padding: 36px 24px 60px;
+}
+.panel-top {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 16px; margin-bottom: 32px;
+}
+.panel-title h1 { font-size: 32px; font-weight: 700; }
+.panel-title p { color: var(--mu); font-size: 15px; margin-top: 2px; }
+
+/* Grid de asignaturas (HU-01, HU-02) */
+.subject-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;
+}
+.subject-card {
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 18px;
+  padding: 24px; box-shadow: var(--sh); transition: transform .2s, box-shadow .2s;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 18px;
+}
+.subject-card:hover { transform: translateY(-3px); box-shadow: var(--sh-lift); }
+.subj-code {
+  display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 700;
+  background: var(--pr-soft); color: var(--pr-tx); margin-bottom: 8px;
+}
+.subj-name { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.subj-prof { font-size: 14px; color: var(--mu); }
+
+/* -------------------------------------------------------------
+   PANTALLA 4: ESTUDIANTE · NUEVO REPORTE (HU-02)
+   ------------------------------------------------------------- */
+.wizard-box {
+  max-width: 760px; margin: 0 auto;
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 24px;
+  padding: 36px; box-shadow: var(--sh-lift);
+}
+.mood-group { margin-bottom: 24px; }
+.mood-label { font-weight: 600; font-size: 15px; margin-bottom: 8px; display: block; }
+.mood-pills { display: flex; gap: 10px; }
+.mood-pill {
+  flex: 1; padding: 12px 10px; border-radius: 14px; border: 1.5px solid var(--bd);
+  background: var(--sf2); font-size: 14px; font-weight: 600; cursor: pointer; text-align: center;
+  transition: all .15s;
+}
+.mood-pill.active {
+  background: var(--pr); border-color: var(--pr); color: var(--on-pr);
+}
+
+.char-counter {
+  display: flex; justify-content: space-between; font-size: 12px; color: var(--mu); margin-top: 6px;
+}
+.char-counter.valid { color: #3DA56A; font-weight: 600; }
+
+/* -------------------------------------------------------------
+   PANTALLA 5: ESTUDIANTE · REPORTE ENVIADO (HU-02)
+   ------------------------------------------------------------- */
+.success-card {
+  max-width: 580px; margin: 40px auto; text-align: center;
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 24px;
+  padding: 48px 32px; box-shadow: var(--sh-lift);
+}
+.success-icon {
+  width: 80px; height: 80px; border-radius: 50%; background: #E4F5EB; color: #1E6B3E;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 38px; margin-bottom: 20px;
+}
+.success-title { font-size: 32px; font-weight: 700; margin-bottom: 10px; }
+.success-desc { color: var(--mu); font-size: 16px; margin-bottom: 28px; }
+.receipt-box {
+  background: var(--sf2); border: 1px solid var(--bd); border-radius: 14px;
+  padding: 18px; text-align: left; margin-bottom: 30px; font-size: 14px;
+}
+.receipt-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.receipt-row:last-child { margin-bottom: 0; }
+.receipt-label { color: var(--mu); font-weight: 600; }
+.receipt-val { font-weight: 700; }
+
+/* -------------------------------------------------------------
+   PANTALLA 6: DOCENTE · REPORTES RECIBIDOS (HU-03)
+   ------------------------------------------------------------- */
+.tabs-row {
+  display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px;
+}
+.tab-btn {
+  padding: 8px 18px; border-radius: 10px; border: 1.5px solid var(--bd);
+  background: var(--sf); font-size: 14px; font-weight: 600; color: var(--mu);
+  cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all .15s;
+}
+.tab-btn.active {
+  background: var(--pr); border-color: var(--pr); color: var(--on-pr);
+}
+.tab-badge {
+  padding: 1px 7px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  background: rgba(0,0,0,.08); color: inherit;
+}
+.tab-btn.active .tab-badge { background: rgba(255,255,255,.25); }
+
+.reports-list { display: flex; flex-direction: column; gap: 16px; }
+.report-card {
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 18px;
+  padding: 22px 26px; box-shadow: var(--sh); transition: transform .2s;
+}
+.report-card:hover { transform: translateY(-2px); }
+.report-card-top {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start;
+  gap: 12px; margin-bottom: 12px;
+}
+.rep-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.badge {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;
+  border-radius: 999px; font-size: 12px; font-weight: 700;
+}
+.badge-pend { background: var(--pend-bg); color: var(--pend-tx); }
+.badge-rev { background: var(--rev-bg); color: var(--rev-tx); }
+.badge-ok { background: var(--ok-bg); color: var(--ok-tx); }
+.badge-cat { background: var(--sf2); color: var(--tx); border: 1px solid var(--bd); }
+
+.report-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--tx); }
+.report-body { font-size: 15px; color: var(--mu); margin-bottom: 16px; line-height: 1.5; }
+
+.status-changer {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding-top: 14px; border-top: 1px solid var(--bd);
+}
+.status-changer-label { font-size: 13px; font-weight: 700; color: var(--mu); margin-right: 4px; }
+.status-pill-btn {
+  border: 1px solid var(--bd); background: var(--sf2); color: var(--tx);
+  padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all .15s;
+}
+.status-pill-btn:hover { border-color: var(--pr); }
+.status-pill-btn.current {
+  background: var(--pr); border-color: var(--pr); color: var(--on-pr); font-weight: 700;
+}
+
+/* -------------------------------------------------------------
+   PANTALLA 7: DOCENTE · ESTADÍSTICAS Y MÉTRICAS (HU-04)
+   ------------------------------------------------------------- */
+.stats-cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 30px;
+}
+.metric-card {
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 18px;
+  padding: 22px; box-shadow: var(--sh);
+}
+.metric-label { font-size: 13px; font-weight: 700; color: var(--mu); text-transform: uppercase; margin-bottom: 6px; }
+.metric-num { font-size: 38px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+.metric-sub { font-size: 13px; color: var(--mu); }
+
+.charts-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px;
+}
+.chart-box {
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 18px;
+  padding: 24px; box-shadow: var(--sh);
+}
+.chart-title { font-size: 18px; font-weight: 700; margin-bottom: 18px; }
+.bar-item { margin-bottom: 14px; }
+.bar-label-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.bar-track { height: 10px; background: var(--sf2); border-radius: 999px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 999px; transition: width .4s ease; }
+
+/* Toast flotante */
+.toast-notice {
+  position: fixed; bottom: 24px; right: 24px; z-index: 10000;
+  background: var(--toast-bg); color: var(--toast-tx);
+  padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25); display: flex; align-items: center; gap: 8px;
+  animation: slide-up .25s ease-out;
+}
+@keyframes slide-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
-<div id="app"></div>
 
-<script>
-/* =========================================================
-   DATOS DE EJEMPLO
-   ========================================================= */
-const THEMES = [
-  { key: 'claro',  name: 'Claro',    sw: ['#832F2F', '#B295B0', '#A2CDAB'] },
-  { key: 'oscuro', name: 'Oscuro',   sw: ['#010F23', '#0461E9', '#867ED3'] },
-  { key: 'jave',   name: 'JaveMode', sw: ['#132135', '#355E96', '#E6B979'] }
-];
-const USERS = {
-  est: { name: 'Mateo Silva', first: 'Mateo', role: 'Estudiante', ini: 'MS' },
-  doc: { name: 'María García', first: 'María', role: 'Docente titular', ini: 'MG' },
-  dir: { name: 'Ana Torres', first: 'Ana', role: 'Dirección de programa', ini: 'AT' }
-};
-const ROLES = { est: ['Estudiante', 'Reporto mis clases'], doc: ['Docente', 'Respondo reportes'], dir: ['Dirección', 'Veo el panorama'] };
-const HOME = { est: 'est-asig', doc: 'doc-panel', dir: 'dir-panel' };
-const EST_LABEL = { pend: 'Pendiente', rev: 'En revisión', ok: 'Atendido' };
-
-const EST_SUBJ = [
-  { n: 'Cálculo Diferencial', ab: 'CD', prof: 'Andrea Ruiz', g: 'Grupo 1', last: '10 sep' },
-  { n: 'Estructuras de Datos', ab: 'ED', prof: 'Luis Peña', g: 'Grupo 1', last: null },
-  { n: 'Bases de Datos I', ab: 'BD', prof: 'Carlos Mejía', g: 'Grupo 1', last: null },
-  { n: 'Programación Orientada a Objetos', ab: 'PO', prof: 'Julián Torres', g: 'Grupo 2', last: null }
-];
-const DOC_ROWS = [
-  { id: 1, d: '12', m: 'sep', asig: 'Matemáticas III', titulo: 'Proyector no funciona en el aula 201', cat: 'Metodología', est: 'pend' },
-  { id: 2, d: '10', m: 'sep', asig: 'Física II', titulo: 'Faltan tizas y borradores en el laboratorio', cat: 'Contenido', est: 'rev' },
-  { id: 3, d: '09', m: 'sep', asig: 'Programación I', titulo: 'Licencia del IDE vencida en el laboratorio 4', cat: 'Contenido', est: 'rev' },
-  { id: 4, d: '08', m: 'sep', asig: 'Matemáticas III', titulo: 'Gotera cerca de la ventana', cat: 'Ritmo', est: 'ok' },
-  { id: 5, d: '05', m: 'sep', asig: 'Física II', titulo: 'Mesa de trabajo inestable en la fila 3', cat: 'Metodología', est: 'ok' }
-];
-const DOC_SUBJ = [['Matemáticas III', 'M3'], ['Física II', 'F2'], ['Programación I', 'P1'], ['Química Analítica', 'QA']];
-const DIR_SUBJ = [
-  { n: 'Cálculo Diferencial', p: 9, r: 2, o: 3, groups: [{ g: 'G1', p: 'Andrea Ruiz', t: 4, pe: 2 }, { g: 'G2', p: 'Mario Cruz', t: 3, pe: 1 }, { g: 'G3', p: 'Diana Suárez', t: 7, pe: 6 }] },
-  { n: 'Estructuras de Datos', p: 5, r: 3, o: 3, groups: [{ g: 'G1', p: 'Luis Peña', t: 6, pe: 3 }, { g: 'G2', p: 'Sofía Ríos', t: 5, pe: 2 }] },
-  { n: 'Ingeniería de Software', p: 3, r: 4, o: 2, groups: [{ g: 'G1', p: 'Camilo Rojas', t: 9, pe: 3 }] },
-  { n: 'Bases de Datos I', p: 1, r: 2, o: 5, groups: [{ g: 'G1', p: 'Carlos Mejía', t: 8, pe: 1 }] },
-  { n: 'Programación Orientada a Objetos', p: 0, r: 1, o: 4, groups: [{ g: 'G1', p: 'Julián Torres', t: 5, pe: 0 }] }
-];
-const CATS = [['Metodología', 40], ['Contenido', 35], ['Ritmo', 25]];
-const GROUP_REPORTS = [
-  { d: '10', m: 'sep', cat: 'Metodología', mood: 0, txt: 'El ritmo de la clase es muy rápido, no alcanzo a tomar apuntes y los temas se acumulan.', est: 'pend' },
-  { d: '9', m: 'sep', cat: 'Contenido', mood: 1, txt: 'Los ejemplos del tema 4 no corresponden con los ejercicios propuestos para el examen parcial.', est: 'rev' },
-  { d: '5', m: 'sep', cat: 'Ritmo', mood: 3, txt: 'Se resolvió el problema de acceso al material complementario en la nube compartida.', est: 'ok' },
-  { d: '3', m: 'sep', cat: 'Metodología', mood: 1, txt: 'Falta retroalimentación detallada en las tareas entregadas para poder corregir errores.', est: 'pend' }
-];
-const MOODS = [
-  { label: 'Muy mal',  d: 'M8 17.2c1.2-1.7 2.5-2.5 4-2.5s2.8.8 4 2.5', brow: true },
-  { label: 'Mal',      d: 'M8.5 16.2c1-.9 2.2-1.3 3.5-1.3s2.5.4 3.5 1.3' },
-  { label: 'Regular',  d: 'M8.5 15.4h7' },
-  { label: 'Bien',     d: 'M8.5 14.2c1 1.1 2.2 1.6 3.5 1.6s2.5-.5 3.5-1.6' },
-  { label: 'Muy bien', d: 'M7.8 13.6c1.1 2.3 2.5 3.4 4.2 3.4s3.1-1.1 4.2-3.4z', fill: true }
-];
-const QUESTIONS = {
-  2: ['¿Cómo te ha ido con la metodología?', 'Piensa en cómo se desarrollan las clases, las explicaciones del docente y las dinámicas de grupo.', 'Metodología'],
-  3: ['¿Qué tan claro te ha resultado el contenido?', 'Los conceptos teóricos, las lecturas y los materiales que hay en la plataforma.', 'Contenido'],
-  4: ['¿Cómo sientes el ritmo de la asignatura?', 'Si la velocidad de las clases te deja aprender o se siente apresurada o lenta.', 'Ritmo']
-};
-const STEP_NAMES = ['Asignatura', 'Metodología', 'Contenido', 'Ritmo', 'Detalle'];
-
-/* =========================================================
-   ÍCONOS
-   ========================================================= */
-const P = {
-  book: '<path d="M2 4.5h6a4 4 0 0 1 4 4V20a3 3 0 0 0-3-3H2zM22 4.5h-6a4 4 0 0 0-4 4V20a3 3 0 0 1 3-3h7z"/>',
-  inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
-  pulse: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
-  chart: '<path d="M3 3v18h18"/><path d="M8 17V11M13 17V7M18 17v-4"/>',
-  pen: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
-  logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
-  back: '<path d="M19 12H5M12 19l-7-7 7-7"/>',
-  right: '<path d="m9 18 6-6-6-6"/>',
-  check: '<path d="M20 6 9 17l-5-5"/>',
-  chev: '<path d="m6 9 6 6 6-6"/>',
-  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
-  lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
-  x: '<path d="M18 6 6 18M6 6l12 12"/>'
-};
-const icon = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
-const face = (i, color = 'currentColor') => {
-  const m = MOODS[i];
-  return `<span class="face" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="10"/><circle cx="9" cy="9.8" r="1.05" fill="${color}" stroke="none"/><circle cx="15" cy="9.8" r="1.05" fill="${color}" stroke="none"/>
-    ${m.brow ? '<path d="M7.6 7.4 10 8.2M16.4 7.4 14 8.2"/>' : ''}<path d="${m.d}" fill="${m.fill ? color : 'none'}"/></svg></span>`;
-};
-const MOOD_COLOR = ['var(--red)', 'var(--amb)', 'var(--mu)', 'var(--pr-tx)', 'var(--grn)'];
-/* Logo N de Nexo: dos personas (puntos) unidas por la N. Los colores cambian según dónde aparece. */
-const mark = (size = 34, where = 'lg') => `<svg width="${size}" height="${size}" viewBox="0 0 36 36" aria-hidden="true">
-  <rect width="36" height="36" rx="10" fill="var(--${where}-bg)"/>
-  <circle cx="12.5" cy="10.5" r="3.2" fill="var(--${where}-fg)"/><circle cx="23.5" cy="10.5" r="3.2" fill="var(--${where}-ac)"/>
-  <path d="M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18" stroke="var(--${where}-fg)" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const plural = (n, s, p) => `${n} ${n === 1 ? s : p}`;
-
-/* =========================================================
-   ESTADO
-   ========================================================= */
-let savedTheme = 'claro';
-try { savedTheme = localStorage.getItem('nexo-tema') || 'claro'; } catch (e) {}
-
-const state = {
-  tema: savedTheme, themeOpen: false, screen: 'login', loginRole: 'est', loginUser: '', loginPass: '',
-  step: 1, subj: null, moods: {}, comments: {}, detalle: '', sentAt: '', reported: { 'Cálculo Diferencial': '10 sep' },
-  rows: DOC_ROWS.map((r) => ({ ...r, id: String(r.id) })), fA: 'Todas', fE: 'todos', menuFor: null, loadingId: null, flash: null, toast: null,
-  dSubj: DIR_SUBJ[0].n, dGroup: 'G1', loginError: '', loginBusy: false
-};
-const set = (patch) => { Object.assign(state, patch); render(); };
-
-/* =========================================================
-   CONEXIÓN CON EL BACKEND (Firebase Auth + API en Java)
-   Si firebase-config.js no está configurado, se usan los datos de ejemplo.
-   ========================================================= */
-const API = () => (window.NexoAPI && window.NexoAPI.enabled ? window.NexoAPI : null);
-const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-const fill = (arr, items) => arr.splice(0, arr.length, ...items);
-let ALL_REPORTS = [];
-function toRow(r) {
-  const d = new Date(r.createdAt);
-  return { id: r.id, d: String(d.getDate()).padStart(2, '0'), m: MESES[d.getMonth()], asig: r.asignatura, grupo: r.grupo,
-    titulo: r.titulo, cat: r.categoria, est: r.estado, txt: r.detalle,
-    mood: Math.min(r.moods.metodologia, r.moods.contenido, r.moods.ritmo) };
-}
-async function loadData(me) {
-  const api = API();
-  const role = me.rol === 'adm' ? 'dir' : me.rol;
-  USERS[role] = { ...USERS[role], name: me.nombre, first: me.primerNombre, ini: me.iniciales };
-  const [subs, reps] = await Promise.all([api.subjects(), api.reports()]);
-  ALL_REPORTS = reps.map(toRow);
-  if (role === 'est') {
-    fill(EST_SUBJ, subs.map((s) => ({ id: s.id, n: s.nombre, ab: s.abreviatura, prof: s.profesor, g: s.grupo })));
-    const reported = {};
-    [...ALL_REPORTS].reverse().forEach((r) => { reported[r.asig] = `${Number(r.d)} ${r.m}`; });
-    state.reported = reported;
-    return role;
-  }
-  const st = await api.stats();
-  fill(DOC_SCORES, st.valoraciones.map((v) => [v.nombre, v.promedio]));
-  fill(DOC_WEEKS, st.porSemana.map((w) => [w.semana, w.total]));
-  fill(CATS, st.porCategoria.map((c) => [c.nombre, c.porcentaje]));
-  if (role === 'doc') {
-    fill(DOC_SUBJ, [...new Map(subs.map((s) => [s.nombre, [s.nombre, s.abreviatura]])).values()]);
-    state.rows = ALL_REPORTS.map((r) => ({ ...r }));
-  } else {
-    fill(DIR_SUBJ, st.porAsignatura.filter((a) => a.pendientes + a.enRevision + a.atendidos > 0).map((a) => ({
-      n: a.nombre, p: a.pendientes, r: a.enRevision, o: a.atendidos,
-      groups: a.grupos.map((g) => ({ g: 'G' + ((g.grupo || '').match(/\d+/) || ['?'])[0], grupo: g.grupo, p: g.profesor, t: g.total, pe: g.pendientes }))
-    })));
-    state.dSubj = DIR_SUBJ[0] ? DIR_SUBJ[0].n : '';
-  }
-  return role;
-}
-const roleOf = (sc) => sc.slice(0, 3);
-
-/* =========================================================
-   PIEZAS COMPARTIDAS
-   ========================================================= */
-const dots = (t) => `<span class="dots" aria-hidden="true">${t.sw.map((c) => `<span style="background:${c}"></span>`).join('')}</span>`;
-function themeSwitch() {
-  const cur = THEMES.find((t) => t.key === state.tema) || THEMES[0];
-  return `<div class="theme-wrap">
-    <button type="button" class="theme-btn" data-action="themeToggle" aria-haspopup="menu" aria-expanded="${state.themeOpen}" aria-label="Tema: ${cur.name}. Cambiar tema">
-      ${dots(cur)}<span class="lbl">${cur.name}</span>${icon('chev')}</button>
-    ${state.themeOpen ? `<div class="theme-menu" role="menu"><p>Tema de la interfaz</p>
-      ${THEMES.map((t) => `<button type="button" role="menuitemradio" aria-checked="${state.tema === t.key}" data-action="tema" data-arg="${t.key}">
-        ${dots(t)}<span class="name">${t.name}</span>${state.tema === t.key ? icon('check') : ''}</button>`).join('')}</div>` : ''}
-  </div>`;
-}
-const status = (est, extra = '') => `<span class="status ${est} ${extra}">${EST_LABEL[est]}</span>`;
-const semaforo = (ratio) => ratio >= 0.6 ? '<span class="sem alto"><i></i>Alto</span>' : ratio >= 0.4 ? '<span class="sem medio"><i></i>Medio</span>' : '<span class="sem bajo"><i></i>Bajo</span>';
-const stackBar = (p, r, o) => { const t = p + r + o || 1;
-  return `<div class="stack" role="img" aria-label="${p} pendientes, ${r} en revisión, ${o} atendidos">${p ? `<i class="p" style="flex:${p / t}"></i>` : ''}${r ? `<i class="r" style="flex:${r / t}"></i>` : ''}${o ? `<i class="o" style="flex:${o / t}"></i>` : ''}</div>`; };
-
-/* ---------- LOGO 3D ----------
-   Capas: cara trasera, cuerpo (varias capas del color lateral), cara frontal y el relieve de la N + puntos. */
-const SPIN_MS = 16000, FLOAT_MS = 7000;
-function logo3d() {
-  const DEPTH = 46;                 // grosor del bloque en px
-  const STEPS = 18;                 // capas del cuerpo (más capas = borde más sólido)
-  const RELIEF = 12;                // cuánto sobresale la N del frente
-  const side = 'color-mix(in srgb, var(--hl-bg) 62%, #000)';
-  const sideN = 'color-mix(in srgb, var(--hl-fg) 60%, #000)';
-  const sideA = 'color-mix(in srgb, var(--hl-ac) 60%, #000)';
-  const rect = (fill) => `<rect width="36" height="36" rx="10" fill="${fill}"/>`;
-  const symbols = (n, a) => `<circle cx="12.5" cy="10.5" r="3.2" fill="${n}"/><circle cx="23.5" cy="10.5" r="3.2" fill="${a}"/>
-    <path d="M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18" stroke="${n}" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
-  const layer = (z, inner, extra = '') => `<div class="layer" style="transform: translateZ(${z.toFixed(1)}px) ${extra}"><svg viewBox="0 0 36 36">${inner}</svg></div>`;
-
-  let html = layer(-DEPTH / 2, rect('var(--hl-bg)') + symbols('var(--hl-fg)', 'var(--hl-ac)'), 'rotateY(180deg)');
-  for (let i = 1; i < STEPS; i++) html += layer(-DEPTH / 2 + (DEPTH * i) / STEPS, rect(side));
-  html += layer(DEPTH / 2, rect('var(--hl-bg)'));
-  for (let i = 1; i <= 6; i++) html += layer(DEPTH / 2 + (RELIEF * i) / 7, symbols(sideN, sideA));
-  html += layer(DEPTH / 2 + RELIEF, symbols('var(--hl-fg)', 'var(--hl-ac)'));
-
-  // El retraso negativo hace que el giro continúe donde iba aunque la pantalla se vuelva a dibujar
-  const t = Date.now();
-  return `<div class="logo3d" aria-hidden="true">
-    <div class="glow" style="animation-delay:-${t % FLOAT_MS}ms"></div>
-    <div class="shadow" style="animation-delay:-${t % FLOAT_MS}ms"></div>
-    <div class="float" style="animation-delay:-${t % FLOAT_MS}ms">
-      <div class="spin" style="animation-delay:-${t % SPIN_MS}ms">${html}</div>
-    </div>
-  </div>`;
-}
-
-/* ---------- INGRESO ---------- */
-function viewLogin() {
-  return `<div class="login">
-    <section class="hero">
-      <div class="hero-top">
-        <div class="wordmark">${mark(32, "hl")}nexo</div>
-        ${themeSwitch()}
-      </div>
+<!-- ENCABEZADO SUPERIOR -->
+<header class="app-header">
+  <div class="header-inner">
+    <a href="#" class="brand" data-screen="landing">
+      <svg width="34" height="34" viewBox="0 0 36 36" aria-hidden="true">
+        <rect width="36" height="36" rx="10" fill="var(--pr)"></rect>
+        <circle cx="12.5" cy="10.5" r="3.2" fill="var(--on-pr)"></circle>
+        <circle cx="23.5" cy="10.5" r="3.2" fill="var(--ac)"></circle>
+        <path d="M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18" stroke="var(--on-pr)" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
       <div>
-        <h1 class="display">Tu voz académica, escuchada a tiempo.</h1>
-        <p class="lead display">Dilo hoy. Mejora mañana.</p>
+        <span class="brand-name display">nexo</span>
+        <span class="brand-sub">PUJ</span>
       </div>
-      <div class="stage3d"><span class="pedestal" aria-hidden="true"></span>${logo3d()}</div>
-      <div class="hero-foot">
-        <p>Un reporte toma menos de dos minutos.</p>
+    </a>
+
+    <div class="header-actions">
+      <!-- Indicador de conexión Firebase -->
+      <div class="fb-badge" title="Conectado directamente a Firebase Authentication y Cloud Firestore">
+        <span class="fb-dot"></span>
+        <span id="fbStatusText">Firebase BaaS</span>
       </div>
-    </section>
-    <section class="login-side">
-      <form class="login-form" id="loginForm" novalidate>
-        <div><h2 class="display">Hola de nuevo</h2><p class="muted" style="margin-top:8px">Ingresa con tu cuenta institucional.</p></div>
-        <fieldset><legend>¿Cómo ingresas?</legend>
-          <div class="roles">${Object.entries(ROLES).map(([k, [t, s]]) => `<button type="button" data-action="loginRole" data-arg="${k}" aria-pressed="${state.loginRole === k}">${t}<small>${s}</small></button>`).join('')}</div>
-        </fieldset>
-        <label class="field">Correo o usuario
-          <span class="input">${icon('mail')}<input type="text" id="loginUser" value="${esc(state.loginUser)}" placeholder="ejemplo@javeriana.edu.co" autocomplete="username"></span></label>
-        <label class="field">Contraseña
-          <span class="input">${icon('lock')}<input type="password" id="loginPass" value="${esc(state.loginPass)}" placeholder="Tu contraseña" autocomplete="current-password"></span></label>
-        ${state.loginError ? `<p role="alert" style="color:var(--red);font-size:14px;font-weight:600">${esc(state.loginError)}</p>` : ''}
-        <button type="submit" class="btn btn-primary" style="min-height:54px;font-size:16px" ${state.loginBusy ? 'disabled' : ''}>${state.loginBusy ? 'Ingresando…' : 'Ingresar'}</button>
-        <p class="muted" style="font-size:13px;text-align:center">¿Olvidaste tu contraseña? <a href="#" style="color:var(--pr-tx);font-weight:600">Recupérala aquí</a></p>
-      </form>
-    </section>
-  </div>`;
-}
 
-/* ---------- SHELL ---------- */
-function viewShell(content) {
-  const role = roleOf(state.screen);
-  const u = USERS[role];
-  const pend = state.rows.filter((r) => r.est === 'pend').length;
-  const navs = {
-    est: [['Mis asignaturas', 'book', ['est-asig'], 'est-asig'], ['Nuevo reporte', 'pen', [], 'newReport']],
-    doc: [['Reportes recibidos', 'inbox', ['doc-panel'], 'doc-panel', pend], ['Estadísticas', 'chart', ['doc-stats'], 'doc-stats'], ['Mis asignaturas', 'book', ['doc-asig'], 'doc-asig']],
-    dir: [['Panorama semanal', 'pulse', ['dir-panel', 'dir-asig', 'dir-grupo'], 'dir-panel']]
-  }[role];
-  return `<div class="app">
-    <aside class="dock"><div class="dock-inner">
-      <div class="wordmark">${mark(32)}nexo</div>
-      <nav class="nav" aria-label="Principal">
-        ${navs.map(([label, ic, screens, to, count]) => `<button type="button" data-action="${to === 'newReport' ? 'newReport' : 'go'}" data-arg="${to}" ${screens.includes(state.screen) ? 'aria-current="page"' : ''}>
-          ${icon(ic)}<span>${label}</span>${count ? `<span class="count" aria-label="${count} pendientes">${count}</span>` : ''}</button>`).join('')}
-      </nav>
-      <div class="dock-foot">
-        ${themeSwitch()}
-        <div class="user">
-          <span class="avatar" aria-hidden="true">${u.ini}</span>
-          <div style="flex:1;min-width:0"><div class="name">${u.name}</div><div class="role">${u.role}</div></div>
-          <button type="button" class="icon-btn" data-action="logout" aria-label="Cerrar sesión" title="Cerrar sesión">${icon('logout')}</button>
-        </div>
+      <!-- Selector de tema -->
+      <div class="theme-switch" role="group" aria-label="Cambiar tema">
+        <button class="theme-btn active" data-theme-val="jave" title="Tema Javeriana">Jave</button>
+        <button class="theme-btn" data-theme-val="claro" title="Tema Claro">Claro</button>
+        <button class="theme-btn" data-theme-val="oscuro" title="Tema Oscuro">Oscuro</button>
       </div>
-    </div></aside>
-    <main class="main"><div class="wrap">${content}</div></main>
-    ${toast()}
-  </div>`;
-}
-const toast = () => state.toast ? `<div class="toast" role="status"><span class="ok-dot">${icon('check')}</span>${state.toast}
-  <button type="button" data-action="closeToast" aria-label="Cerrar notificación">${icon('x')}</button></div>` : '';
 
-/* ---------- ESTUDIANTE ---------- */
-function viewEstAsig() {
-  const pending = EST_SUBJ.filter((s) => !state.reported[s.n]).length;
-  return `<header class="page-head"><div>
-      <p class="kicker">Semana 6, del 8 al 12 de septiembre</p>
-      <h1 class="display">Hola, ${USERS.est.first}. ${pending ? `Te ${pending === 1 ? 'falta 1 asignatura' : `faltan ${pending} asignaturas`} por reportar.` : 'Reportaste todas tus asignaturas.'}</h1>
-    </div></header>
-    ${pending ? `<section class="prompt"><span class="ring" aria-hidden="true"></span>
-      <div><h2 class="display">¿Cómo te fue esta semana?</h2><p>Elige una asignatura y responde tres preguntas rápidas. Tu docente verá el reporte y podrá responder.</p></div>
-      <button type="button" class="btn btn-primary" data-action="newReport">Hacer un reporte</button></section>` : ''}
-    <section class="panel">
-      <div class="panel-head"><h2>Tus asignaturas</h2><span class="muted" style="font-size:13px">${plural(EST_SUBJ.length, 'asignatura', 'asignaturas')} este semestre</span></div>
-      <ul class="rows">${EST_SUBJ.map((s) => {
-        const done = state.reported[s.n];
-        return `<li class="row est-row">
-          <span class="subj-mark" aria-hidden="true">${s.ab}</span>
-          <div><div class="title">${s.n}</div><div class="meta">${s.prof}, ${s.g}</div></div>
-          <span class="status-cell">${done ? `<span class="done-pill">${icon('check')}Reportada el ${done}</span>` : '<span class="todo-pill">Sin reporte esta semana</span>'}</span>
-          <button type="button" class="btn ${done ? '' : 'btn-primary'}" style="min-height:40px;padding:0 16px" data-action="openSubj" data-arg="${s.n}">${done ? 'Reportar otra vez' : 'Reportar'}</button>
-        </li>`; }).join('')}</ul>
-    </section>`;
-}
-
-function wordCount() { const t = state.detalle.trim(); return t ? t.split(/\s+/).length : 0; }
-function canNext() {
-  if (state.step === 1) return !!state.subj;
-  if (state.step <= 4) return state.moods[state.step] !== undefined;
-  return wordCount() >= 20;
-}
-
-function viewWizard() {
-  const s = state.step;
-  const segs = STEP_NAMES.map((_, i) => `<span class="${i + 1 < s ? 'done' : i + 1 === s ? 'cur' : ''}"></span>`).join('');
-  let body = '';
-  if (s === 1) {
-    body = `<div><h1 class="display">¿Sobre qué asignatura quieres reportar?</h1>
-        <p class="desc">Tu reporte le llega al docente del grupo y a la dirección del programa.</p></div>
-      <div class="subject-pick">${EST_SUBJ.map((x) => `<button type="button" class="pick" data-action="pickSubj" data-arg="${x.n}" aria-pressed="${state.subj === x.n}">
-        <span class="subj-mark" aria-hidden="true">${x.ab}</span><span><strong>${x.n}</strong><small>${x.prof}, ${x.g}</small></span></button>`).join('')}</div>`;
-  } else if (s <= 4) {
-    const [q, d] = QUESTIONS[s];
-    body = `<div><h1 class="display">${q}</h1><p class="desc">${d}</p></div>
-      <div class="scale" role="group" aria-label="Tu valoración">${MOODS.map((m, i) => `
-        <button type="button" class="mood" data-action="mood" data-arg="${i}" aria-pressed="${state.moods[s] === i}">${face(i, MOOD_COLOR[i])}${m.label}</button>`).join('')}</div>
-      <label class="field" style="font-size:14px">¿Quieres agregar algo? <span class="muted" style="font-weight:500">Es opcional.</span>
-        <textarea id="comment" rows="3" placeholder="Un ejemplo concreto ayuda a que el docente entienda.">${esc(state.comments[s] || '')}</textarea></label>`;
-  } else {
-    body = `<div><h1 class="display">Cuéntanos con más detalle qué está pasando</h1>
-        <p class="desc">Escribe al menos 20 palabras. Lo concreto ayuda: qué tema, qué clase, qué necesitarías.</p></div>
-      <div><label class="sr-only" for="detalle">Descripción</label>
-        <textarea id="detalle" rows="6" style="min-height:190px" placeholder="Ej.: Tengo dificultades para entender la recursividad aplicada a árboles binarios. En clase vamos muy rápido y…">${esc(state.detalle)}</textarea>
-        <div class="wordbar" id="wordBar" aria-hidden="true"><div></div></div>
-        <div class="counter" aria-live="polite"><span class="muted" id="wordCount"></span><span id="wordMsg"></span></div></div>`;
-  }
-  return `<div class="focus">
-    <div class="focus-bar">
-      <div class="wordmark">${mark(30, "fl")}nexo</div>
-      <button type="button" class="btn btn-ghost" data-action="go" data-arg="est-asig">${icon('x')}Salir del reporte</button>
+      <!-- Botón dinámico según sesión -->
+      <div id="headerAuthSlot"></div>
     </div>
-    <div class="progress">
-      <div class="label"><span>Paso ${s} de 5: <strong>${STEP_NAMES[s - 1]}</strong></span><span>${state.subj && s > 1 ? state.subj : ''}</span></div>
-      <div class="segs" aria-hidden="true">${segs}</div>
-    </div>
-    <section class="stage" aria-live="polite">
-      ${body}
-      <div class="stage-actions">
-        <button type="button" class="btn" data-action="back">${s === 1 ? 'Cancelar' : 'Atrás'}</button>
-        <button type="button" class="btn btn-primary" id="nextBtn" data-action="next" ${canNext() ? '' : 'disabled'}>${s === 5 ? 'Enviar reporte' : 'Continuar'}</button>
-      </div>
-    </section>
-    ${toast()}
-  </div>`;
-}
+  </div>
 
-function updateWordUI() {
-  const n = wordCount(), ok = n >= 20;
-  const bar = document.getElementById('wordBar');
-  if (!bar) return;
-  bar.classList.toggle('ok', ok);
-  bar.firstElementChild.style.width = Math.min(n / 20, 1) * 100 + '%';
-  document.getElementById('wordCount').textContent = `${n} de 20 palabras`;
-  const msg = document.getElementById('wordMsg');
-  msg.textContent = ok ? 'Listo para enviar' : n === 0 ? '' : `Faltan ${plural(20 - n, 'palabra', 'palabras')}`;
-  msg.style.color = ok ? 'var(--ok-tx)' : 'var(--pend-tx)';
-  document.getElementById('detalle').classList.toggle('ok', ok);
-  document.getElementById('nextBtn').disabled = !ok;
-}
+  <!-- Barra de navegación rápida de las 10 pantallas (para evaluación) -->
+  <div class="demo-screens-bar">
+    <span class="demo-bar-title">Pantallas (10):</span>
+    <button class="screen-tag active" data-screen="landing">1. Landing</button>
+    <button class="screen-tag" data-screen="login">2. Login</button>
+    <button class="screen-tag" data-screen="est-asig">3. Estudiante: Asignaturas</button>
+    <button class="screen-tag" data-screen="est-nuevo">4. Estudiante: Nuevo Reporte</button>
+    <button class="screen-tag" data-screen="est-enviado">5. Estudiante: Reporte Enviado</button>
+    <button class="screen-tag" data-screen="doc-reportes">6. Docente: Reportes</button>
+    <button class="screen-tag" data-screen="doc-stats">7. Docente: Estadísticas</button>
+    <button class="screen-tag" data-screen="doc-asig">8. Docente: Asignaturas</button>
+    <button class="screen-tag" data-screen="dir-semanal">9. Dirección: Panorama</button>
+    <button class="screen-tag" data-screen="dir-grupo">10. Dirección: Detalle Grupo</button>
+  </div>
+</header>
 
-function viewEstOk() {
-  return `<div class="focus">
-    <div class="focus-bar"><div class="wordmark">${mark(30, "fl")}nexo</div></div>
-    <section class="success">
-      ${face(4)}
-      <div><h1 class="display">Tu reporte fue enviado</h1>
-        <p class="muted" style="margin-top:14px;font-size:16px">${USERS.est.first}, gracias. Te avisaremos cuando tu docente cambie el estado del reporte.</p></div>
-      <div class="ticket">
-        <div class="line"><span class="display" style="font-size:22px">${state.subj}</span>${status('pend')}</div>
-        <div class="moods-mini">${[2, 3, 4].map((k) => `<span>${face(state.moods[k] ?? 2, MOOD_COLOR[state.moods[k] ?? 2])}${QUESTIONS[k][2]}</span>`).join('')}</div>
-        <div class="tear" aria-hidden="true"></div>
-        <div class="line"><span class="muted">Enviado</span><strong>${state.sentAt}</strong></div>
-      </div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
-        <button type="button" class="btn" data-action="go" data-arg="est-asig">Volver a mis asignaturas</button>
-        <button type="button" class="btn btn-primary" data-action="newReport">Hacer otro reporte</button>
-      </div>
-    </section>
-  </div>`;
-}
+<!-- CONTENEDOR PRINCIPAL DE PANTALLAS -->
+<main id="appRoot"></main>
 
-/* ---------- DOCENTE ---------- */
-function viewDocPanel() {
-  const inSubj = state.rows.filter((r) => state.fA === 'Todas' || r.asig === state.fA);
-  const rows = inSubj.filter((r) => state.fE === 'todos' || r.est === state.fE);
-  const c = (k) => inSubj.filter((r) => r.est === k).length;
-  const pend = c('pend');
-  const tabs = [['todos', 'Todos', inSubj.length], ['pend', 'Pendientes', pend], ['rev', 'En revisión', c('rev')], ['ok', 'Atendidos', c('ok')]];
+<!-- CONTENEDOR PARA TOAST NOTIFICATIONS -->
+<div id="toastContainer"></div>
 
-  const list = rows.length ? `<ul class="rows">${rows.map((r) => `<li class="row doc-row ${state.flash === r.id ? 'flash' : ''}">
-      <div class="date"><strong>${r.d}</strong>${r.m}</div>
-      <div><div class="title">${r.titulo}</div><div class="tags"><span class="muted" style="font-size:13px;font-weight:600">${r.asig}</span><span class="tag">${r.cat}</span></div></div>
-      <div class="menu-wrap">
-        ${state.loadingId === r.id ? `<svg class="spinner" viewBox="0 0 24 24" role="img" aria-label="Actualizando"><circle cx="12" cy="12" r="9" stroke="var(--bd)" stroke-width="3" fill="none"/><path d="M21 12a9 9 0 0 0-9-9" stroke="var(--pr)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>` : ''}
-        <button type="button" class="status status-btn ${r.est} ${state.flash === r.id ? 'flash' : ''}" data-action="toggleMenu" data-arg="${r.id}" aria-haspopup="menu" aria-expanded="${state.menuFor === r.id}" aria-label="Estado: ${EST_LABEL[r.est]}. Cambiar estado">${EST_LABEL[r.est]}${icon('chev')}</button>
-        ${state.menuFor === r.id ? `<div class="menu" role="menu"><p>Cambiar estado a</p>${['pend', 'rev', 'ok'].map((k) => `
-          <button type="button" role="menuitem" class="${r.est === k ? 'cur' : ''}" data-action="setEstado" data-arg="${r.id}:${k}">
-            <span class="dot" style="background:var(--${k})"></span><span style="flex:1">${EST_LABEL[k]}</span>${r.est === k ? icon('check') : ''}</button>`).join('')}</div>` : ''}
-      </div></li>`).join('')}</ul>`
-    : `<div class="empty">${face(2)}
-        <h2 class="display" style="font-size:24px">${state.fA !== 'Todas' && !inSubj.length ? `${state.fA} no tiene reportes` : 'Nada por aquí'}</h2>
-        <p class="muted" style="max-width:40ch">${state.fA !== 'Todas' && !inSubj.length ? 'Cuando un estudiante reporte algo en esta asignatura, aparecerá aquí.' : 'No hay reportes con este estado.'}</p>
-        <button type="button" class="btn" data-action="clearFilters">Ver todos los reportes</button></div>`;
+<!-- LÓGICA DE LA APLICACIÓN & CONEXIÓN CON FIREBASE -->
+<script type="module">
+import { NexoAPI, ROL_MAP, EST_MAP, EST_LABELS } from './nexo-api.js';
 
-  return `<header class="page-head"><div>
-      <p class="kicker">Hola, ${USERS.doc.first}</p>
-      <h1 class="display">${pend ? `Tienes ${plural(pend, 'reporte pendiente', 'reportes pendientes')}${state.fA !== 'Todas' ? ` en ${state.fA}` : ''}.` : `Estás al día${state.fA !== 'Todas' ? ` en ${state.fA}` : ''}.`}</h1>
-      <p class="sub">Cambia el estado de cada reporte para que el estudiante sepa que lo leíste.</p>
-    </div></header>
-    <div class="toolbar">
-      <div class="tabs" role="group" aria-label="Filtrar por estado">${tabs.map(([k, l, n]) => `<button type="button" data-action="fE" data-arg="${k}" aria-pressed="${state.fE === k}">${l}<span class="n">${n}</span></button>`).join('')}</div>
-      <label><span class="sr-only">Asignatura</span><select id="fA"><option value="Todas">Todas las asignaturas</option>${DOC_SUBJ.map(([s]) => `<option value="${s}" ${state.fA === s ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
-    </div>
-    <section class="panel">${list}</section>`;
-}
-
-function viewDocAsig() {
-  return `<header class="page-head"><div><p class="kicker">Semestre 2026-2</p><h1 class="display">Tus asignaturas</h1>
-      <p class="sub">Abre una asignatura para ver solo sus reportes.</p></div></header>
-    <section class="panel"><ul class="rows">${DOC_SUBJ.map(([n, ab]) => {
-      const all = state.rows.filter((r) => r.asig === n);
-      const pe = all.filter((r) => r.est === 'pend').length;
-      return `<li class="row course-row clickable" data-action="docOpen" data-arg="${n}" tabindex="0" role="button">
-        <span class="subj-mark" aria-hidden="true">${ab}</span>
-        <div><div class="title">${n}</div><div class="meta">${all.length ? plural(all.length, 'reporte', 'reportes') : 'Sin reportes todavía'}</div></div>
-        <span class="chip-cell">${pe ? `<span class="status pend">${plural(pe, 'pendiente', 'pendientes')}</span>` : all.length ? '<span class="status ok">Al día</span>' : ''}</span>
-        ${icon('right', 'chev')}</li>`; }).join('')}</ul></section>`;
-}
-
-/* Valoración promedio que dan los estudiantes al docente (escala de 1 a 5) y reportes por semana */
-const DOC_SCORES = [['Metodología', 3.4], ['Contenido', 3.9], ['Ritmo', 2.6]];
-const DOC_WEEKS = [['S1', 1], ['S2', 3], ['S3', 2], ['S4', 4], ['S5', 3], ['S6', 5]];
-
-function viewDocStats() {
-  // Todo se calcula con los reportes actuales: si cambias un estado, las gráficas se actualizan
-  const rows = state.rows;
-  const cnt = (arr, k) => arr.filter((r) => r.est === k).length;
-  const P_ = cnt(rows, 'pend'), R_ = cnt(rows, 'rev'), O_ = cnt(rows, 'ok'), T = rows.length;
-  const subj = DOC_SUBJ.map(([n, ab]) => { const a = rows.filter((r) => r.asig === n); return { n, ab, t: a.length, p: cnt(a, 'pend'), r: cnt(a, 'rev'), o: cnt(a, 'ok') }; })
-    .sort((a, b) => (b.t ? b.p / b.t : -1) - (a.t ? a.p / a.t : -1) || b.t - a.t);
-  const worst = subj.find((x) => x.p > 0);
-  const cats = ['Metodología', 'Contenido', 'Ritmo'].map((c) => [c, rows.filter((r) => r.cat === c).length]);
-  const maxW = Math.max(...DOC_WEEKS.map((w) => w[1]));
-  const low = [...DOC_SCORES].sort((a, b) => a[1] - b[1])[0];
-
-  return `<header class="page-head"><div>
-      <p class="kicker">Semana 6, del 8 al 12 de septiembre</p>
-      <h1 class="display">${worst ? `${worst.n} concentra tus reportes pendientes.` : 'Respondiste todos tus reportes.'}</h1>
-      <p class="sub">${worst ? `Tiene ${worst.p} de ${worst.t} sin responder. ` : ''}Tus estudiantes valoran mejor el contenido y piden revisar el ${low[0].toLowerCase()}.</p>
-    </div></header>
-    <div class="pulse">
-      <section class="panel big">
-        <div class="bignum"><strong>${T}</strong><span>reportes en tus asignaturas este semestre</span></div>
-        ${stackBar(P_, R_, O_)}
-        <div class="legend">
-          <div><b>${P_}</b><span style="--c:var(--pend)">Pendientes</span></div>
-          <div><b>${R_}</b><span style="--c:var(--rev)">En revisión</span></div>
-          <div><b>${O_}</b><span style="--c:var(--ok)">Atendidos</span></div>
-        </div>
-      </section>
-      <section class="panel cats"><h2>¿Sobre qué te reportan?</h2>
-        ${cats.map(([c, v]) => `<div class="cat"><div class="top"><span>${c}</span><b>${Math.round((v / (T || 1)) * 100)} %</b></div><div class="track"><i style="width:${(v / (T || 1)) * 100}%"></i></div></div>`).join('')}
-      </section>
-    </div>
-    <div class="pulse">
-      <section class="panel cats"><h2>Cómo te valoran tus estudiantes</h2>
-        ${DOC_SCORES.map(([c, v]) => { const f = Math.max(0, Math.min(4, Math.round(v) - 1));
-          return `<div class="score"><span class="score-face">${face(f, MOOD_COLOR[f])}</span>
-            <div class="cat" style="flex:1"><div class="top"><span>${c}</span><b>${v.toFixed(1).replace('.', ',')} <small class="muted">de 5</small></b></div>
-            <div class="track"><i style="width:${(v / 5) * 100}%;background:${MOOD_COLOR[f]}"></i></div></div></div>`; }).join('')}
-      </section>
-      <section class="panel cats"><h2>Reportes por semana</h2>
-        <div class="weeks" role="img" aria-label="Reportes por semana: ${DOC_WEEKS.map(([w, v]) => `semana ${w.slice(1)}, ${v}`).join('; ')}">
-          ${DOC_WEEKS.map(([w, v], i) => `<div class="wk ${i === DOC_WEEKS.length - 1 ? 'now' : ''}"><b>${v}</b><i style="height:${Math.round((v / maxW) * 110)}px"></i><span>${w}</span></div>`).join('')}
-        </div>
-      </section>
-    </div>
-    <section class="panel">
-      <div class="panel-head"><h2>Tus asignaturas, de mayor a menor urgencia</h2>
-        <span class="muted" style="font-size:13px">Toca una para ver sus reportes</span></div>
-      <div class="dir-head dir-row"><span>Asignatura</span><span>Estado de los reportes</span><span style="text-align:right">Total</span><span style="text-align:right">Pendientes</span><span>Semáforo</span><span></span></div>
-      <ul class="rows">${subj.map((x) => `<li class="row dir-row clickable" data-action="docOpen" data-arg="${x.n}" tabindex="0" role="button">
-          <div><div class="title">${x.n}</div><div class="meta">${x.t ? plural(x.t, 'reporte', 'reportes') : 'Sin reportes todavía'}</div></div>
-          <div class="stack-cell">${x.t ? stackBar(x.p, x.r, x.o) : '<div class="stack"><i style="flex:1;background:var(--sf2)"></i></div>'}</div>
-          <div class="nums">${x.t}</div><div class="nums">${x.p}</div>
-          <div>${x.t ? semaforo(x.p / x.t) : '<span class="muted" style="font-size:13px">—</span>'}</div>${icon('right', 'chev')}</li>`).join('')}</ul>
-    </section>`;
-}
-
-/* ---------- DIRECCIÓN ---------- */
-function viewDirPanel() {
-  if (!DIR_SUBJ.length) return `<header class="page-head"><div><h1 class="display">Panorama semanal</h1></div></header>
-    <section class="panel"><div class="empty">${face(2)}<h2 class="display" style="font-size:24px">Sin reportes registrados</h2></div></section>`;
-  const P_ = DIR_SUBJ.reduce((a, x) => a + x.p, 0), R_ = DIR_SUBJ.reduce((a, x) => a + x.r, 0), O_ = DIR_SUBJ.reduce((a, x) => a + x.o, 0);
-  const T = P_ + R_ + O_;
-  const sorted = [...DIR_SUBJ].sort((a, b) => b.p / (b.p + b.r + b.o) - a.p / (a.p + a.r + a.o));
-  const worst = sorted[0];
-  return `<header class="page-head"><div>
-      <p class="kicker">Semana 6, del 8 al 12 de septiembre</p>
-      <h1 class="display">${worst.n} necesita atención esta semana.</h1>
-      <p class="sub">Tiene ${worst.p} de ${worst.p + worst.r + worst.o} reportes sin responder, la proporción más alta del programa.</p>
-    </div></header>
-    <div class="pulse">
-      <section class="panel big">
-        <div class="bignum"><strong>${T}</strong><span>reportes recibidos esta semana</span></div>
-        ${stackBar(P_, R_, O_)}
-        <div class="legend">
-          <div><b>${P_}</b><span style="--c:var(--pend)">Pendientes</span></div>
-          <div><b>${R_}</b><span style="--c:var(--rev)">En revisión</span></div>
-          <div><b>${O_}</b><span style="--c:var(--ok)">Atendidos</span></div>
-        </div>
-      </section>
-      <section class="panel cats"><h2>¿Sobre qué reportan?</h2>
-        ${CATS.map(([c, v]) => `<div class="cat"><div class="top"><span>${c}</span><b>${v} %</b></div><div class="track"><i style="width:${v}%"></i></div></div>`).join('')}
-      </section>
-    </div>
-    <section class="panel">
-      <div class="panel-head"><h2>Asignaturas, de mayor a menor urgencia</h2>
-        <span class="muted" style="font-size:13px">El semáforo compara pendientes con el total</span></div>
-      <div class="dir-head dir-row"><span>Asignatura</span><span>Estado de los reportes</span><span style="text-align:right">Total</span><span style="text-align:right">Pendientes</span><span>Semáforo</span><span></span></div>
-      <ul class="rows">${sorted.map((x) => { const t = x.p + x.r + x.o;
-        return `<li class="row dir-row clickable" data-action="dirSubj" data-arg="${x.n}" tabindex="0" role="button">
-          <div><div class="title">${x.n}</div><div class="meta">${plural(x.groups.length, 'grupo', 'grupos')}</div></div>
-          <div class="stack-cell">${stackBar(x.p, x.r, x.o)}</div>
-          <div class="nums">${t}</div><div class="nums">${x.p}</div>
-          <div>${semaforo(x.p / t)}</div>${icon('right', 'chev')}</li>`; }).join('')}</ul>
-    </section>`;
-}
-
-function viewDirAsig() {
-  const cur = DIR_SUBJ.find((x) => x.n === state.dSubj) || DIR_SUBJ[0];
-  const t = cur.p + cur.r + cur.o;
-  return `<header class="page-head"><div>
-      <nav class="crumbs" aria-label="Ruta"><button type="button" data-action="go" data-arg="dir-panel">Panorama semanal</button>${icon('right')}<span>${cur.n}</span></nav>
-      <h1 class="display">${cur.n}</h1>
-      <p class="sub">${plural(t, 'reporte', 'reportes')} en ${plural(cur.groups.length, 'grupo', 'grupos')}. ${cur.p ? `${plural(cur.p, 'sigue pendiente', 'siguen pendientes')}.` : 'Todo está respondido.'}</p>
-    </div></header>
-    <section class="panel big" style="padding:26px 30px;display:flex;flex-direction:column;gap:18px">
-      ${stackBar(cur.p, cur.r, cur.o)}
-      <div class="legend"><div><b>${cur.p}</b><span style="--c:var(--pend)">Pendientes</span></div><div><b>${cur.r}</b><span style="--c:var(--rev)">En revisión</span></div><div><b>${cur.o}</b><span style="--c:var(--ok)">Atendidos</span></div></div>
-    </section>
-    <section class="panel">
-      <div class="panel-head"><h2>Grupos</h2></div>
-      <ul class="rows">${cur.groups.map((g) => `<li class="row clickable" style="grid-template-columns:56px minmax(0,1fr) 120px 90px 20px" data-action="dirGroup" data-arg="${g.g}" tabindex="0" role="button">
-        <span class="subj-mark" style="width:44px;height:44px;font-size:15px">${g.g}</span>
-        <div><div class="title">${g.p}</div><div class="meta">${plural(g.t, 'reporte', 'reportes')}, ${g.pe} sin responder</div></div>
-        <div>${semaforo(g.pe / g.t)}</div><div class="nums" style="text-align:right;font-weight:700">${g.pe}/${g.t}</div>${icon('right', 'chev')}</li>`).join('')}</ul>
-    </section>`;
-}
-
-function viewDirGrupo() {
-  const cur = DIR_SUBJ.find((x) => x.n === state.dSubj) || DIR_SUBJ[0];
-  const g = cur.groups.find((x) => x.g === state.dGroup) || cur.groups[0];
-  return `<header class="page-head"><div>
-      <nav class="crumbs" aria-label="Ruta"><button type="button" data-action="go" data-arg="dir-panel">Panorama semanal</button>${icon('right')}<button type="button" data-action="go" data-arg="dir-asig">${cur.n}</button>${icon('right')}<span>${g.g}</span></nav>
-      <h1 class="display">${g.p}</h1>
-      <p class="sub">Grupo ${g.g.slice(1)} de ${cur.n}. Estos son los reportes de sus estudiantes, del más reciente al más antiguo.</p>
-    </div></header>
-    <ol class="timeline">${GROUP_REPORTS.map((r) => `<li>
-      <div class="when"><strong>${r.d}</strong>${r.m}</div>
-      <div class="rail" aria-hidden="true"><i style="background:var(--${r.est})"></i></div>
-      <article class="panel card"><div class="top"><span style="display:flex;align-items:center;gap:10px">${face(r.mood, MOOD_COLOR[r.mood])}<span class="tag">${r.cat}</span></span>${status(r.est)}</div>
-        <p style="font-size:15.5px">${r.txt}</p></article></li>`).join('')}</ol>`;
-}
-
-/* =========================================================
-   RENDER Y EVENTOS
-   ========================================================= */
-const VIEWS = { 'est-asig': viewEstAsig, 'doc-panel': viewDocPanel, 'doc-stats': viewDocStats, 'doc-asig': viewDocAsig, 'dir-panel': viewDirPanel, 'dir-asig': viewDirAsig, 'dir-grupo': viewDirGrupo };
-const app = document.getElementById('app');
-
-function render() {
-  document.documentElement.dataset.theme = state.tema;
-  const sc = state.screen;
-  app.innerHTML = sc === 'login' ? viewLogin() : sc === 'est-wizard' ? viewWizard() : sc === 'est-ok' ? viewEstOk() : viewShell(VIEWS[sc]());
-  if (sc === 'est-wizard' && state.step === 5) updateWordUI();
-}
-
-const ACTIONS = {
-  tema: (k) => { try { localStorage.setItem('nexo-tema', k); } catch (e) {} set({ tema: k, themeOpen: false }); },
-  themeToggle: () => set({ themeOpen: !state.themeOpen, menuFor: null }),
-  loginRole: (k) => set({ loginRole: k }),
-  go: (sc) => { set({ screen: sc, menuFor: null }); window.scrollTo(0, 0); },
-  logout: () => { if (API()) API().logout(); set({ screen: 'login', menuFor: null, toast: null, loginError: '' }); },
-  closeToast: () => set({ toast: null }),
-  newReport: () => { set({ screen: 'est-wizard', step: 1, subj: null, moods: {}, comments: {}, detalle: '' }); window.scrollTo(0, 0); },
-  openSubj: (n) => { set({ screen: 'est-wizard', step: 2, subj: n, moods: {}, comments: {}, detalle: '' }); window.scrollTo(0, 0); },
-  pickSubj: (n) => set({ subj: n }),
-  mood: (i) => set({ moods: { ...state.moods, [state.step]: Number(i) } }),
-  back: () => state.step > 1 ? set({ step: state.step - 1 }) : set({ screen: 'est-asig' }),
-  next: () => {
-    if (!canNext()) return;
-    if (state.step < 5) { set({ step: state.step + 1 }); window.scrollTo(0, 0); return; }
-    const finish = (iso) => {
-      const d = iso ? new Date(iso) : new Date(), pad = (x) => String(x).padStart(2, '0');
-      const h = d.getHours() % 12 || 12, ap = d.getHours() >= 12 ? 'p. m.' : 'a. m.';
-      set({ screen: 'est-ok', toast: null, sentAt: `${d.getDate()} ${MESES[d.getMonth()]}, ${h}:${pad(d.getMinutes())} ${ap}`,
-        reported: { ...state.reported, [state.subj]: `${d.getDate()} ${MESES[d.getMonth()]}` } });
-      window.scrollTo(0, 0);
-    };
-    const api = API();
-    if (!api) return finish();
-    const subj = EST_SUBJ.find((x) => x.n === state.subj);
-    const btn = document.getElementById('nextBtn');
-    if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
-    api.createReport({
-      subjectId: subj && subj.id,
-      moods: { metodologia: state.moods[2], contenido: state.moods[3], ritmo: state.moods[4] },
-      comments: { metodologia: state.comments[2] || '', contenido: state.comments[3] || '', ritmo: state.comments[4] || '' },
-      detalle: state.detalle
-    }).then((r) => finish(r.createdAt)).catch((e) => set({ toast: e.message }));
-  },
-  toggleMenu: (id) => set({ menuFor: state.menuFor === id ? null : id }),
-  setEstado: (arg) => {
-    const [id, k] = arg.split(':');
-    set({ menuFor: null, loadingId: id });
-    const apply = () => {
-      set({ rows: state.rows.map((r) => (r.id === id ? { ...r, est: k } : r)), loadingId: null, flash: id, toast: `Reporte marcado como “${EST_LABEL[k].toLowerCase()}”` });
-      setTimeout(() => set({ flash: null, toast: null }), 3200);
-    };
-    const api = API();
-    if (!api) return setTimeout(apply, 650);
-    api.setStatus(id, k).then(apply).catch((e) => {
-      set({ loadingId: null, toast: e.message });
-      setTimeout(() => set({ toast: null }), 3200);
-    });
-  },
-  fE: (k) => set({ fE: k, menuFor: null }),
-  clearFilters: () => set({ fA: 'Todas', fE: 'todos' }),
-  docOpen: (n) => { set({ screen: 'doc-panel', fA: n, fE: 'todos' }); window.scrollTo(0, 0); },
-  dirSubj: (n) => { set({ screen: 'dir-asig', dSubj: n }); window.scrollTo(0, 0); },
-  dirGroup: (g) => {
-    if (API()) {
-      const cur = DIR_SUBJ.find((x) => x.n === state.dSubj);
-      const grp = cur && cur.groups.find((x) => x.g === g);
-      fill(GROUP_REPORTS, ALL_REPORTS.filter((r) => r.asig === state.dSubj && (!grp || r.grupo === grp.grupo)));
-    }
-    set({ screen: 'dir-grupo', dGroup: g }); window.scrollTo(0, 0);
-  }
+// Estado global de la vista
+const AppState = {
+  currentScreen: 'landing', // 'landing', 'login', 'est-asig', 'est-nuevo', 'est-enviado', 'doc-reportes', 'doc-stats', 'doc-asig', 'dir-semanal', 'dir-grupo'
+  theme: localStorage.getItem('nexo_theme') || 'jave',
+  user: null, // Perfil del usuario activo
+  selectedRole: 'est', // 'est', 'doc', 'dir'
+  loginEmail: 'estudiante@javeriana.edu.co',
+  loginPass: 'clave123',
+  loginLoading: false,
+  loginError: '',
+  
+  // Datos del nuevo reporte
+  newReportSubjectId: 'subj-poo',
+  newReportMoods: { metodologia: 2, contenido: 2, ritmo: 2 },
+  newReportDetail: '',
+  lastCreatedReport: null,
+  
+  // Filtros docentes
+  docFilterState: 'todos', // 'todos', 'pend', 'rev', 'ok'
+  docFilterSubject: 'todos',
+  
+  // Asignaturas y reportes cargados
+  subjects: [],
+  reports: []
 };
 
-/* Rebote: recuerda qué botón se tocó y, después de redibujar, lo anima */
-function bounce(el) {
-  if (!el || el.disabled) return;
-  el.classList.remove('bounce'); void el.offsetWidth; el.classList.add('bounce');
-  el.addEventListener('animationend', () => el.classList.remove('bounce'), { once: true });
+// ===============================================================
+// RENDERIZADO DE LAS 10 PANTALLAS
+// ===============================================================
+
+// 1. PANTALLA 1: LANDING PAGE
+function renderLanding() {
+  return `
+  <section class="landing-hero">
+    <div class="landing-grid"></div>
+    <div class="landing-container">
+      <div class="landing-flex">
+        <div class="landing-content">
+          <h1 class="landing-title display">Tu voz académica, escuchada a tiempo.</h1>
+          <p class="landing-lead display">Dilo hoy. Mejora mañana.</p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap">
+            <button class="btn btn-accent" data-screen="login" style="font-size:17px;min-height:52px;padding:0 32px">
+              Ingresar al portal
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+            <button class="btn btn-white" data-screen="doc-reportes">
+              Ver panel docente
+            </button>
+          </div>
+        </div>
+
+        <div class="stage-3d">
+          <div class="orbit-ring r1"><i></i></div>
+          <div class="orbit-ring r2"></div>
+          <div class="logo-core">
+            <svg width="150" height="150" viewBox="0 0 36 36">
+              <rect width="36" height="36" rx="10" fill="var(--hl-bg)"></rect>
+              <circle cx="12.5" cy="10.5" r="3.2" fill="var(--hl-fg)"></circle>
+              <circle cx="23.5" cy="10.5" r="3.2" fill="var(--hl-ac)"></circle>
+              <path d="M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18" stroke="var(--hl-fg)" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-steps">
+        <div class="step-card">
+          <div class="step-num display">1</div>
+          <div class="step-info">
+            <h3 class="display">Elige la materia</h3>
+            <p>Selecciona el curso o laboratorio sobre el que quieres retroalimentar.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num display">2</div>
+          <div class="step-info">
+            <h3 class="display">Cuéntanos</h3>
+            <p>Describe con claridad las dificultades en metodología, contenido o ritmo.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num display">3</div>
+          <div class="step-info">
+            <h3 class="display">Envía y listo</h3>
+            <p>El docente lo recibe de inmediato en su panel y actualiza su estado.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>`;
 }
-function pressKey(el) {
-  const sel = el.dataset.action ? `[data-action="${el.dataset.action}"]${el.dataset.arg !== undefined ? `[data-arg="${CSS.escape(el.dataset.arg)}"]` : ':not([data-arg])'}` : null;
-  if (!sel) return null;
-  return { sel, index: [...app.querySelectorAll(sel)].indexOf(el) };
+
+// 2. PANTALLA 2: INICIAR SESIÓN (HU-01)
+function renderLogin() {
+  return `
+  <section class="login-view">
+    <div class="login-card">
+      <div class="login-header">
+        <h2 class="display">Iniciar sesión</h2>
+        <p>Accede con tus credenciales institucionales PUJ.</p>
+      </div>
+
+      <div class="roles-selector">
+        <button type="button" class="role-chip ${AppState.selectedRole === 'est' ? 'selected' : ''}" data-role="est">Estudiante</button>
+        <button type="button" class="role-chip ${AppState.selectedRole === 'doc' ? 'selected' : ''}" data-role="doc">Docente</button>
+        <button type="button" class="role-chip ${AppState.selectedRole === 'dir' ? 'selected' : ''}" data-role="dir">Dirección</button>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="inputEmail">Correo institucional</label>
+          <div class="input-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--mu)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input type="email" id="inputEmail" value="${AppState.loginEmail}" placeholder="ejemplo@javeriana.edu.co" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputPassword">Contraseña</label>
+          <div class="input-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--mu)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" id="inputPassword" value="${AppState.loginPass}" placeholder="Tu contraseña" required>
+          </div>
+        </div>
+
+        ${AppState.loginError ? `<p style="color:var(--red);font-size:13px;font-weight:600;margin-bottom:14px">${AppState.loginError}</p>` : ''}
+
+        <button type="submit" class="btn btn-primary" style="width:100%;min-height:50px" ${AppState.loginLoading ? 'disabled' : ''}>
+          ${AppState.loginLoading ? 'Conectando con Firebase…' : 'Ingresar'}
+        </button>
+      </form>
+
+      <div class="demo-logins">
+        <div class="demo-logins-title">Acceso rápido con cuentas de prueba:</div>
+        <div class="demo-buttons">
+          <button class="demo-pill" data-demo-user="est">👤 Estudiante (Ana Ruiz)</button>
+          <button class="demo-pill" data-demo-user="doc">👨‍🏫 Docente (Dr. Mendoza)</button>
+          <button class="demo-pill" data-demo-user="dir">🏛️ Dirección (Dra. Gómez)</button>
+        </div>
+      </div>
+    </div>
+  </section>`;
 }
-app.addEventListener('click', (e) => {
-  const pressed = e.target.closest('button, [role="button"]');
-  if (pressed && !pressed.disabled) {
-    const key = pressed.dataset.action ? pressKey(pressed) : null;
-    requestAnimationFrame(() => {
-      if (pressed.isConnected) return bounce(pressed);
-      if (!key) return;
-      const list = app.querySelectorAll(key.sel);
-      bounce(list[key.index] || list[0]);
-    });
+
+// 3. PANTALLA 3: ESTUDIANTE · MIS ASIGNATURAS (HU-01, HU-02)
+function renderEstAsig() {
+  const user = AppState.user || { nombre: 'Ana María Ruiz', email: 'estudiante@javeriana.edu.co' };
+  return `
+  <section class="panel-view">
+    <div class="panel-top">
+      <div class="panel-title">
+        <h1 class="display">Mis asignaturas inscritas</h1>
+        <p>Semestre 2026-2 · Selecciona una asignatura para reportar dificultades o inquietudes.</p>
+      </div>
+      <button class="btn btn-primary" data-screen="est-nuevo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Nuevo reporte
+      </button>
+    </div>
+
+    <div class="subject-grid">
+      ${AppState.subjects.map(s => `
+        <div class="subject-card">
+          <div>
+            <span class="subj-code">${s.codigo || 'PUJ'} · ${s.grupo || 'G1'}</span>
+            <h3 class="subj-name">${s.nombre}</h3>
+            <p class="subj-prof">Docente: <strong>${s.profesor}</strong></p>
+          </div>
+          <button class="btn btn-secondary" data-action="crear-reporte-asig" data-subj-id="${s.id}" style="width:100%">
+            Crear reporte sobre esta materia
+          </button>
+        </div>
+      `).join('')}
+    </div>
+  </section>`;
+}
+
+// 4. PANTALLA 4: ESTUDIANTE · NUEVO REPORTE (HU-02)
+function renderEstNuevo() {
+  const currentChars = (AppState.newReportDetail || '').length;
+  const isValidLength = currentChars >= 20;
+
+  return `
+  <section class="panel-view">
+    <div class="panel-top" style="justify-content:center;text-align:center;margin-bottom:20px">
+      <div class="panel-title">
+        <h1 class="display">Crear reporte de dificultad</h1>
+        <p>Tu reporte ayuda al docente a ajustar el ritmo y metodología del curso.</p>
+      </div>
+    </div>
+
+    <div class="wizard-box">
+      <form id="newReportForm">
+        <div class="form-group">
+          <label for="selectSubject">Asignatura</label>
+          <div class="input-wrap">
+            <select id="selectSubject">
+              ${AppState.subjects.map(s => `
+                <option value="${s.id}" ${s.id === AppState.newReportSubjectId ? 'selected' : ''}>${s.nombre} (${s.profesor})</option>
+              `).join('')}
+            </select>
+          </div>
+        </div>
+
+        <div class="mood-group">
+          <label class="mood-label">1. Metodología de clase</label>
+          <div class="mood-pills">
+            <button type="button" class="mood-pill ${AppState.newReportMoods.metodologia === 1 ? 'active' : ''}" data-mood="metodologia" data-val="1">Difícil de seguir</button>
+            <button type="button" class="mood-pill ${AppState.newReportMoods.metodologia === 2 ? 'active' : ''}" data-mood="metodologia" data-val="2">Adecuada</button>
+            <button type="button" class="mood-pill ${AppState.newReportMoods.metodologia === 3 ? 'active' : ''}" data-mood="metodologia" data-val="3">Muy clara</button>
+          </div>
+        </div>
+
+        <div class="mood-group">
+          <label class="mood-label">2. Complejidad del contenido</label>
+          <div class="mood-pills">
+            <button type="button" class="mood-pill ${AppState.newReportMoods.contenido === 1 ? 'active' : ''}" data-mood="contenido" data-val="1">Muy complejo</button>
+            <button type="button" class="mood-pill ${AppState.newReportMoods.contenido === 2 ? 'active' : ''}" data-mood="contenido" data-val="2">Nivel esperado</button>
+            <button type="button" class="mood-pill ${AppState.newReportMoods.contenido === 3 ? 'active' : ''}" data-mood="contenido" data-val="3">Manejable</button>
+          </div>
+        </div>
+
+        <div class="mood-group">
+          <label class="mood-label">3. Ritmo de las sesiones</label>
+          <div class="mood-pills">
+            <button type="button" class="mood-pill ${AppState.newReportMoods.ritmo === 1 ? 'active' : ''}" data-mood="ritmo" data-val="1">Demasiado rápido</button>
+            <button type="button" class="mood-pill ${AppState.newReportMoods.ritmo === 2 ? 'active' : ''}" data-mood="ritmo" data-val="2">Equilibrado</button>
+            <button type="button" class="mood-pill ${AppState.newReportMoods.ritmo === 3 ? 'active' : ''}" data-mood="ritmo" data-val="3">Tranquilo</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reportDetail">Descripción detallada de la dificultad</label>
+          <div class="input-wrap" style="align-items:flex-start;padding:12px">
+            <textarea id="reportDetail" rows="4" placeholder="Explica con ejemplos concretos qué tema o actividad representó una dificultad..." required>${AppState.newReportDetail}</textarea>
+          </div>
+          <div class="char-counter ${isValidLength ? 'valid' : ''}">
+            <span>${isValidLength ? '✓ Longitud válida' : 'Mínimo 20 caracteres requeridos (Criterio HU-02)'}</span>
+            <span>${currentChars} / 20</span>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:28px">
+          <button type="button" class="btn btn-secondary" data-screen="est-asig" style="flex:1">Cancelar</button>
+          <button type="submit" class="btn btn-primary" style="flex:2" ${!isValidLength ? 'disabled' : ''}>
+            Enviar reporte a Firebase
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>`;
+}
+
+// 5. PANTALLA 5: ESTUDIANTE · REPORTE ENVIADO (HU-02)
+function renderEstEnviado() {
+  const rep = AppState.lastCreatedReport || {
+    id: 'rep-001',
+    asignatura: 'Programación Orientada a Objetos',
+    createdAt: new Date().toISOString(),
+    estado: 'pend'
+  };
+
+  const fechaFormat = new Date(rep.createdAt).toLocaleString('es-CO', {
+    dateStyle: 'medium', timeStyle: 'short'
+  });
+
+  return `
+  <section class="panel-view">
+    <div class="success-card">
+      <div class="success-icon">✓</div>
+      <h1 class="success-title display">¡Reporte enviado exitosamente!</h1>
+      <p class="success-desc">Tu observación fue registrada en Cloud Firestore y asignada al docente para seguimiento.</p>
+
+      <div class="receipt-box">
+        <div class="receipt-row">
+          <span class="receipt-label">Folio del reporte:</span>
+          <span class="receipt-val">${rep.id}</span>
+        </div>
+        <div class="receipt-row">
+          <span class="receipt-label">Asignatura:</span>
+          <span class="receipt-val">${rep.asignatura}</span>
+        </div>
+        <div class="receipt-row">
+          <span class="receipt-label">Fecha y hora:</span>
+          <span class="receipt-val">${fechaFormat}</span>
+        </div>
+        <div class="receipt-row">
+          <span class="receipt-label">Estado inicial:</span>
+          <span class="badge badge-pend">Pendiente</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;justify-content:center">
+        <button class="btn btn-primary" data-screen="est-asig">Volver a mis asignaturas</button>
+        <button class="btn btn-secondary" data-screen="est-nuevo">Crear otro reporte</button>
+      </div>
+    </div>
+  </section>`;
+}
+
+// 6. PANTALLA 6: DOCENTE · REPORTES RECIBIDOS (HU-03)
+function renderDocReportes() {
+  const filtered = AppState.reports.filter(r => {
+    const matchState = AppState.docFilterState === 'todos' || r.estado === AppState.docFilterState;
+    const matchSubj = AppState.docFilterSubject === 'todos' || r.subjectId === AppState.docFilterSubject;
+    return matchState && matchSubj;
+  });
+
+  const countTodos = AppState.reports.length;
+  const countPend = AppState.reports.filter(r => r.estado === 'pend').length;
+  const countRev = AppState.reports.filter(r => r.estado === 'rev').length;
+  const countOk = AppState.reports.filter(r => r.estado === 'ok').length;
+
+  return `
+  <section class="panel-view">
+    <div class="panel-top">
+      <div class="panel-title">
+        <h1 class="display">Reportes académicos recibidos</h1>
+        <p>Monitoreo en tiempo real de dificultades reportadas por los estudiantes.</p>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-secondary" data-screen="doc-stats">Ver estadísticas</button>
+        <button class="btn btn-secondary" data-screen="doc-asig">Mis cursos</button>
+      </div>
+    </div>
+
+    <!-- Pestañas de estado (HU-03) -->
+    <div class="tabs-row">
+      <button class="tab-btn ${AppState.docFilterState === 'todos' ? 'active' : ''}" data-doc-filter="todos">
+        Todos <span class="tab-badge">${countTodos}</span>
+      </button>
+      <button class="tab-btn ${AppState.docFilterState === 'pend' ? 'active' : ''}" data-doc-filter="pend">
+        Pendientes <span class="tab-badge">${countPend}</span>
+      </button>
+      <button class="tab-btn ${AppState.docFilterState === 'rev' ? 'active' : ''}" data-doc-filter="rev">
+        En revisión <span class="tab-badge">${countRev}</span>
+      </button>
+      <button class="tab-btn ${AppState.docFilterState === 'ok' ? 'active' : ''}" data-doc-filter="ok">
+        Atendidos <span class="tab-badge">${countOk}</span>
+      </button>
+    </div>
+
+    <!-- Lista de reportes -->
+    <div class="reports-list">
+      ${filtered.length === 0 ? `
+        <div style="background:var(--sf);border:1px solid var(--bd);border-radius:18px;padding:48px;text-align:center">
+          <p style="font-size:18px;font-weight:600;color:var(--mu)">Sin reportes registrados con este filtro.</p>
+        </div>
+      ` : filtered.map(r => `
+        <div class="report-card">
+          <div class="report-card-top">
+            <div class="rep-meta">
+              <span class="badge ${r.estado === 'pend' ? 'badge-pend' : r.estado === 'rev' ? 'badge-rev' : 'badge-ok'}">
+                ● ${EST_LABELS[r.estado] || r.estado}
+              </span>
+              <span class="badge badge-cat">${r.categoria || 'Metodología'}</span>
+              <span style="font-size:13px;font-weight:600;color:var(--mu)">${r.asignatura} (${r.grupo || 'G1'})</span>
+            </div>
+            <span style="font-size:12px;color:var(--mu)">${new Date(r.createdAt).toLocaleDateString('es-CO')}</span>
+          </div>
+
+          <h3 class="report-title">${r.titulo}</h3>
+          <p class="report-body">${r.detalle}</p>
+
+          <!-- Modificación reactiva del estado (HU-03) -->
+          <div class="status-changer">
+            <span class="status-changer-label">Cambiar estado en Firestore:</span>
+            <button class="status-pill-btn ${r.estado === 'pend' ? 'current' : ''}" data-action="set-status" data-id="${r.id}" data-new-status="pend">Pendiente</button>
+            <button class="status-pill-btn ${r.estado === 'rev' ? 'current' : ''}" data-action="set-status" data-id="${r.id}" data-new-status="rev">En revisión</button>
+            <button class="status-pill-btn ${r.estado === 'ok' ? 'current' : ''}" data-action="set-status" data-id="${r.id}" data-new-status="ok">Atendido</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </section>`;
+}
+
+// 7. PANTALLA 7: DOCENTE · ESTADÍSTICAS Y MÉTRICAS (HU-04)
+function renderDocStats() {
+  const total = AppState.reports.length;
+  const pend = AppState.reports.filter(r => r.estado === 'pend').length;
+  const rev = AppState.reports.filter(r => r.estado === 'rev').length;
+  const ok = AppState.reports.filter(r => r.estado === 'ok').length;
+  const tasa = total > 0 ? Math.round((ok / total) * 100) : 0;
+
+  const catMet = AppState.reports.filter(r => r.categoria === 'Metodología').length;
+  const catCon = AppState.reports.filter(r => r.categoria === 'Contenido').length;
+  const catRit = AppState.reports.filter(r => r.categoria === 'Ritmo').length;
+
+  const pctMet = total > 0 ? Math.round((catMet / total) * 100) : 0;
+  const pctCon = total > 0 ? Math.round((catCon / total) * 100) : 0;
+  const pctRit = total > 0 ? Math.round((catRit / total) * 100) : 0;
+
+  return `
+  <section class="panel-view">
+    <div class="panel-top">
+      <div class="panel-title">
+        <h1 class="display">Métricas y analítica consolidada</h1>
+        <p>Recálculo automático y reactivo ante cualquier actualización en Firestore.</p>
+      </div>
+      <button class="btn btn-secondary" data-screen="doc-reportes">Volver a reportes</button>
+    </div>
+
+    <!-- Bloque de contadores numéricos (HU-04) -->
+    <div class="stats-cards-grid">
+      <div class="metric-card">
+        <div class="metric-label">Total Recibidos</div>
+        <div class="metric-num display">${total}</div>
+        <div class="metric-sub">Todas las materias a cargo</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label" style="color:var(--pend)">Pendientes</div>
+        <div class="metric-num display" style="color:var(--pend)">${pend}</div>
+        <div class="metric-sub">Por revisar</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label" style="color:var(--rev)">En Revisión</div>
+        <div class="metric-num display" style="color:var(--rev)">${rev}</div>
+        <div class="metric-sub">En ajuste pedagógico</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label" style="color:var(--ok)">Atendidos</div>
+        <div class="metric-num display" style="color:var(--ok)">${ok}</div>
+        <div class="metric-sub">${tasa}% resueltos</div>
+      </div>
+    </div>
+
+    <!-- Gráficos dinámicos -->
+    <div class="charts-row">
+      <div class="chart-box">
+        <h3 class="chart-title">Distribución por categoría de dificultad</h3>
+        <div class="bar-item">
+          <div class="bar-label-row"><span>Metodología de clase</span> <span>${catMet} (${pctMet}%)</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pctMet}%;background:var(--pr)"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span>Complejidad de contenido</span> <span>${catCon} (${pctCon}%)</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pctCon}%;background:var(--ac)"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span>Ritmo de avance</span> <span>${catRit} (${pctRit}%)</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pctRit}%;background:#E6B979"></div></div>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <h3 class="chart-title">Estado de atención general</h3>
+        <div class="bar-item">
+          <div class="bar-label-row"><span>Atendidos y resueltos</span> <span>${ok}</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${tasa}%;background:#3DA56A"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span>En proceso de ajuste</span> <span>${rev}</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${total > 0 ? (rev/total)*100 : 0}%;background:#867ED3"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label-row"><span>Pendientes por abrir</span> <span>${pend}</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${total > 0 ? (pend/total)*100 : 0}%;background:#D9952B"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+
+// 8. PANTALLA 8: DOCENTE · MIS ASIGNATURAS
+function renderDocAsig() {
+  return `
+  <section class="panel-view">
+    <div class="panel-top">
+      <div class="panel-title">
+        <h1 class="display">Docente · Mis cursos asignados</h1>
+        <p>Pontificia Universidad Javeriana · Facultad de Ingeniería.</p>
+      </div>
+      <button class="btn btn-primary" data-screen="doc-reportes">Ver todos los reportes</button>
+    </div>
+
+    <div class="subject-grid">
+      ${AppState.subjects.map(s => {
+        const count = AppState.reports.filter(r => r.subjectId === s.id).length;
+        return `
+        <div class="subject-card">
+          <div>
+            <span class="subj-code">${s.codigo} · ${s.grupo}</span>
+            <h3 class="subj-name">${s.nombre}</h3>
+            <p class="subj-prof">Estudiantes matriculados: <strong>28</strong></p>
+            <p style="margin-top:8px;font-size:13px;color:var(--mu)">Reportes recibidos en el semestre: <strong>${count}</strong></p>
+          </div>
+          <button class="btn btn-secondary" data-screen="doc-reportes">Filtrar reportes de este curso</button>
+        </div>`;
+      }).join('')}
+    </div>
+  </section>`;
+}
+
+// 9. PANTALLA 9: DIRECCIÓN · PANORAMA SEMANAL
+function renderDirSemanal() {
+  return `
+  <section class="panel-view">
+    <div class="panel-top">
+      <div class="panel-title">
+        <h1 class="display">Dirección · Panorama general del programa</h1>
+        <p>Consolidado estratégico de seguimiento docente y alertas tempranas.</p>
+      </div>
+      <button class="btn btn-primary" data-screen="dir-grupo">Ver detalle de grupo</button>
+    </div>
+
+    <div class="stats-cards-grid">
+      <div class="metric-card">
+        <div class="metric-label">Reportes Semestrales</div>
+        <div class="metric-num display">${AppState.reports.length}</div>
+        <div class="metric-sub">5 asignaturas monitoreadas</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Tasa de Respuesta</div>
+        <div class="metric-num display" style="color:var(--ok)">88%</div>
+        <div class="metric-sub">Tiempo promedio: 1.8 días</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Cursos con Alertas</div>
+        <div class="metric-num display" style="color:var(--pend)">2</div>
+        <div class="metric-sub">POO & Estructuras de Datos</div>
+      </div>
+    </div>
+  </section>`;
+}
+
+// 10. PANTALLA 10: DIRECCIÓN · DETALLE DE GRUPO
+function renderDirGrupo() {
+  return `
+  <section class="panel-view">
+    <div class="panel-top">
+      <div class="panel-title">
+        <h1 class="display">Dirección · Detalle de Grupo G1 (POO)</h1>
+        <p>Docente a cargo: Dr. Carlos Mendoza · 32 estudiantes activos.</p>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-secondary" data-screen="dir-semanal">Volver al panorama</button>
+        <button class="btn btn-primary" onclick="alert('Notificación enviada al docente via correo institucional.')">Contactar docente</button>
+      </div>
+    </div>
+
+    <div class="chart-box" style="margin-bottom:24px">
+      <h3 class="chart-title">Desglose de dificultades en el grupo</h3>
+      <div class="bar-item">
+        <div class="bar-label-row"><span>Laboratorios extensos (Metodología)</span> <span>5 reportes</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:65%;background:var(--pr)"></div></div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label-row"><span>Sintaxis y compiladores (Contenido)</span> <span>3 reportes</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--ac)"></div></div>
+      </div>
+    </div>
+  </section>`;
+}
+
+// ===============================================================
+// ROUTER & DISPATCHER PRINCIPAL
+// ===============================================================
+function renderApp() {
+  const root = document.getElementById('appRoot');
+  const authSlot = document.getElementById('headerAuthSlot');
+
+  // Actualizar slot del usuario en el navbar
+  if (AppState.user) {
+    authSlot.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--pr);color:var(--on-pr);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">
+          ${AppState.user.iniciales || 'PU'}
+        </div>
+        <span style="font-size:13px;font-weight:600;display:none;sm:inline">${AppState.user.primerNombre || 'Usuario'}</span>
+        <button class="btn btn-secondary" id="logoutBtn" style="padding:4px 12px;min-height:32px;font-size:12px">Salir</button>
+      </div>`;
+  } else {
+    authSlot.innerHTML = `
+      <button class="btn btn-primary" data-screen="login" style="padding:6px 16px;min-height:36px;font-size:13px">
+        Iniciar sesión
+      </button>`;
   }
-}, true);
-/* Acciones que cambian de pantalla o cierran un menú: esperan un instante para que se vea el rebote */
-const NAV_ACTIONS = new Set(['go', 'newReport', 'openSubj', 'docOpen', 'dirSubj', 'dirGroup', 'logout', 'tema']);
-const BOUNCE_WAIT = 170;
-app.addEventListener('click', (e) => {
-  const el = e.target.closest('[data-action]');
-  if (el && NAV_ACTIONS.has(el.dataset.action) && ACTIONS[el.dataset.action]) {
-    if (state.themeOpen && !e.target.closest('.theme-wrap')) state.themeOpen = false;
-    const { action, arg } = el.dataset;
-    setTimeout(() => ACTIONS[action](arg), BOUNCE_WAIT);
+
+  // Actualizar clase activa en la barra de pantallas
+  document.querySelectorAll('.screen-tag').forEach(tag => {
+    tag.classList.toggle('active', tag.dataset.screen === AppState.currentScreen);
+  });
+
+  // Renderizar pantalla correspondiente
+  switch (AppState.currentScreen) {
+    case 'landing': root.innerHTML = renderLanding(); break;
+    case 'login': root.innerHTML = renderLogin(); break;
+    case 'est-asig': root.innerHTML = renderEstAsig(); break;
+    case 'est-nuevo': root.innerHTML = renderEstNuevo(); break;
+    case 'est-enviado': root.innerHTML = renderEstEnviado(); break;
+    case 'doc-reportes': root.innerHTML = renderDocReportes(); break;
+    case 'doc-stats': root.innerHTML = renderDocStats(); break;
+    case 'doc-asig': root.innerHTML = renderDocAsig(); break;
+    case 'dir-semanal': root.innerHTML = renderDirSemanal(); break;
+    case 'dir-grupo': root.innerHTML = renderDirGrupo(); break;
+    default: root.innerHTML = renderLanding();
+  }
+
+  window.scrollTo(0, 0);
+}
+
+// ===============================================================
+// EVENT HANDLERS & VINCULACIÓN CON BACKEND (NexoAPI)
+// ===============================================================
+
+function showToast(msg) {
+  const c = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = 'toast-notice';
+  el.innerHTML = `<span>⚡</span> <span>${msg}</span>`;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// Navegación con delegación de eventos
+document.addEventListener('click', async (e) => {
+  // Cambio de pantalla
+  const navBtn = e.target.closest('[data-screen]');
+  if (navBtn) {
+    e.preventDefault();
+    AppState.currentScreen = navBtn.dataset.screen;
+    renderApp();
     return;
   }
-  let closedTheme = false;
-  if (state.themeOpen && !e.target.closest('.theme-wrap')) { state.themeOpen = false; closedTheme = true; }
-  if (el && ACTIONS[el.dataset.action]) ACTIONS[el.dataset.action](el.dataset.arg);
-  else if (state.menuFor !== null && !e.target.closest('.menu-wrap')) set({ menuFor: null });
-  else if (closedTheme) render();
-});
-app.addEventListener('keydown', (e) => {
-  const el = e.target.closest('[role="button"][data-action]');
-  if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); ACTIONS[el.dataset.action](el.dataset.arg); }
-});
-app.addEventListener('submit', (e) => {
-  if (e.target.id !== 'loginForm') return;
-  bounce(e.submitter);
-  e.preventDefault();
-  setTimeout(async () => {
-    const api = API();
-    if (!api) {
-      // Modo prototipo (sin Firebase configurado): entra con el rol elegido
-      set({ screen: HOME[state.loginRole], loginPass: '' });
-      window.scrollTo(0, 0);
-      return;
-    }
-    const email = state.loginUser.trim();
-    if (!/@javeriana\.edu\.co$/i.test(email)) return set({ loginError: 'Usa tu correo institucional (@javeriana.edu.co).' });
-    if (!state.loginPass) return set({ loginError: 'Escribe tu contraseña.' });
-    set({ loginBusy: true, loginError: '' });
-    try {
-      const me = await api.login(email, state.loginPass);
-      const role = await loadData(me); // el rol lo decide el servidor, no el botón elegido
-      set({ screen: HOME[role], loginPass: '', loginBusy: false });
-      window.scrollTo(0, 0);
-    } catch (err) {
-      set({ loginBusy: false, loginError: err.message });
-    }
-  }, BOUNCE_WAIT);
-});
-app.addEventListener('change', (e) => { if (e.target.id === 'fA') set({ fA: e.target.value, menuFor: null }); });
-app.addEventListener('input', (e) => {
-  if (e.target.id === 'loginUser') state.loginUser = e.target.value;
-  if (e.target.id === 'loginPass') state.loginPass = e.target.value;
-  if (e.target.id === 'detalle') { state.detalle = e.target.value; updateWordUI(); }
-  if (e.target.id === 'comment') state.comments[state.step] = e.target.value;
-});
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && (state.menuFor !== null || state.themeOpen)) set({ menuFor: null, themeOpen: false }); });
 
-render();
+  // Cambio de tema
+  const themeBtn = e.target.closest('[data-theme-val]');
+  if (themeBtn) {
+    const val = themeBtn.dataset.themeVal;
+    AppState.theme = val;
+    document.documentElement.setAttribute('data-theme', val);
+    localStorage.setItem('nexo_theme', val);
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.themeVal === val));
+    return;
+  }
+
+  // Cerrar sesión
+  if (e.target.id === 'logoutBtn') {
+    await NexoAPI.logout();
+    AppState.user = null;
+    AppState.currentScreen = 'landing';
+    showToast('Sesión cerrada correctamente.');
+    renderApp();
+    return;
+  }
+
+  // Selección de rol en Login
+  const roleBtn = e.target.closest('[data-role]');
+  if (roleBtn) {
+    AppState.selectedRole = roleBtn.dataset.role;
+    renderApp();
+    return;
+  }
+
+  // Cuentas de demostración en Login
+  const demoBtn = e.target.closest('[data-demo-user]');
+  if (demoBtn) {
+    const u = demoBtn.dataset.demoUser;
+    AppState.selectedRole = u;
+    if (u === 'est') { AppState.loginEmail = 'estudiante@javeriana.edu.co'; }
+    if (u === 'doc') { AppState.loginEmail = 'profesor@javeriana.edu.co'; }
+    if (u === 'dir') { AppState.loginEmail = 'direccion@javeriana.edu.co'; }
+    AppState.loginPass = 'clave123';
+    renderApp();
+    return;
+  }
+
+  // Selección de materia para nuevo reporte
+  const crearAsigBtn = e.target.closest('[data-action="crear-reporte-asig"]');
+  if (crearAsigBtn) {
+    AppState.newReportSubjectId = crearAsigBtn.dataset.subjId;
+    AppState.currentScreen = 'est-nuevo';
+    renderApp();
+    return;
+  }
+
+  // Selección de mood en nuevo reporte
+  const moodBtn = e.target.closest('[data-mood]');
+  if (moodBtn) {
+    const cat = moodBtn.dataset.mood;
+    const val = Number(moodBtn.dataset.val);
+    AppState.newReportMoods[cat] = val;
+    renderApp();
+    return;
+  }
+
+  // Filtros de estado en panel docente
+  const docFilterBtn = e.target.closest('[data-doc-filter]');
+  if (docFilterBtn) {
+    AppState.docFilterState = docFilterBtn.dataset.docFilter;
+    renderApp();
+    return;
+  }
+
+  // Cambio reactivo de estado en reporte (HU-03)
+  const statusBtn = e.target.closest('[data-action="set-status"]');
+  if (statusBtn) {
+    const repId = statusBtn.dataset.id;
+    const newStatus = statusBtn.dataset.newStatus;
+    try {
+      await NexoAPI.setStatus(repId, newStatus);
+      showToast(`Estado actualizado a: ${EST_LABELS[newStatus] || newStatus}`);
+      // El suscriptor onSnapshot de Firebase actualizará los datos automáticamente
+    } catch (err) {
+      alert('Error actualizando estado: ' + err.message);
+    }
+    return;
+  }
+});
+
+// Manejo de input de texto con validación en tiempo real (HU-02)
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'reportDetail') {
+    AppState.newReportDetail = e.target.value;
+    const counter = document.querySelector('.char-counter');
+    const submitBtn = document.querySelector('#newReportForm button[type="submit"]');
+    if (counter && submitBtn) {
+      const len = e.target.value.length;
+      const valid = len >= 20;
+      counter.classList.toggle('valid', valid);
+      counter.innerHTML = `<span>${valid ? '✓ Longitud válida' : 'Mínimo 20 caracteres requeridos (Criterio HU-02)'}</span><span>${len} / 20</span>`;
+      submitBtn.disabled = !valid;
+    }
+  }
+  if (e.target.id === 'inputEmail') AppState.loginEmail = e.target.value;
+  if (e.target.id === 'inputPassword') AppState.loginPass = e.target.value;
+});
+
+document.addEventListener('change', (e) => {
+  if (e.target.id === 'selectSubject') {
+    AppState.newReportSubjectId = e.target.value;
+  }
+});
+
+// Envíos de formulario
+document.addEventListener('submit', async (e) => {
+  // Formulario de login
+  if (e.target.id === 'loginForm') {
+    e.preventDefault();
+    AppState.loginLoading = true;
+    AppState.loginError = '';
+    renderApp();
+
+    try {
+      const user = await NexoAPI.login(AppState.loginEmail, AppState.loginPass, AppState.selectedRole);
+      AppState.user = user;
+      AppState.loginLoading = false;
+      showToast(`¡Bienvenido(a), ${user.nombre}!`);
+
+      // Redirección según rol (HU-01)
+      if (user.rol === 'doc') {
+        AppState.currentScreen = 'doc-reportes';
+      } else if (user.rol === 'dir' || user.rol === 'adm') {
+        AppState.currentScreen = 'dir-semanal';
+      } else {
+        AppState.currentScreen = 'est-asig';
+      }
+    } catch (err) {
+      AppState.loginLoading = false;
+      AppState.loginError = err.message;
+    }
+    renderApp();
+    return;
+  }
+
+  // Formulario de nuevo reporte (HU-02)
+  if (e.target.id === 'newReportForm') {
+    e.preventDefault();
+    try {
+      const nuevo = await NexoAPI.createReport({
+        subjectId: AppState.newReportSubjectId,
+        moods: AppState.newReportMoods,
+        detalle: AppState.newReportDetail
+      });
+      AppState.lastCreatedReport = nuevo;
+      AppState.newReportDetail = '';
+      AppState.currentScreen = 'est-enviado';
+      showToast('Reporte guardado con éxito en Firebase.');
+      renderApp();
+    } catch (err) {
+      alert('Error creando reporte: ' + err.message);
+    }
+  }
+});
+
+// Inicialización de la aplicación
+async function initApp() {
+  document.documentElement.setAttribute('data-theme', AppState.theme);
+
+  // Actualizar estado de Firebase en UI
+  const fbText = document.getElementById('fbStatusText');
+  if (fbText) {
+    fbText.textContent = NexoAPI.isFirebaseActive ? `Firestore: ${NexoAPI.projectId}` : 'Nexo Firebase';
+  }
+
+  // Cargar asignaturas y reportes
+  try {
+    AppState.subjects = await NexoAPI.subjects();
+    AppState.reports = await NexoAPI.reports();
+  } catch (e) {
+    console.warn(e);
+  }
+
+  // Suscribirse a cambios en tiempo real (HU-03 / HU-04)
+  NexoAPI.subscribeReports((updatedReports) => {
+    AppState.reports = updatedReports;
+    // Si estamos en pantallas docentes que dependen de reportes, refrescamos reactivamente
+    if (['doc-reportes', 'doc-stats', 'dir-semanal'].includes(AppState.currentScreen)) {
+      renderApp();
+    }
+  });
+
+  renderApp();
+}
+
+window.addEventListener('DOMContentLoaded', initApp);
 </script>
-<script type="module" src="nexo-api.js"></script>
-<style>.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}</style>
+
 </body>
 </html>

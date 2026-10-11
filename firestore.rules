@@ -3,13 +3,20 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Funciones auxiliares de autenticación y rol
+    // ===============================================================
+    // FUNCIONES AUXILIARES DE AUTENTICACIÓN, ROLES E INTEGRIDAD (HU-01 a HU-05)
+    // ===============================================================
     function isAuthenticated() {
       return request.auth != null;
     }
 
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isInstitutionalEmail() {
+      return isAuthenticated() && 
+        request.auth.token.email.matches('.*@javeriana[.]edu[.]co$');
     }
 
     function getUserData() {
@@ -21,57 +28,93 @@ service cloud.firestore {
     }
 
     function isEstudiante() {
-      return isAuthenticated() && userRole() == 'ESTUDIANTE';
+      return isAuthenticated() && (userRole() == 'ESTUDIANTE' || userRole() == 'est');
     }
 
     function isDocente() {
-      return isAuthenticated() && userRole() == 'DOCENTE';
+      return isAuthenticated() && (userRole() == 'DOCENTE' || userRole() == 'doc');
     }
 
     function isDireccionOrAdmin() {
-      return isAuthenticated() && (userRole() == 'DIRECCION' || userRole() == 'ADMIN');
+      return isAuthenticated() && (
+        userRole() == 'DIRECCION' || 
+        userRole() == 'dir' || 
+        userRole() == 'ADMIN' || 
+        userRole() == 'adm'
+      );
     }
 
-    // 1. Colección de Usuarios:
-    // Cualquier usuario con sesión iniciada puede leer los datos de perfil
+    // ===============================================================
+    // HU-01 & HU-05: COLECCIÓN DE USUARIOS Y PERFILES
+    // ===============================================================
     match /users/{userId} {
+      // Todo usuario autenticado puede leer datos básicos de perfiles
       allow read: if isAuthenticated();
-      allow write: if isOwner(userId);
+      
+      // Creación/actualización del propio perfil con correo institucional válido
+      allow write: if isOwner(userId) && (
+        !('email' in request.resource.data) ||
+        request.resource.data.email.matches('.*@javeriana[.]edu[.]co$')
+      );
     }
 
-    // 2. Colección de Asignaturas:
-    // Los estudiantes y docentes pueden consultar las materias
+    // ===============================================================
+    // HU-02 & HU-05: COLECCIÓN DE ASIGNATURAS CURSADAS / A CARGO
+    // ===============================================================
     match /subjects/{subjectId} {
+      // Estudiantes y docentes matriculados o directores pueden leer asignaturas
       allow read: if isAuthenticated();
+      
+      // Solo dirección o administrador del sistema puede crear/modificar asignaturas
       allow write: if isDireccionOrAdmin();
     }
 
-    // 3. Colección de Reportes de Dificultades Académicas:
+    // ===============================================================
+    // HU-02, HU-03, HU-04 & HU-05: COLECCIÓN DE REPORTES DE DIFICULTADES
+    // ===============================================================
     match /reports/{reportId} {
-      // LECTURA:
-      // - Estudiante: únicamente sus propios reportes
-      // - Docente: únicamente reportes dirigidos a asignaturas a su cargo
-      // - Dirección / Administración: todos los reportes para métricas globales
+      
+      // LECTURA (Criterios HU-03 y HU-04):
+      // - Estudiante: consulta sus propios reportes
+      // - Docente: consulta únicamente reportes de las materias a su cargo
+      // - Dirección / Administración: consulta consolidada para métricas globales
       allow read: if isAuthenticated() && (
         resource.data.studentUid == request.auth.uid ||
         resource.data.professorUid == request.auth.uid ||
         isDireccionOrAdmin()
       );
 
-      // CREACIÓN:
-      // Solo un estudiante puede crear reportes y debe registrarse como emisor
+      // CREACIÓN (Criterios HU-02 y HU-05):
+      // - Solo estudiantes autenticados
+      // - Emisor obligatorio igual al usuario en sesión
+      // - Estado inicial automático e inalterable en "PENDIENTE"
+      // - Descripción con longitud mínima válida (al menos 20 caracteres)
+      // - Llaves foráneas obligatorias: studentUid, subjectId
       allow create: if isEstudiante() &&
         request.resource.data.studentUid == request.auth.uid &&
-        request.resource.data.estado == 'PENDIENTE';
+        request.resource.data.estado == 'PENDIENTE' &&
+        request.resource.data.detalle.size() >= 20 &&
+        request.resource.data.subjectId is string &&
+        request.resource.data.createdAt != null;
 
-      // ACTUALIZACIÓN DE ESTADO:
-      // Solo el docente asignado a esa materia (o dirección) puede cambiar el estado
+      // ACTUALIZACIÓN DE ESTADO (Criterios HU-03 y HU-05):
+      // - Modificación permitida exclusivamente al docente a cargo o a dirección
+      // - Solo se permite cambiar el estado a valores válidos: PENDIENTE, EN_REVISION, ATENDIDO
+      // - Inmutabilidad de emisor (studentUid) y asignatura (subjectId) para garantizar trazabilidad
       allow update: if isAuthenticated() && (
         (isDocente() && resource.data.professorUid == request.auth.uid) ||
         isDireccionOrAdmin()
+      ) &&
+      request.resource.data.studentUid == resource.data.studentUid &&
+      request.resource.data.subjectId == resource.data.subjectId &&
+      (
+        request.resource.data.estado == 'PENDIENTE' ||
+        request.resource.data.estado == 'EN_REVISION' ||
+        request.resource.data.estado == 'ATENDIDO'
       );
 
-      // Prohibido eliminar reportes para trazabilidad y auditoría
+      // PROHIBICIÓN DE BORRADO (Criterio HU-05):
+      // Los reportes no se pueden eliminar físicamente para preservar auditoría y trazabilidad
       allow delete: if false;
     }
   }
