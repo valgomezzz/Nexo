@@ -56,6 +56,7 @@ ${extraStyles}
 </helmet>
 ${bodyInner}
 </x-dc>
+${DOCK_SCRIPT}
 </body></html>`;
 
   let outer = b3Raw;
@@ -63,87 +64,88 @@ ${bodyInner}
   outer = outer.replace(/<div id="__bundler_placeholder">[\s\S]*?<\/div>/i, `<div id="__bundler_placeholder">Loading ${title}...</div>`);
   outer = outer.replace(
     /<script type="__bundler\/template">[\s\S]*?<\/script>/,
-    `<script type="__bundler/template">\n${JSON.stringify(innerTemplate)}\n  </script>`
+    `<script type="__bundler/template">\n${JSON.stringify(innerTemplate).replace(/<\//g, '<\\/')}\n  </script>`
   );
   return outer;
 }
 
-function createDocentDock(activePage = 'reports', pendingCount = 3) {
-  return `
-<aside class="dock" style="flex:0 0 268px">
-  <div style="display:flex;align-items:center;gap:12px;padding:0 8px">
-    <svg width="44" height="44" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="10" fill="#832F2F"/><circle cx="12.5" cy="10.5" r="3.2" fill="#fff"/><circle cx="23.5" cy="10.5" r="3.2" fill="#A2CDAB"/><path d="M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <span class="d" style="font-size:26px;font-weight:700;color:#2B1E1F">nexo</span>
-  </div>
-  <nav style="display:flex;flex-direction:column;gap:6px">
-    <a class="nv ${activePage === 'reports' ? 'on' : ''}" href="#" style="position:relative">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
-      <span style="flex:1">Reportes recibidos</span>
-      ${pendingCount ? `<span style="padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;background:${activePage === 'reports' ? '#fff' : '#D9952B'};color:${activePage === 'reports' ? '#832F2F' : '#fff'}">${pendingCount}</span>` : ''}
-    </a>
-    <a class="nv ${activePage === 'stats' ? 'on' : ''}" href="#">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M8 17V11M13 17V7M18 17v-4"/></svg>
-      <span>Estadísticas</span>
-    </a>
-    <a class="nv ${activePage === 'courses' ? 'on' : ''}" href="#">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4.5h6a4 4 0 0 1 4 4V20a3 3 0 0 0-3-3H2zM22 4.5h-6a4 4 0 0 0-4 4V20a3 3 0 0 1 3-3h7z"/></svg>
-      <span>Mis asignaturas</span>
-    </a>
-  </nav>
-
-  <!-- Mini card resumen en dock -->
-  <div style="position:relative;overflow:hidden;padding:16px;border-radius:20px;color:#fff;background:linear-gradient(135deg,#9A3A3A,#6E2626);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 12px 24px -10px rgba(110,38,38,.6);display:flex;align-items:center;gap:14px">
-    <svg width="48" height="48" viewBox="0 0 56 56" style="flex:0 0 48px"><circle cx="28" cy="28" r="22" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="6"/><circle cx="28" cy="28" r="22" fill="none" stroke="#A2CDAB" stroke-width="6" stroke-linecap="round" stroke-dasharray="82.9 138.2" transform="rotate(-90 28 28)"/></svg>
-    <div>
-      <div class="d" style="font-size:18px;font-weight:600">3 de 5</div>
-      <div style="font-size:12px;color:#F1D9D9;line-height:1.25">reportes pendientes por atender</div>
-    </div>
-  </div>
-
-  <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 12px;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.7));box-shadow:inset 0 1px 0 #fff,0 16px 28px -14px rgba(64,32,32,.4)">
-    <div style="display:flex;align-items:center;gap:10px;min-width:0">
-      <span style="position:relative;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#2B1E1F;background:linear-gradient(145deg,#D5DEE3,#9FB0B8);border:2px solid #fff;box-shadow:0 6px 14px -4px rgba(64,32,32,.35)">MG<i style="position:absolute;right:-2px;bottom:-2px;width:12px;height:12px;border-radius:50%;background:#6DAF7E;border:2px solid #fff"></i></span>
-      <div style="min-width:0"><div style="font-weight:700;font-size:14px;color:#2B1E1F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">María García</div><div style="font-size:12px;color:#6B5E60">Docente titular</div></div>
-    </div>
-    <a class="out" href="#" aria-label="Cerrar sesión" title="Cerrar sesión" style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></a>
-  </div>
-</aside>`;
+// ---------- Caritas: mismas que el asistente del estudiante (0 Muy mal … 4 Muy bien) ----------
+const MOODS = [
+  ['Muy mal', 'M8 17.2c1.2-1.7 2.5-2.5 4-2.5s2.8.8 4 2.5', true, false, '#B3403A'],
+  ['Mal', 'M8.5 16.2c1-.9 2.2-1.3 3.5-1.3s2.5.4 3.5 1.3', false, false, '#C98418'],
+  ['Regular', 'M8.5 15.4h7', false, false, '#6B5E60'],
+  ['Bien', 'M8.5 14.2c1 1.1 2.2 1.6 3.5 1.6s2.5-.5 3.5-1.6', false, false, '#832F2F'],
+  ['Muy bien', 'M7.8 13.6c1.1 2.3 2.5 3.4 4.2 3.4s3.1-1.1 4.2-3.4z', false, true, '#4B9862']
+];
+function face(i, size = 30) {
+  const [label, d, brow, filled, c] = MOODS[i];
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${label}" style="flex:none"><circle cx="12" cy="12" r="10"/><circle cx="9" cy="9.8" r="1.05" fill="${c}" stroke="none"/><circle cx="15" cy="9.8" r="1.05" fill="${c}" stroke="none"/>${brow ? '<path d="M7.6 7.4 10 8.2M16.4 7.4 14 8.2"/>' : ''}<path d="${d}" fill="${filled ? c : 'none'}"/></svg>`;
 }
 
-function createDirDock(activePage = 'weekly') {
+// ---------- Barra lateral: misma estructura que la del estudiante ----------
+const ICONS = {
+  inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  chart: '<path d="M3 3v18h18"/><path d="M8 17V11M13 17V7M18 17v-4"/>',
+  book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/>',
+  pulse: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  grid: '<path d="M2 4.5h6a4 4 0 0 1 4 4V20a3 3 0 0 0-3-3H2zM22 4.5h-6a4 4 0 0 0-4 4V20a3 3 0 0 1 3-3h7z"/>'
+};
+const ico = (k, s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
+
+function createDock({ nav, done, total, caption, ini, name, avatarBg }) {
+  const dash = ((done / total) * 138.2).toFixed(1);
   return `
-<aside class="dock" style="flex:0 0 268px">
-  <div style="display:flex;align-items:center;gap:12px;padding:0 8px">
-    <svg width="44" height="44" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="10" fill="#832F2F"/><circle cx="12.5" cy="10.5" r="3.2" fill="#fff"/><circle cx="23.5" cy="10.5" r="3.2" fill="#A2CDAB"/><path d="M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <span class="d" style="font-size:26px;font-weight:700;color:#2B1E1F">nexo</span>
-  </div>
-  <nav style="display:flex;flex-direction:column;gap:6px">
-    <a class="nv ${activePage === 'weekly' ? 'on' : ''}" href="#">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-      <span>Panorama semanal</span>
-    </a>
-    <a class="nv ${activePage === 'subjects' ? 'on' : ''}" href="#">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4.5h6a4 4 0 0 1 4 4V20a3 3 0 0 0-3-3H2zM22 4.5h-6a4 4 0 0 0-4 4V20a3 3 0 0 1 3-3h7z"/></svg>
-      <span>Grupos y materias</span>
-    </a>
-  </nav>
-
-  <!-- Widget directivo -->
-  <div style="position:relative;overflow:hidden;padding:16px;border-radius:20px;color:#fff;background:linear-gradient(135deg,#9A3A3A,#6E2626);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 12px 24px -10px rgba(110,38,38,.6)">
-    <div style="font-size:12px;color:#F1D9D9;text-transform:uppercase;letter-spacing:.08em;font-weight:700">Facultad de Ingeniería</div>
-    <div class="d" style="font-size:28px;font-weight:700;margin:6px 0 2px">28 reportes</div>
-    <div style="font-size:13px;color:#F1D9D9">recibidos en el programa</div>
-  </div>
-
-  <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 12px;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.7));box-shadow:inset 0 1px 0 #fff,0 16px 28px -14px rgba(64,32,32,.4)">
-    <div style="display:flex;align-items:center;gap:10px;min-width:0">
-      <span style="position:relative;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#2B1E1F;background:linear-gradient(145deg,#E6B979,#D9952B);border:2px solid #fff;box-shadow:0 6px 14px -4px rgba(64,32,32,.35)">AT<i style="position:absolute;right:-2px;bottom:-2px;width:12px;height:12px;border-radius:50%;background:#6DAF7E;border:2px solid #fff"></i></span>
-      <div style="min-width:0"><div style="font-weight:700;font-size:14px;color:#2B1E1F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Ana Torres</div><div style="font-size:12px;color:#6B5E60">Dirección de programa</div></div>
-    </div>
-    <a class="out" href="#" aria-label="Cerrar sesión" title="Cerrar sesión" style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></a>
-  </div>
-</aside>`;
+<aside class="dock z" style="position:relative;overflow:hidden;transition:flex-basis .35s ease,padding .35s ease,opacity .25s ease;{{dockStyle}}">
+<div aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;pointer-events:none">
+<div style="position:absolute;left:-60px;top:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(131,47,47,.22),transparent 68%)"></div>
+<div style="position:absolute;inset:0;background-image:radial-gradient(rgba(131,47,47,.13) 1.2px,transparent 1.4px);background-size:18px 18px;-webkit-mask-image:linear-gradient(180deg,transparent 35%,#000 100%);mask-image:linear-gradient(180deg,transparent 35%,#000 100%)"></div>
+<div class="orbit" style="width:300px;height:300px;left:-90px;bottom:-70px;border:1px dashed rgba(131,47,47,.3);animation-duration:40s"><i style="background:#832F2F"></i></div>
+<div class="orbit" style="width:190px;height:190px;left:-35px;bottom:-15px;border:1px solid rgba(131,47,47,.22);animation-duration:26s;animation-direction:reverse"><i style="background:#B295B0"></i></div>
+</div>
+<div style="position:relative;width:228px;flex:1 0 auto;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;align-items:center;justify-content:space-between"><a href="#" aria-label="Nexo" style="display:flex"><svg width="44" height="44" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="10" fill="#832F2F"/><circle cx="12.5" cy="10.5" r="3.2" fill="#fff"/><circle cx="23.5" cy="10.5" r="3.2" fill="#A2CDAB"/><path d="M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+<button sc-camel-on-click="{{toggle}}" aria-label="Ocultar panel" style="width:38px;height:38px;border-radius:50%;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:#fff;color:#832F2F;box-shadow:inset 0 1px 0 #fff,0 8px 16px -8px rgba(64,32,32,.4)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button></div>
+<nav aria-label="Principal" style="display:flex;flex-direction:column;gap:8px">
+${nav.map(([label, icon, on]) => `<a class="nv ${on ? 'on' : ''}" href="#">${ico(icon)}${label}</a>`).join('\n')}
+</nav>
+<div style="position:relative;overflow:hidden;border-radius:22px;padding:18px;color:#fff;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#9A3A3A,#5E2121);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 22px 34px -16px rgba(110,38,38,.8)">
+<div class="orbit" style="width:120px;height:120px;right:-40px;top:-50px;border:1px dashed rgba(255,255,255,.3);animation-duration:24s"><i style="background:#A2CDAB"></i></div>
+<svg width="56" height="56" viewBox="0 0 56 56" style="position:relative;flex:0 0 56px" aria-hidden="true"><circle cx="28" cy="28" r="22" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="6"/><circle cx="28" cy="28" r="22" fill="none" stroke="#A2CDAB" stroke-width="6" stroke-linecap="round" stroke-dasharray="${dash} 138.2" transform="rotate(-90 28 28)"/></svg>
+<div style="position:relative"><div class="d" style="font-size:20px;font-weight:600">${done} de ${total}</div><div style="font-size:13px;color:#F1D9D9;line-height:1.3">${caption}</div></div></div>
+<div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 12px;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.7));box-shadow:inset 0 1px 0 #fff,0 16px 28px -14px rgba(64,32,32,.4)">
+<span style="position:relative;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#2B1E1F;background:${avatarBg};border:3px solid #fff;box-shadow:0 8px 16px -6px rgba(64,32,32,.45)" role="img" aria-label="Foto de perfil de ${name}">${ini}<i style="position:absolute;right:-2px;bottom:-2px;width:13px;height:13px;border-radius:50%;background:#6DAF7E;border:2px solid #fff"></i></span>
+<a class="out" href="#" aria-label="Cerrar sesión" title="Cerrar sesión" style="width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></a>
+</div>
+</div>
+</aside>
+<sc-if value="{{closed}}" hint-placeholder-val="{{false}}"><button class="z" sc-camel-on-click="{{toggle}}" aria-label="Mostrar panel" style="position:absolute;left:16px;top:24px;z-index:5;width:48px;height:48px;border-radius:50%;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#832F2F;background:linear-gradient(180deg,#fff,#F6EFEC);box-shadow:inset 0 1px 0 #fff,0 16px 28px -10px rgba(64,32,32,.5)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></sc-if>`;
 }
+
+function createDocentDock(active = 'reports') {
+  return createDock({
+    nav: [['Reportes recibidos', 'inbox', active === 'reports'], ['Estadísticas', 'chart', active === 'stats'], ['Mis asignaturas', 'book', active === 'courses']],
+    done: 3, total: 5, caption: 'reportes pendientes por atender',
+    ini: 'MG', name: 'María García', avatarBg: 'linear-gradient(145deg,#D5DEE3,#9FB0B8)'
+  });
+}
+function createDirDock(active = 'weekly') {
+  return createDock({
+    nav: [['Panorama semanal', 'pulse', active === 'weekly'], ['Grupos y materias', 'grid', active === 'subjects']],
+    done: 15, total: 28, caption: 'reportes sin responder en el programa',
+    ini: 'AT', name: 'Ana Torres', avatarBg: 'linear-gradient(145deg,#E6B979,#D9952B)'
+  });
+}
+
+// Lógica del panel plegable (idéntica a la del tablero del estudiante)
+const DOCK_SCRIPT = `<script type="text/x-dc" data-dc-script="" data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+renderVals() {
+const open = !(this.state && this.state.open === false);
+return { closed: !open, toggle: () => this.setState({ open: !open }),
+dockStyle: open ? 'flex:0 0 268px;opacity:1' : 'flex:0 0 0px;padding-left:0;padding-right:0;opacity:0;pointer-events:none;border-right-width:0' };
+}
+}
+</script>`;
 
 const sceneHtml = `
 <div class="scene">
@@ -160,7 +162,7 @@ const b1_DocPanel = `
 <div class="root">
   ${sceneHtml}
   <div style="display:flex;min-height:940px">
-    ${createDocentDock('reports', 3)}
+    ${createDocentDock('reports')}
     <main class="z" style="flex:1;min-width:0;padding:44px 48px;display:flex;flex-direction:column;gap:28px">
       <header>
         <p style="margin:0;font-weight:700;color:#832F2F;letter-spacing:.12em;text-transform:uppercase;font-size:13px">Semana 6, del 8 al 12 de septiembre · Semestre 2026-2</p>
@@ -286,7 +288,7 @@ const b2_DocStats = `
 <div class="root">
   ${sceneHtml}
   <div style="display:flex;min-height:1040px">
-    ${createDocentDock('stats', 3)}
+    ${createDocentDock('stats')}
     <main class="z" style="flex:1;min-width:0;padding:44px 48px;display:flex;flex-direction:column;gap:28px">
       <header>
         <p style="margin:0;font-weight:700;color:#832F2F;letter-spacing:.12em;text-transform:uppercase;font-size:13px">Semana 6, del 8 al 12 de septiembre · Métricas consolidadas</p>
@@ -356,21 +358,21 @@ const b2_DocStats = `
           <h2 class="d" style="font-size:22px;font-weight:600">Cómo te valoran tus estudiantes</h2>
           <div style="display:flex;flex-direction:column;gap:14px">
             <div style="display:flex;align-items:center;gap:14px">
-              <span style="font-size:24px">😊</span>
+              ${face(3, 30)}
               <div style="flex:1">
                 <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600"><span>Contenido</span><strong>3.9 <small style="color:#6B5E60;font-weight:500">de 5</small></strong></div>
                 <div class="stat-track" style="margin-top:6px"><div class="stat-fill" style="width:78%;background:#6DAF7E"></div></div>
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:14px">
-              <span style="font-size:24px">😐</span>
+              ${face(2, 30)}
               <div style="flex:1">
                 <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600"><span>Metodología</span><strong>3.4 <small style="color:#6B5E60;font-weight:500">de 5</small></strong></div>
                 <div class="stat-track" style="margin-top:6px"><div class="stat-fill" style="width:68%;background:#D9952B"></div></div>
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:14px">
-              <span style="font-size:24px">😟</span>
+              ${face(1, 30)}
               <div style="flex:1">
                 <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600"><span>Ritmo</span><strong>2.6 <small style="color:#6B5E60;font-weight:500">de 5</small></strong></div>
                 <div class="stat-track" style="margin-top:6px"><div class="stat-fill" style="width:52%;background:#B3403A"></div></div>
@@ -459,7 +461,7 @@ const b3_DocAsig = `
 <div class="root">
   ${sceneHtml}
   <div style="display:flex;min-height:900px">
-    ${createDocentDock('courses', 3)}
+    ${createDocentDock('courses')}
     <main class="z" style="flex:1;min-width:0;padding:44px 48px;display:flex;flex-direction:column;gap:28px">
       <header>
         <p style="margin:0;font-weight:700;color:#832F2F;letter-spacing:.12em;text-transform:uppercase;font-size:13px">Semestre 2026-2 · Asignaciones académicas</p>
@@ -666,7 +668,7 @@ const b5_DirGrupo = `
             <div style="flex:1">
               <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
                 <div style="display:flex;align-items:center;gap:10px">
-                  <span style="font-size:20px">😟</span>
+                  ${face(1, 28)}
                   <span class="tag-badge">Metodología</span>
                 </div>
                 <span class="pill" style="background:#FBEBD3;color:#85500C">Pendiente</span>
@@ -680,7 +682,7 @@ const b5_DirGrupo = `
             <div style="flex:1">
               <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
                 <div style="display:flex;align-items:center;gap:10px">
-                  <span style="font-size:20px">😐</span>
+                  ${face(2, 28)}
                   <span class="tag-badge">Contenido</span>
                 </div>
                 <span class="pill" style="background:#ECE3EB;color:#62405F">En revisión</span>
@@ -694,7 +696,7 @@ const b5_DirGrupo = `
             <div style="flex:1">
               <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
                 <div style="display:flex;align-items:center;gap:10px">
-                  <span style="font-size:20px">😊</span>
+                  ${face(3, 28)}
                   <span class="tag-badge">Ritmo</span>
                 </div>
                 <span class="pill" style="background:#E1F1E5;color:#2A6A3D">Atendido</span>
