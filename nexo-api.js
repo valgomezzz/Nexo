@@ -152,6 +152,13 @@ export function normalizeReport(r) {
     },
     comentarios: r.comentarios || {},
     estado,
+    // Seguimiento: cambios de estado con su fecha (más antiguo primero)
+    historial: (Array.isArray(r.historial) ? r.historial : [])
+      .map(h => {
+        const e = String(h?.estado || '');
+        return { estado: ['pend', 'rev', 'ok'].includes(e) ? e : (EST_MAP[e.toUpperCase()] || 'pend'), fecha: toIso(h?.fecha) };
+      })
+      .sort((a, b) => new Date(a.fecha) - new Date(b.fecha)),
     createdAt: toIso(r.createdAt),
     updatedAt: toIso(r.updatedAt || r.createdAt)
   };
@@ -513,7 +520,7 @@ export const NexoAPI = {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
-      return normalizeReport({ id: ref.id, ...data, estado: 'PENDIENTE' });
+      return normalizeReport({ id: ref.id, ...data, estado: 'PENDIENTE', historial: [{ estado: 'PENDIENTE', fecha: new Date().toISOString() }] });
     }
 
     // 4. Demo local
@@ -597,6 +604,7 @@ export const NexoAPI = {
     if (rep) {
       rep.estado = uiStatus;
       rep.updatedAt = new Date().toISOString();
+      rep.historial = [...(rep.historial || []), { estado: uiStatus, fecha: rep.updatedAt }];
       saveLocalDb(localDb);
     }
     return { id: reportId, estado: uiStatus };

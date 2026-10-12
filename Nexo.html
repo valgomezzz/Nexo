@@ -125,6 +125,32 @@ h1,h2,h3,p{margin:0}
 .status-menu button:hover{background:#EEF3FA}
 .status-menu button .dot{width:10px;height:10px;border-radius:50%}
 
+/* ---------- Detalle de un reporte (solo lectura) ---------- */
+.viewable{cursor:pointer}
+.view-hint{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:#355E96;white-space:nowrap}
+.modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:24px}
+.modal-bg{position:absolute;inset:0;background:rgba(19,33,53,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);animation:fadein .2s ease both}
+@keyframes fadein{from{opacity:0}}
+.modal-card{position:relative;width:min(660px,100%);max-height:calc(100vh - 48px);overflow:auto;border-radius:28px;padding:32px;background:#fff;box-shadow:0 40px 80px -30px rgba(19,33,53,.6);display:flex;flex-direction:column;gap:24px;animation:rise .3s cubic-bezier(.2,.7,.2,1) both}
+.modal-card h3{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#5B6B82;margin-bottom:12px}
+.mood-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.mood-tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 12px;border-radius:18px;background:#F4F7FC;border:1px solid #DCE5F2;text-align:center}
+.mood-tile .c{font-size:13px;font-weight:600;color:#5B6B82}
+.mood-tile .v{font-weight:700;font-size:15px}
+.mood-tile .note{margin-top:4px;font-size:14px;line-height:1.4;color:#2A3A52;font-style:italic}
+.msg{margin:0;padding:18px 20px;border-radius:18px;background:#F4F7FC;border-left:4px solid #355E96;font-size:16px;line-height:1.6;color:#132135;white-space:pre-wrap;overflow-wrap:anywhere}
+.track3{display:flex;align-items:flex-start}
+.track3 .stp{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:13px;color:#5B6B82}
+.track3 .stp + .stp::before{content:"";position:absolute;top:9px;left:-50%;right:50%;height:3px;background:#DCE5F2}
+.track3 .stp.done::before{background:#355E96}
+.track3 .dot{position:relative;z-index:1;width:20px;height:20px;border-radius:50%;background:#DCE5F2;border:3px solid #fff;box-shadow:0 0 0 1px #DCE5F2}
+.track3 .done .dot{background:#355E96;box-shadow:0 0 0 1px #355E96}
+.track3 .now .dot{background:#E6B979;box-shadow:0 0 0 4px rgba(230,185,121,.35)}
+.track3 b{color:#132135}
+.icon-close{width:42px;height:42px;flex:none;border-radius:50%;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:#EEF3FA;color:#355E96;transition:background .2s}
+.icon-close:hover{background:#DCE5F2}
+@media (max-width:560px){.modal{padding:12px;align-items:flex-end}.modal-card{padding:24px 20px;border-radius:24px}}
+
 /* ---------- Asistente de reporte ---------- */
 .steps{display:flex;gap:8px}
 .steps span{flex:1;height:8px;border-radius:8px;background:#DCE5F2;box-shadow:inset 0 1px 2px rgba(19,33,53,.12);transition:background .3s}
@@ -260,7 +286,8 @@ const S = {
   login: { role: 'est', email: '', pass: '', error: '', loading: false },
   wizard: null,
   lastReport: null,
-  doc: { estado: 'todos', subject: 'todos', openId: null, menuId: null },
+  doc: { estado: 'todos', subject: 'todos', menuId: null },
+  viewId: null, // reporte abierto en la ventana de detalle
   dir: { subjectId: null }
 };
 
@@ -585,10 +612,11 @@ function renderEstAsig() {
     </li>`;
   }).join('');
 
-  const mine = S.reports.slice(0, 6).map(r => `<li class="row" style="box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(19,33,53,.06)">
+  const mine = S.reports.slice(0, 6).map(r => `<li class="row lift viewable" data-act="view-report" data-id="${esc(r.id)}" tabindex="0" role="button" aria-label="Ver detalle del reporte de ${esc(r.asignatura)}" style="box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(19,33,53,.06)">
       ${dayBadge(r.createdAt)}
       <div style="flex:1 1 220px;min-width:0"><div style="font-weight:700;font-size:16px">${esc(r.titulo)}</div><div style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:#355E96">${esc(r.asignatura)}</span><span class="tag-badge">${esc(r.categoria)}</span></div></div>
       ${statusPill(r.estado)}
+      <span class="view-hint">Ver detalle${icon('right', 16, 'stroke-width="2.5"')}</span>
     </li>`).join('');
 
   return shell('est-asig', `
@@ -732,12 +760,53 @@ function statusControl(r) {
   </div>`;
 }
 
-function reportDetail(r) {
-  const coments = CATEGORIAS.filter(c => r.comentarios[c.key]).map(c => `<div><b>${c.nombre}:</b> ${esc(r.comentarios[c.key])}</div>`).join('');
-  return `<div class="rep-body">
-    <div class="rep-faces">${CATEGORIAS.map(c => `<span>${face(r.moods[c.key], 28)}${c.nombre} · ${MOOD_LABELS[r.moods[c.key]]}</span>`).join('')}</div>
-    <p class="quote">“${esc(r.detalle)}”</p>
-    ${coments ? `<div class="coments">${coments}</div>` : ''}
+// Ventana de detalle de un reporte: solo lectura, para estudiantes, docentes y dirección
+function reportModal() {
+  const r = S.reports.find(x => x.id === S.viewId) || (S.lastReport?.id === S.viewId ? S.lastReport : null);
+  if (!r) return '';
+  const esEst = roleOf(S.user) === 'est';
+  const orden = ['pend', 'rev', 'ok'];
+  const actual = orden.indexOf(r.estado);
+  const fechaDe = (e) => {
+    const h = [...(r.historial || [])].reverse().find(x => x.estado === e);
+    if (h) return fullDate(h.fecha);
+    return e === 'pend' ? fullDate(r.createdAt) : '';
+  };
+  const pasos = [['pend', 'Enviado'], ['rev', 'En revisión'], ['ok', 'Atendido']].map(([e, label], i) => {
+    const cls = i < actual ? 'done' : i === actual ? 'done now' : '';
+    const fecha = i <= actual ? fechaDe(e) : '';
+    return `<div class="stp ${cls}"><span class="dot"></span><b>${label}</b><span>${fecha || (i <= actual ? '' : 'Por hacer')}</span></div>`;
+  }).join('');
+
+  return `<div class="modal">
+    <div class="modal-bg" data-act="close-report"></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="repTitle">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px">
+        <div style="min-width:0">
+          <p class="eyebrow">Reporte · ${fullDate(r.createdAt)}</p>
+          <h2 id="repTitle" class="d" style="font-size:clamp(26px,3vw,34px);line-height:1.1;font-weight:600;margin-top:8px">${esc(r.asignatura)}</h2>
+          <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap">
+            ${statusPill(r.estado)}<span class="tag-badge">Mayor dificultad: ${esc(r.categoria)}</span><span style="font-size:13px;color:#5B6B82">${esc(r.grupo)}</span>
+          </div>
+        </div>
+        <button class="icon-close" data-act="close-report" aria-label="Cerrar detalle" id="repClose">${icon('x', 20)}</button>
+      </div>
+      <section>
+        <h3>${esEst ? 'Tu valoración' : 'Cómo se siente el estudiante'}</h3>
+        <div class="mood-tiles">
+          ${CATEGORIAS.map(c => `<div class="mood-tile">${face(r.moods[c.key], 40)}<span class="c">${c.nombre}</span><span class="v">${MOOD_LABELS[r.moods[c.key]]}</span>${r.comentarios[c.key] ? `<span class="note">“${esc(r.comentarios[c.key])}”</span>` : ''}</div>`).join('')}
+        </div>
+      </section>
+      <section>
+        <h3>${esEst ? 'Lo que escribiste' : 'Mensaje del estudiante'}</h3>
+        <p class="msg">${esc(r.detalle)}</p>
+      </section>
+      <section>
+        <h3>Seguimiento</h3>
+        <div class="track3">${pasos}</div>
+      </section>
+      <div style="display:flex;justify-content:flex-end"><button class="btn" data-act="close-report">Cerrar</button></div>
+    </div>
   </div>`;
 }
 
@@ -753,15 +822,14 @@ function renderDocReportes() {
   const tab = (val, label, n) => `<button class="nav-tab ${D.estado === val ? 'active' : ''}" data-act="doc-tab" data-val="${val}">${label} <span class="badge">${n}</span></button>`;
 
   const items = list.map(r => `<li class="rep lift">
-    <div class="rep-top" data-act="toggle-report" data-id="${esc(r.id)}" aria-expanded="${D.openId === r.id}">
+    <div class="rep-top" data-act="view-report" data-id="${esc(r.id)}" tabindex="0" role="button" aria-label="Ver detalle del reporte: ${esc(r.titulo)}">
       ${dayBadge(r.createdAt)}
       <div style="flex:1;min-width:0">
         <div style="font-weight:700;font-size:17px;color:#132135">${esc(r.titulo)}</div>
-        <div style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:#355E96">${esc(r.asignatura)}</span><span class="tag-badge">${esc(r.categoria)}</span><span style="font-size:13px;color:#5B6B82">${esc(r.grupo)}</span></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:#355E96">${esc(r.asignatura)}</span><span class="tag-badge">${esc(r.categoria)}</span><span style="font-size:13px;color:#5B6B82">${esc(r.grupo)}</span><span class="view-hint">Ver detalle${icon('right', 14, 'stroke-width="2.5"')}</span></div>
       </div>
       ${statusControl(r)}
     </div>
-    ${D.openId === r.id ? reportDetail(r) : ''}
   </li>`).join('');
 
   return shell('doc-reportes', `
@@ -1014,14 +1082,14 @@ function renderDirGrupo() {
     <section class="glass" style="border-radius:30px;padding:32px">
       <h2 class="d" style="font-size:22px;font-weight:600;margin-bottom:24px">Trazabilidad de reportes del grupo</h2>
       <div style="display:flex;flex-direction:column;gap:18px">
-        ${reps.length ? reps.map(r => `<div class="lift" style="display:flex;gap:20px;padding:22px 24px;border-radius:20px;background:#fff;box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(19,33,53,.06)">
+        ${reps.length ? reps.map(r => `<div class="lift viewable" data-act="view-report" data-id="${esc(r.id)}" tabindex="0" role="button" aria-label="Ver detalle del reporte" style="display:flex;gap:20px;padding:22px 24px;border-radius:20px;background:#fff;box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(19,33,53,.06)">
           ${dayBadge(r.createdAt)}
           <div style="flex:1;min-width:0">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap">
               <div style="display:flex;align-items:center;gap:10px">${face(worstMood(r), 28)}<span class="tag-badge">${esc(r.categoria)}</span></div>
-              ${statusPill(r.estado)}
+              <div style="display:flex;align-items:center;gap:12px">${statusPill(r.estado)}<span class="view-hint">Ver detalle${icon('right', 14, 'stroke-width="2.5"')}</span></div>
             </div>
-            <p class="quote">“${esc(r.detalle)}”</p>
+            <p class="quote" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">“${esc(r.detalle)}”</p>
           </div>
         </div>`).join('') : `<p class="empty">Este grupo aún no tiene reportes.</p>`}
       </div>
@@ -1068,7 +1136,10 @@ function render() {
   }
   const changed = S.screen !== s;
   S.screen = s;
-  app.innerHTML = SCREENS[s]();
+  if (changed) S.viewId = null;
+  const modal = S.viewId && S.user ? reportModal() : '';
+  app.innerHTML = SCREENS[s]() + modal;
+  document.body.style.overflow = modal ? 'hidden' : '';
   document.title = 'Nexo · ' + ({ landing: 'Tu voz académica', login: 'Iniciar sesión', 'est-asig': 'Mis asignaturas', 'est-nuevo': 'Nuevo reporte', 'est-enviado': 'Reporte enviado', 'doc-reportes': 'Reportes recibidos', 'doc-stats': 'Estadísticas', 'doc-asig': 'Mis asignaturas', 'dir-semanal': 'Panorama semanal', 'dir-grupo': 'Detalle de grupo' }[s]);
   if (changed) window.scrollTo(0, 0);
   if (s === 'landing') setupReveal();
@@ -1143,7 +1214,8 @@ async function endSession() {
   S.reports = [];
   S.wizard = null;
   S.lastReport = null;
-  S.doc = { estado: 'todos', subject: 'todos', openId: null, menuId: null };
+  S.doc = { estado: 'todos', subject: 'todos', menuId: null };
+  S.viewId = null;
   S.login = { ...S.login, pass: '', error: '', loading: false };
 }
 
@@ -1241,14 +1313,22 @@ document.addEventListener('click', async (e) => {
     // ----- Docente -----
     case 'doc-tab':
       S.doc.estado = el.dataset.val;
-      S.doc.openId = null;
       if (S.screen !== 'doc-reportes') go('doc-reportes'); else render();
       break;
-    case 'toggle-report':
+    case 'view-report': {
       if (e.target.closest('.status-wrap')) return;
-      S.doc.openId = S.doc.openId === id ? null : id;
+      S.viewId = id;
       render();
+      document.getElementById('repClose')?.focus();
       break;
+    }
+    case 'close-report': {
+      const back = S.viewId;
+      S.viewId = null;
+      render();
+      document.querySelector(`[data-act="view-report"][data-id="${CSS.escape(back || '')}"]`)?.focus();
+      break;
+    }
     case 'status-menu':
       S.doc.menuId = S.doc.menuId === id ? null : id;
       render();
@@ -1259,13 +1339,16 @@ document.addEventListener('click', async (e) => {
       const next = el.dataset.val;
       S.doc.menuId = null;
       if (!rep || prev === next) { render(); break; }
+      const prevHist = rep.historial;
       rep.estado = next;
+      rep.historial = [...(rep.historial || []), { estado: next, fecha: new Date().toISOString() }];
       render();
       try {
         await NexoAPI.setStatus(id, next);
         toast(`Estado actualizado: ${EST_LABELS[next]}`);
       } catch (err) {
         rep.estado = prev;
+        rep.historial = prevHist;
         render();
         toast('No se pudo cambiar el estado: ' + err.message, true);
       }
@@ -1274,7 +1357,6 @@ document.addEventListener('click', async (e) => {
     case 'open-subject':
       S.doc.subject = id;
       S.doc.estado = 'todos';
-      S.doc.openId = null;
       go('doc-reportes');
       break;
 
@@ -1318,7 +1400,6 @@ document.addEventListener('input', (e) => {
 document.addEventListener('change', (e) => {
   if (e.target.id === 'docSubject') {
     S.doc.subject = e.target.value;
-    S.doc.openId = null;
     render();
   }
   if (e.target.id === 'dirGroup') {
@@ -1328,9 +1409,10 @@ document.addEventListener('change', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && S.viewId) { S.viewId = null; render(); return; }
   if (e.key === 'Escape' && S.doc.menuId) { S.doc.menuId = null; render(); }
   // Accesibilidad: Enter/Espacio en filas clicables
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.rep-top,[data-act="open-subject"],[data-act="open-group"]')) {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-act="view-report"],[data-act="open-subject"],[data-act="open-group"]')) {
     e.preventDefault();
     e.target.click();
   }
