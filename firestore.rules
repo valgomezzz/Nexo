@@ -51,11 +51,18 @@ service cloud.firestore {
       // Todo usuario autenticado puede leer datos básicos de perfiles
       allow read: if isAuthenticated();
       
-      // Creación/actualización del propio perfil con correo institucional válido
-      allow write: if isOwner(userId) && (
-        !('email' in request.resource.data) ||
-        request.resource.data.email.matches('.*@javeriana[.]edu[.]co$')
-      );
+      // Creación del propio perfil: correo institucional igual al de la sesión
+      // y rol inicial obligatorio de estudiante (no se permite autoasignarse roles)
+      allow create: if isOwner(userId) && isInstitutionalEmail() &&
+        request.resource.data.email == request.auth.token.email &&
+        request.resource.data.rol in ['ESTUDIANTE', 'est'];
+
+      // Actualización del propio perfil sin poder cambiar rol ni correo.
+      // Los roles DOCENTE / DIRECCION / ADMIN se asignan con el Admin SDK (backend).
+      allow update: if isOwner(userId) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['rol', 'email']);
+
+      allow delete: if false;
     }
 
     // ===============================================================

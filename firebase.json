@@ -8,8 +8,13 @@
       "firebase.json",
       "firestore.rules",
       "**/.*",
+      "**/node_modules/**",
       "*.md",
-      "tablero-mockups.html"
+      "*.log",
+      "tablero-mockups.html",
+      "seed-data.js",
+      "backend/**",
+      "**/serviceAccountKey*.json"
     ],
     "cleanUrls": true,
     "rewrites": [

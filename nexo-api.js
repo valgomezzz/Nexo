@@ -199,7 +199,10 @@ async function checkJavaBackend() {
     const timeout = setTimeout(() => ctrl.abort(), 1200);
     const res = await fetch(`${API_BASE}/health`, { signal: ctrl.signal });
     clearTimeout(timeout);
-    if (res.ok) {
+    // En Hosting, /api/health se reescribe a Nexo.html (200 OK con HTML),
+    // así que solo se considera activo si responde el JSON del backend.
+    const data = res.ok ? await res.json().catch(() => null) : null;
+    if (data && data.status === 'ok') {
       isJavaBackendActive = true;
       console.log('[Nexo] Backend Java 17 detectado y activo en:', API_BASE);
       return true;
@@ -212,6 +215,15 @@ async function checkJavaBackend() {
 
 // Iniciar chequeo de inmediato
 checkJavaBackend();
+
+// Token para el backend Java: ID token real de Firebase si hay sesión,
+// o el uid demo cuando el backend corre en modo Local Mock.
+async function bearerToken(me, fallback) {
+  if (auth?.currentUser) {
+    try { return await auth.currentUser.getIdToken(); } catch (e) {}
+  }
+  return me.token || me.uid || fallback;
+}
 
 // ===============================================================
 // API PÚBLICA DE NEXO (Java + Firebase)
@@ -295,7 +307,9 @@ export const NexoAPI = {
           profileData = {
             email: cleanEmail,
             nombre: nombreEstimado,
-            rol: ROL_MAP[requestedRole] || 'ESTUDIANTE',
+            // Todo perfil nuevo nace como estudiante; los roles DOCENTE/DIRECCION
+            // se asignan desde el backend (AsignarRol) y las reglas impiden autoasignarlos.
+            rol: 'ESTUDIANTE',
             createdAt: serverTimestamp()
           };
           await setDoc(userDocRef, profileData);
@@ -356,7 +370,7 @@ export const NexoAPI = {
     if (isJavaBackendActive) {
       try {
         const res = await fetch(`${API_BASE}/subjects`, {
-          headers: { 'Authorization': `Bearer ${me.token || me.uid || 'demo-est-01'}` }
+          headers: { 'Authorization': `Bearer ${await bearerToken(me, 'demo-est-01')}` }
         });
         if (res.ok) {
           const list = await res.json();
@@ -398,7 +412,7 @@ export const NexoAPI = {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${me.token || me.uid || 'demo-est-01'}`
+            'Authorization': `Bearer ${await bearerToken(me, 'demo-est-01')}`
           },
           body: JSON.stringify({
             subjectId: payload.subjectId,
@@ -484,7 +498,7 @@ export const NexoAPI = {
     if (isJavaBackendActive) {
       try {
         const res = await fetch(`${API_BASE}/reports`, {
-          headers: { 'Authorization': `Bearer ${me.token || me.uid || 'demo-doc-01'}` }
+          headers: { 'Authorization': `Bearer ${await bearerToken(me, 'demo-doc-01')}` }
         });
         if (res.ok) {
           const list = await res.json();
@@ -575,7 +589,7 @@ export const NexoAPI = {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${me.token || me.uid || 'demo-doc-01'}`
+            'Authorization': `Bearer ${await bearerToken(me, 'demo-doc-01')}`
           },
           body: JSON.stringify({ estado: uiStatus })
         });
@@ -622,7 +636,7 @@ export const NexoAPI = {
       try {
         const queryStr = filterSubjectId && filterSubjectId !== 'todos' ? `?subjectId=${filterSubjectId}` : '';
         const res = await fetch(`${API_BASE}/stats${queryStr}`, {
-          headers: { 'Authorization': `Bearer ${me.token || me.uid || 'demo-doc-01'}` }
+          headers: { 'Authorization': `Bearer ${await bearerToken(me, 'demo-doc-01')}` }
         });
         if (res.ok) {
           return await res.json();

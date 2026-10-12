@@ -154,6 +154,8 @@ public class ReportService {
         DocumentReference ref = col().document();
         Firebase.await(ref.set(data));
         return Reporte.desde(Firebase.await(ref.get()));
+      } catch (ApiException e) {
+        throw e;
       } catch (Exception e) {}
     }
 
@@ -176,6 +178,9 @@ public class ReportService {
         Firebase.await(db.runTransaction(tx -> {
           DocumentSnapshot d = tx.get(ref).get();
           if (!d.exists()) throw new ApiException(404, "El reporte no existe");
+          if (u.rol() == Rol.DOCENTE && !u.uid().equals(d.getString("professorUid"))) {
+            throw new ApiException(403, "Solo el docente a cargo de la asignatura puede cambiar este reporte");
+          }
           Timestamp ahora = Timestamp.now();
           tx.update(ref, Map.of(
               "estado", nuevo.name(),
@@ -184,6 +189,8 @@ public class ReportService {
           return null;
         }));
         return Reporte.desde(Firebase.await(ref.get()));
+      } catch (ApiException e) {
+        throw e;
       } catch (Exception e) {}
     }
 

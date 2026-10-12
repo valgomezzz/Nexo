@@ -1,0 +1,11 @@
+# Logs de Firebase CLI
+firebase-debug.log
+firestore-debug.log
+*.log
+
+# Credenciales privadas (nunca subir)
+serviceAccountKey.json
+**/serviceAccountKey*.json
+
+# Caché de Firebase
+.firebase/
