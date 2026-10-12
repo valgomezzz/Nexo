@@ -23,9 +23,13 @@
 
 ## 🛠️ Tecnologías
 
-| Frontend | Diseño | Backend |
-|---|---|---|
-| React + TypeScript | Figma | En desarrollo |
+| Frontend | Backend | Base de datos y autenticación | Diseño |
+|---|---|---|---|
+| HTML5 | Java 17 | Firebase Authentication | Figma |
+| CSS3 (animaciones, 3D, glassmorphism, Grid, Flexbox) | Maven | Cloud Firestore (tiempo real con `onSnapshot`) | UI Kit propio |
+| JavaScript vanilla (ES Modules) | API REST (`/api/health`, `/auth/login`, `/subjects`, `/reports`) | Firebase Hosting | Google Fonts (Fraunces y Source Sans 3) |
+| Fetch API + AbortController | Autenticación con ID token de Firebase (Bearer) | Firebase Web SDK 10.12.2 | Íconos y logo en SVG |
+| IntersectionObserver y localStorage | | localStorage como modo demo sin conexión | |
 
 ## 🚀 Cómo ejecutarlo
 
