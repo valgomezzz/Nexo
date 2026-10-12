@@ -1,95 +1,132 @@
-# Nexo - Sistema de Feedback y Reporte de Barreras Académicas (PUJ)
-### Backend en Java 17 + Firebase Admin SDK & Frontend Interactivo
+# Nexo
 
-Este repositorio contiene la implementación completamente funcional de **Nexo**, la plataforma de feedback académico de la Pontificia Universidad Javeriana (PUJ).
+Plataforma web para que los estudiantes reporten problemas en sus asignaturas
+y los docentes les den seguimiento de forma ordenada.
 
-El backend está desarrollado en **Java 17 (Temurin)** con **Firebase Admin SDK** y **Cloud Firestore**, acompañado de una interfaz web reactiva de alta fidelidad que implementa las 10 pantallas del sistema.
+> MVP del semestre — [Nombre de la materia], [Universidad], 2026-2
+
+## El problema
+2–3 líneas: qué pasa hoy con los reportes/quejas de estudiantes y por qué
+se pierden o no se atienden.
+
+## La solución
+Qué hace Nexo en una frase + los roles (estudiante, profesor).
+
+## Funcionalidades (MVP)
+- **HU-03 – Gestión de reportes:** lista con fecha, asignatura, título,
+  estado y cambio de estado.
+- **HU-04 – Resumen consolidado:** contadores de total, pendientes,
+  en revisión y atendidos, filtrables por asignatura y categoría.
+- Navegación: Dashboard, Reportes, Asignaturas, Perfil.
+
+## Capturas
+![Panel de Reportes](docs/img/panel-reportes.png)
+
+## Diseño
+- Prototipo en Figma: https://www.figma.com/design/nNU1yd0nPgQySvt6AanQet/Nexo
+- UI Kit propio (paleta, tipografía, botones, componentes)
+- Microinteracción de cambio de estado: loader → resaltado → toast
+
+## Stack
+- React + TypeScript
+- [Vite / CRA], [React Router], [librería de estilos]
+- Backend y base de datos: *pendiente (fase final del proyecto)*
+
+## Cómo correrlo
+```bash
+git clone https://github.com/<usuario>/nexo.git
+cd nexo
+npm install
+npm run dev
+```
+
+## Estructura del proyecto
 
 ---
 
-## 🛠️ Estructura del Proyecto
+# Documentación técnica
 
-### ☕ Backend en Java ([`backend/`](file:///c:/Users/vanva/.gemini/antigravity-ide/scratch/mi-workspace/Van%20Workspace/Proyecto_Innovación/backend))
-- [`backend/pom.xml`](file:///c:/Users/vanva/.gemini/antigravity-ide/scratch/mi-workspace/Van%20Workspace/Proyecto_Innovación/backend/pom.xml): Configuración Maven con Java 17, `firebase-admin`, `gson` y plugins de ejecución.
-- [`backend/src/main/java/co/edu/javeriana/nexo/NexoServer.java`](file:///c:/Users/vanva/.gemini/antigravity-ide/scratch/mi-workspace/Van%20Workspace/Proyecto_Innovación/backend/src/main/java/co/edu/javeriana/nexo/NexoServer.java): Servidor HTTP autónomo (`http://localhost:8080`) con soporte CORS completo.
-- [`backend/src/main/java/co/edu/javeriana/nexo/NexoApi.java`](file:///c:/Users/vanva/.gemini/antigravity-ide/scratch/mi-workspace/Van%20Workspace/Proyecto_Innovación/backend/src/main/java/co/edu/javeriana/nexo/NexoApi.java): Despachador de rutas REST y controlador principal.
-- [`backend/src/main/java/co/edu/javeriana/nexo/model/`](file:///c:/Users/vanva/.gemini/antigravity-ide/scratch/mi-workspace/Van%20Workspace/Proyecto_Innovación/backend/src/main/java/co/edu/javeriana/nexo/model): Records del dominio (`Usuario`, `Rol`, `Asignatura`, `Reporte`, `Estado`).
-- [`backend/src/main/java/co/edu/javeriana/nexo/service/`](file:///c:/Users/vanva/.gemini/antigravity-ide/scratch/mi-workspace/Van%20Workspace/Proyecto_Innovación/backend/src/main/java/co/edu/javeriana/nexo/service): Lógica de negocio para autenticación (`AuthService`), materias (`SubjectService`), reportes (`ReportService`) y analítica consolidada (`StatsService`).
-- [`backend/src/main/java/co/edu/javeriana/nexo/support/Firebase.java`](file:///c:/Users/vanva/.gemini/antigravity-ide/scratch/mi-workspace/Van%20Workspace/Proyecto_Innovación/backend/src/main/java/co/edu/javeriana/nexo/support/Firebase.java): Inicializador dual de Firebase Admin SDK (Cloud Firestore y Modo Mock Seguro).
-- [`backend/start-backend.ps1`](file:///c:/Users/vanva/.gemini/antigravity-ide/scratch/mi-workspace/Van%20Workspace/Proyecto_Innovación/backend/start-backend.ps1): Script PowerShell para iniciar el backend con un clic.
+**App publicada:** https://nexo-7a24e.web.app
 
-### 🌐 Frontend & Integración
-- [`Nexo.html`](file:///c:/Users/vanva/.gemini/antigravity-ide/scratch/mi-workspace/Van%20Workspace/Proyecto_Innovación/Nexo.html) / [`index.html`](file:///c:/Users/vanva/.gemini/antigravity-ide/scratch/mi-workspace/Van%20Workspace/Proyecto_Innovación/index.html): Aplicación web interactiva que navega entre las **10 pantallas del sistema**.
-- [`nexo-api.js`](file:///c:/Users/vanva/.gemini/antigravity-ide/scratch/mi-workspace/Van%20Workspace/Proyecto_Innovación/nexo-api.js): Cliente puente que conecta el frontend con el servidor Java (`http://localhost:8080/api`) y sincroniza con Firebase.
-- [`firebase-config.js`](file:///c:/Users/vanva/.gemini/antigravity-ide/scratch/mi-workspace/Van%20Workspace/Proyecto_Innovación/firebase-config.js): Configuración del proyecto Firebase (`nexo-7a24e`) y URL base del backend Java.
-- [`firestore.rules`](file:///c:/Users/vanva/.gemini/antigravity-ide/scratch/mi-workspace/Van%20Workspace/Proyecto_Innovación/firestore.rules): Reglas declarativas de seguridad de Cloud Firestore.
+Interfaz web (HTML + JavaScript) conectada a **Firebase** (Authentication y Cloud Firestore), con un backend opcional en **Java 17 + Firebase Admin SDK**.
 
----
+## 🛠️ Estructura
 
-## 🚀 ¿Cómo Ejecutar el Backend en Java?
+### 🌐 Frontend
+- [`Nexo.html`](Nexo.html) / [`index.html`](index.html): aplicación con las **10 pantallas** (landing, login y paneles de estudiante, docente y dirección).
+- [`nexo-api.js`](nexo-api.js): capa de datos. Usa el backend Java si está corriendo en `http://localhost:8080/api`; si no, se conecta directo a Firestore. Normaliza los datos para que la interfaz reciba siempre la misma forma.
+- [`firebase-config.js`](firebase-config.js): configuración del proyecto Firebase (`nexo-7a24e`).
+- [`firestore.rules`](firestore.rules): reglas de seguridad de Cloud Firestore.
+- [`firebase.json`](firebase.json) / [`.firebaserc`](.firebaserc): configuración de Firebase Hosting.
 
-Abre una terminal PowerShell en la carpeta `backend` y ejecuta:
+### ☕ Backend en Java ([`backend/`](backend))
+- [`pom.xml`](backend/pom.xml): Maven con Java 17, `firebase-admin` y `gson`.
+- [`NexoServer.java`](backend/src/main/java/co/edu/javeriana/nexo/NexoServer.java): servidor HTTP (`http://localhost:8080`).
+- [`NexoApi.java`](backend/src/main/java/co/edu/javeriana/nexo/NexoApi.java): rutas REST.
+- [`model/`](backend/src/main/java/co/edu/javeriana/nexo/model) y [`service/`](backend/src/main/java/co/edu/javeriana/nexo/service): dominio y lógica (autenticación, asignaturas, reportes y estadísticas).
+- [`AsignarRol.java`](backend/src/main/java/co/edu/javeriana/nexo/AsignarRol.java): utilidad para asignar los roles DOCENTE / DIRECCION.
 
-```powershell
+## 🚀 Cómo ejecutarlo
+
+**Frontend con Firebase real** (desde la raíz del proyecto):
+```bash
+firebase serve --only hosting
+```
+y abrir http://localhost:5000
+
+**Backend Java** (opcional, desde `backend/`):
+```bash
 mvn compile exec:java
 ```
-O usando el script de inicio:
-```powershell
-.\start-backend.ps1
+Para que use Cloud Firestore necesita `backend/serviceAccountKey.json` (Consola de Firebase → Cuentas de servicio). **Ese archivo nunca se sube al repositorio** (está en `.gitignore`). Sin la clave, el backend funciona en modo de datos simulados.
+
+**Asignar roles** (con la clave instalada; la persona debe haber iniciado sesión una vez):
+```bash
+mvn -q compile exec:java "-Dexec.mainClass=co.edu.javeriana.nexo.AsignarRol" "-Dexec.args=correo@javeriana.edu.co DOCENTE"
 ```
 
-El servidor quedará activo en: **`http://localhost:8080`**
-
-### Verificación de Salud
-```powershell
-curl http://localhost:8080/api/health
+**Publicar:**
+```bash
+firebase deploy --only hosting
 ```
-Respuesta:
-```json
-{
-  "status": "ok",
-  "service": "Nexo Backend (Java 17)",
-  "firebaseCloud": false,
-  "timestamp": 1791762268396
-}
-```
-
----
 
 ## 📡 Endpoints de la API Java
 
 | Método | Endpoint | Descripción | Criterio |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/health` | Estado del backend y de Firebase | Salud de la API |
-| `POST` | `/api/auth/login` | Login institucional con verificación de `@javeriana.edu.co` | **HU-01** |
-| `GET` | `/api/me` | Información del usuario en sesión | **HU-01** |
+| `GET` | `/api/me` | Usuario en sesión | **HU-01** |
 | `GET` | `/api/subjects` | Asignaturas inscritas o a cargo | **HU-02** / **HU-03** |
-| `GET` | `/api/reports` | Listado de reportes según rol | **HU-03** |
-| `POST` | `/api/reports` | Creación de reporte (validación $\ge$ 20 caracteres) | **HU-02** |
-| `PATCH` | `/api/reports/{id}` | Cambio de estado (`pend`, `rev`, `ok`) con trazabilidad | **HU-03** |
-| `GET` | `/api/stats` | Métricas y analítica pedagógica reactiva | **HU-04** |
+| `GET` | `/api/reports` | Reportes según el rol | **HU-03** |
+| `POST` | `/api/reports` | Crear reporte (mensaje de mínimo 20 caracteres) | **HU-02** |
+| `PATCH` | `/api/reports/{id}` | Cambiar estado (`pend`, `rev`, `ok`) | **HU-03** |
+| `GET` | `/api/stats` | Métricas consolidadas | **HU-04** |
 
----
+Con Firebase activo, las rutas protegidas requieren el ID token de Firebase (`Authorization: Bearer <token>`).
 
-## 📱 Pantallas Implementadas (10)
+## 📱 Pantallas (10)
 
-1. **Landing (Inicio):** Hero institucional con logotipo 3D y flujo de retroalimentación en 3 pasos.
-2. **Iniciar Sesión:** Acceso con rol de Estudiante, Docente o Dirección, validación de correo PUJ y accesos directos demo.
-3. **Estudiante · Mis Asignaturas:** Catálogo de cursos matriculados con profesor, grupo y botón de reporte.
-4. **Estudiante · Nuevo Reporte:** Formulario interactivo con evaluación de Metodología, Contenido y Ritmo, con contador de caracteres (mínimo 20 por HU-02).
-5. **Estudiante · Reporte Enviado:** Confirmación con folio, fecha/hora y estado `Pendiente`.
-6. **Docente · Reportes Recibidos:** Pestañas filtrables (*Todos*, *Pendientes*, *En revisión*, *Atendidos*) y selector interactivo para modificar el estado en Java/Firestore en tiempo real (HU-03).
-7. **Docente · Estadísticas y Métricas:** Métricas cuantitativas consolidadas y gráficos dinámicos con recálculo automático ante cualquier cambio (HU-04).
-8. **Docente · Mis Asignaturas:** Asignaturas a cargo del docente con estadísticas de estudiantes y reportes.
-9. **Dirección · Panorama Semanal:** Visión macro y alertas tempranas de asignaturas.
-10. **Dirección · Detalle de Grupo:** Análisis en profundidad de grupos específicos y motivos de dificultad.
+1. **Landing:** logo 3D giratorio y "Así funciona" en 3 pasos que aparecen al hacer scroll.
+2. **Iniciar sesión:** correo institucional `@javeriana.edu.co`; el rol se toma del perfil en Firestore.
+3. **Estudiante · Mis asignaturas:** asignaturas de la semana por reportar y reportes recientes con su estado.
+4. **Estudiante · Nuevo reporte:** asistente de 5 pasos (asignatura, metodología, contenido, ritmo con escala de 5 caritas y mensaje).
+5. **Estudiante · Reporte enviado:** comprobante con valoraciones, fecha y estado.
+6. **Docente · Reportes recibidos:** filtros por estado y asignatura, y cambio de estado desde cada reporte (HU-03).
+7. **Docente · Estadísticas:** totales, categorías, valoración promedio, reportes por semana y urgencia por asignatura (HU-04).
+8. **Docente · Mis asignaturas:** asignaturas a cargo con sus pendientes.
+9. **Dirección · Panorama semanal:** consolidado del programa y ranking de urgencia.
+10. **Dirección · Detalle de grupo:** trazabilidad de los reportes de un grupo.
 
----
+Cualquier reporte se puede abrir en una ventana de **solo lectura** con su detalle completo y su seguimiento.
 
-## 👥 Cuentas de Prueba Preconfiguradas
+## 👥 Cuentas de prueba (solo modo demo local)
 
-| Rol | Correo Institucional | Contraseña | Nombre |
-| :--- | :--- | :--- | :--- |
-| **Estudiante** | `estudiante@javeriana.edu.co` | `clave123` | Ana María Ruiz |
-| **Docente** | `profesor@javeriana.edu.co` | `clave123` | Dr. Carlos Mendoza |
-| **Dirección** | `direccion@javeriana.edu.co` | `clave123` | Dra. Elena Gómez |
+Cuando Firebase no está configurado, la app funciona con datos de demostración y acepta cualquier contraseña con estas cuentas:
+
+| Rol | Correo |
+| :--- | :--- |
+| Estudiante | `estudiante@javeriana.edu.co` |
+| Docente | `profesor@javeriana.edu.co` |
+| Dirección | `direccion@javeriana.edu.co` |
+
+En la app publicada se usan las cuentas reales de Firebase Authentication.
