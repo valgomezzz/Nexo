@@ -32,7 +32,7 @@ public record Asignatura(String id, String codigo, String nombre, String abrevia
     m.put("nombre", nombre);
     m.put("abreviatura", abreviatura);
     m.put("grupo", grupo);
-    m.put("profesor", profesorNombre);
+    m.put("professorNombre", profesorNombre);
     m.put("professorUid", profesorUid);
     return m;
   }

@@ -6,12 +6,20 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Reporte de dificultad académica (HU-02, HU-03, HU-04 y HU-05). */
+/**
+ * Reporte de dificultad académica (HU-02, HU-03, HU-04 y HU-05).
+ * Las valoraciones (moods) usan la escala de 5 caritas: 0 = Muy mal … 4 = Muy bien.
+ */
 public record Reporte(String id, String studentUid, String studentNombre, String subjectId,
                       String subjectNombre, String grupo, String professorUid,
                       int moodMetodologia, int moodContenido, int moodRitmo,
+                      Map<String, String> comentarios,
                       String categoria, String titulo, String detalle,
                       Estado estado, Instant createdAt, Instant updatedAt) {
+
+  public static final int MOOD_MIN = 0;
+  public static final int MOOD_MAX = 4;
+  public static final int MOOD_DEFAULT = 2;
 
   public static Reporte desde(DocumentSnapshot d) {
     return new Reporte(
@@ -20,11 +28,12 @@ public record Reporte(String id, String studentUid, String studentNombre, String
         d.getString("studentNombre") != null ? d.getString("studentNombre") : "Estudiante",
         d.getString("subjectId"),
         d.getString("subjectNombre") != null ? d.getString("subjectNombre") : d.getString("asignatura"),
-        d.getString("grupo") != null ? d.getString("grupo") : "G1",
+        d.getString("grupo") != null ? d.getString("grupo") : "Grupo 1",
         d.getString("professorUid"),
         entero(d, "moods.metodologia"),
         entero(d, "moods.contenido"),
         entero(d, "moods.ritmo"),
+        comentarios(d),
         d.getString("categoria") != null ? d.getString("categoria") : "Metodología",
         d.getString("titulo"),
         d.getString("detalle"),
@@ -38,12 +47,14 @@ public record Reporte(String id, String studentUid, String studentNombre, String
     Map<String, Object> m = new LinkedHashMap<>();
     m.put("id", id);
     m.put("subjectId", subjectId);
-    m.put("asignatura", subjectNombre);
+    m.put("subjectNombre", subjectNombre);
     m.put("grupo", grupo);
+    m.put("professorUid", professorUid);
     m.put("categoria", categoria);
     m.put("titulo", titulo);
     m.put("detalle", detalle);
     m.put("moods", Map.of("metodologia", moodMetodologia, "contenido", moodContenido, "ritmo", moodRitmo));
+    m.put("comentarios", comentarios == null ? Map.of() : comentarios);
     m.put("estado", estado.codigo());
     m.put("createdAt", createdAt == null ? Instant.now().toString() : createdAt.toString());
     m.put("updatedAt", updatedAt == null ? Instant.now().toString() : updatedAt.toString());
@@ -54,9 +65,27 @@ public record Reporte(String id, String studentUid, String studentNombre, String
     return m;
   }
 
+  /** Copia del reporte con un nuevo estado (usado por el almacenamiento local). */
+  public Reporte conEstado(Estado nuevo) {
+    return new Reporte(id, studentUid, studentNombre, subjectId, subjectNombre, grupo, professorUid,
+        moodMetodologia, moodContenido, moodRitmo, comentarios, categoria, titulo, detalle,
+        nuevo, createdAt, Instant.now());
+  }
+
   private static int entero(DocumentSnapshot d, String campo) {
     Long v = d.getLong(campo);
-    return v == null ? 2 : v.intValue();
+    return v == null ? MOOD_DEFAULT : Math.max(MOOD_MIN, Math.min(MOOD_MAX, v.intValue()));
+  }
+
+  private static Map<String, String> comentarios(DocumentSnapshot d) {
+    Map<String, String> out = new LinkedHashMap<>();
+    Object raw = d.get("comentarios");
+    if (raw instanceof Map<?, ?> map) {
+      map.forEach((k, v) -> {
+        if (k != null && v != null && !v.toString().isBlank()) out.put(k.toString(), v.toString());
+      });
+    }
+    return out;
   }
 
   private static Instant instante(Timestamp t) {

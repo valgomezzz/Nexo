@@ -1,9 +1,15 @@
 /**
- * NEXO - API & Client Integration (Java 17 Backend + Firebase Admin SDK)
+ * NEXO - API & Client Integration (Java 17 Backend + Firebase)
  * Pontificia Universidad Javeriana (PUJ).
- * 
- * Se conecta automáticamente al backend en Java 17 en http://localhost:8080/api.
- * Cuenta con fallback inteligente a Firebase Client SDK para máxima resiliencia.
+ *
+ * Orden de conexión:
+ *   1. Backend Java 17 en http://localhost:8080/api (si está corriendo), autenticado
+ *      con el ID token de Firebase.
+ *   2. Firebase Web SDK directo a Cloud Firestore (lo que usa la app publicada en Hosting).
+ *   3. Datos locales de demostración, solo si Firebase no está configurado.
+ *
+ * Toda respuesta se normaliza (normalizeSubject / normalizeReport) para que la
+ * interfaz reciba siempre la misma forma, venga del backend Java o de Firestore.
  */
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
@@ -11,8 +17,8 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut,
-  sendPasswordResetEmail
+  onAuthStateChanged,
+  signOut
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   getFirestore,
@@ -21,13 +27,13 @@ import {
   setDoc,
   collection,
   query,
+  where,
   getDocs,
   addDoc,
   updateDoc,
   onSnapshot,
   serverTimestamp,
-  arrayUnion,
-  orderBy
+  arrayUnion
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { FIREBASE_CONFIG, API_BASE } from './firebase-config.js';
 
@@ -59,6 +65,14 @@ export const EST_LABELS = {
   ok: 'Atendido'
 };
 
+// Escala de valoración de 5 caritas (0 = Muy mal … 4 = Muy bien)
+export const MOOD_LABELS = ['Muy mal', 'Mal', 'Regular', 'Bien', 'Muy bien'];
+export const CATEGORIAS = [
+  { key: 'metodologia', nombre: 'Metodología' },
+  { key: 'contenido', nombre: 'Contenido' },
+  { key: 'ritmo', nombre: 'Ritmo' }
+];
+
 // Estado del backend en Java
 let isJavaBackendActive = false;
 
@@ -83,94 +97,92 @@ if (isFirebaseConfigured) {
   }
 }
 
-// Cuentas de demostración iniciales (PUJ)
+// ===============================================================
+// NORMALIZACIÓN DE DATOS
+// ===============================================================
+function toIso(v) {
+  if (!v) return new Date().toISOString();
+  if (typeof v.toDate === 'function') return v.toDate().toISOString();
+  if (typeof v === 'object' && typeof v.seconds === 'number') return new Date(v.seconds * 1000).toISOString();
+  return new Date(v).toISOString();
+}
+
+function clampMood(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.max(0, Math.min(4, Math.round(n))) : 2;
+}
+
+function initialsOf(text) {
+  const words = String(text || '').split(/\s+/).filter(w => w.length > 2 || /^[A-ZÁÉÍÓÚ]/.test(w));
+  const ini = words.slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  return ini || 'NX';
+}
+
+export function normalizeSubject(s) {
+  return {
+    id: s.id,
+    nombre: s.nombre || 'Asignatura',
+    abreviatura: (s.abreviatura && s.abreviatura.length <= 3) ? s.abreviatura.toUpperCase() : initialsOf(s.nombre),
+    grupo: s.grupo || 'Grupo 1',
+    profesor: s.professorNombre || s.profesor || 'Docente',
+    professorUid: s.professorUid || '',
+    studentUids: Array.isArray(s.studentUids) ? s.studentUids : []
+  };
+}
+
+export function normalizeReport(r) {
+  const moods = r.moods || {};
+  const raw = String(r.estado || 'pend');
+  const estado = ['pend', 'rev', 'ok'].includes(raw) ? raw : (EST_MAP[raw.toUpperCase()] || 'pend');
+  return {
+    id: r.id,
+    subjectId: r.subjectId || '',
+    asignatura: r.subjectNombre || r.asignatura || 'Asignatura',
+    grupo: r.grupo || 'Grupo 1',
+    professorUid: r.professorUid || '',
+    studentUid: r.studentUid || '',
+    studentNombre: r.studentNombre || 'Estudiante',
+    categoria: r.categoria || 'Metodología',
+    titulo: r.titulo || (r.detalle || '').slice(0, 65),
+    detalle: r.detalle || '',
+    moods: {
+      metodologia: clampMood(moods.metodologia),
+      contenido: clampMood(moods.contenido),
+      ritmo: clampMood(moods.ritmo)
+    },
+    comentarios: r.comentarios || {},
+    estado,
+    createdAt: toIso(r.createdAt),
+    updatedAt: toIso(r.updatedAt || r.createdAt)
+  };
+}
+
+const byDateDesc = (a, b) => new Date(b.createdAt) - new Date(a.createdAt);
+
+// ===============================================================
+// DATOS LOCALES DE DEMOSTRACIÓN (solo sin Firebase)
+// ===============================================================
 const DEFAULT_USERS = {
-  'estudiante@javeriana.edu.co': {
-    uid: 'demo-est-01',
-    email: 'estudiante@javeriana.edu.co',
-    nombre: 'Ana María Ruiz',
-    primerNombre: 'Ana',
-    iniciales: 'AR',
-    rol: 'est'
-  },
-  'profesor@javeriana.edu.co': {
-    uid: 'demo-doc-01',
-    email: 'profesor@javeriana.edu.co',
-    nombre: 'Dr. Carlos Mendoza',
-    primerNombre: 'Carlos',
-    iniciales: 'CM',
-    rol: 'doc'
-  },
-  'direccion@javeriana.edu.co': {
-    uid: 'demo-dir-01',
-    email: 'direccion@javeriana.edu.co',
-    nombre: 'Dra. Elena Gómez',
-    primerNombre: 'Elena',
-    iniciales: 'EG',
-    rol: 'dir'
-  }
+  'estudiante@javeriana.edu.co': { uid: 'demo-est-01', email: 'estudiante@javeriana.edu.co', nombre: 'Mateo Silva', rol: 'est' },
+  'profesor@javeriana.edu.co': { uid: 'demo-doc-01', email: 'profesor@javeriana.edu.co', nombre: 'María García', rol: 'doc' },
+  'direccion@javeriana.edu.co': { uid: 'demo-dir-01', email: 'direccion@javeriana.edu.co', nombre: 'Ana Torres', rol: 'dir' }
 };
 
 const DEFAULT_SUBJECTS = [
-  { id: 'subj-poo', codigo: 'IS-301', nombre: 'Programación Orientada a Objetos', abreviatura: 'POO', profesor: 'Dr. Carlos Mendoza', professorUid: 'demo-doc-01', grupo: 'G1', creditos: 3, studentUids: ['demo-est-01'] },
-  { id: 'subj-calc', codigo: 'MAT-201', nombre: 'Cálculo Diferencial e Integral', abreviatura: 'Cálculo', profesor: 'Dra. Patricia Silva', professorUid: 'doc-silva', grupo: 'G2', creditos: 4, studentUids: ['demo-est-01'] },
-  { id: 'subj-edd', codigo: 'IS-302', nombre: 'Estructuras de Datos y Algoritmos', abreviatura: 'EDD', profesor: 'Dr. Carlos Mendoza', professorUid: 'demo-doc-01', grupo: 'G1', creditos: 3, studentUids: ['demo-est-01'] },
-  { id: 'subj-fis', codigo: 'FIS-101', nombre: 'Física Mecánica y Termodinámica', abreviatura: 'Física', profesor: 'Ing. Roberto Andrade', professorUid: 'doc-andrade', grupo: 'G3', creditos: 3, studentUids: ['demo-est-01'] },
-  { id: 'subj-alg', codigo: 'MAT-102', nombre: 'Álgebra Lineal Aplicada', abreviatura: 'Álgebra', profesor: 'Dr. Carlos Mendoza', professorUid: 'demo-doc-01', grupo: 'G2', creditos: 3, studentUids: [] }
+  { id: 'calculo-g1', nombre: 'Cálculo Diferencial', abreviatura: 'CD', grupo: 'Grupo 1', professorNombre: 'Andrea Ruiz', professorUid: 'doc-ruiz', studentUids: ['demo-est-01'] },
+  { id: 'estructuras-g1', nombre: 'Estructuras de Datos', abreviatura: 'ED', grupo: 'Grupo 1', professorNombre: 'María García', professorUid: 'demo-doc-01', studentUids: ['demo-est-01'] },
+  { id: 'bases-g1', nombre: 'Bases de Datos I', abreviatura: 'BD', grupo: 'Grupo 1', professorNombre: 'María García', professorUid: 'demo-doc-01', studentUids: ['demo-est-01'] },
+  { id: 'poo-g2', nombre: 'Programación Orientada a Objetos', abreviatura: 'PO', grupo: 'Grupo 2', professorNombre: 'Julián Torres', professorUid: 'doc-torres', studentUids: ['demo-est-01'] }
 ];
 
+const daysAgo = (n) => new Date(Date.now() - 86400000 * n).toISOString();
 const DEFAULT_REPORTS = [
-  {
-    id: 'rep-001',
-    studentUid: 'demo-est-01',
-    studentNombre: 'Ana María Ruiz',
-    subjectId: 'subj-poo',
-    asignatura: 'Programación Orientada a Objetos',
-    grupo: 'G1',
-    professorUid: 'demo-doc-01',
-    categoria: 'Metodología',
-    titulo: 'Ejercicios de herencia y polimorfismo muy extensos para el tiempo de clase',
-    detalle: 'Sentimos que los ejercicios de herencia múltiple y polimorfismo planteados en los talleres prácticos son sumamente extensos para resolver en el bloque de 2 horas. Sería de gran ayuda contar con retroalimentación previa de las plantillas de código antes del laboratorio calificado.',
-    moods: { metodologia: 1, contenido: 2, ritmo: 2 },
-    estado: 'pend',
-    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000 * 2).toISOString()
-  },
-  {
-    id: 'rep-002',
-    studentUid: 'demo-est-01',
-    studentNombre: 'Ana María Ruiz',
-    subjectId: 'subj-edd',
-    asignatura: 'Estructuras de Datos y Algoritmos',
-    grupo: 'G1',
-    professorUid: 'demo-doc-01',
-    categoria: 'Ritmo',
-    titulo: 'Avance muy rápido en árboles binarios balanceados (AVL y Rojinegros)',
-    detalle: 'El ritmo en la última semana fue bastante acelerado al explicar rotaciones dobles en árboles AVL. Varios compañeros nos quedamos con dudas en el rastreo de punteros en memoria y necesitaríamos una sesión de dudas antes del parcial.',
-    moods: { metodologia: 2, contenido: 2, ritmo: 1 },
-    estado: 'rev',
-    createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000 * 1).toISOString()
-  },
-  {
-    id: 'rep-003',
-    studentUid: 'est-juan',
-    studentNombre: 'Juan Diego Morales',
-    subjectId: 'subj-poo',
-    asignatura: 'Programación Orientada a Objetos',
-    grupo: 'G1',
-    professorUid: 'demo-doc-01',
-    categoria: 'Contenido',
-    titulo: 'Discrepancia entre la versión del compilador local y las pruebas automáticas',
-    detalle: 'El entorno de entrega automática en GitHub Classroom evalúa con Java 21 mientras que la guía del laboratorio especifica Java 17, generando errores de compilación con las sintaxis de Switch expresiones.',
-    moods: { metodologia: 3, contenido: 1, ritmo: 2 },
-    estado: 'ok',
-    createdAt: new Date(Date.now() - 86400000 * 6).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000 * 3).toISOString()
-  }
+  { id: 'demo-1', studentUid: 'demo-est-01', studentNombre: 'Mateo Silva', subjectId: 'estructuras-g1', subjectNombre: 'Estructuras de Datos', grupo: 'Grupo 1', professorUid: 'demo-doc-01', categoria: 'Ritmo', titulo: 'El ritmo de la clase es muy rápido', detalle: 'El ritmo de la clase es muy rápido, no alcanzo a tomar apuntes y los temas de árboles y grafos se acumulan antes del parcial.', moods: { metodologia: 1, contenido: 2, ritmo: 0 }, comentarios: {}, estado: 'pend', createdAt: daysAgo(2) },
+  { id: 'demo-2', studentUid: 'demo-est-02', studentNombre: 'Laura Díaz', subjectId: 'bases-g1', subjectNombre: 'Bases de Datos I', grupo: 'Grupo 1', professorUid: 'demo-doc-01', categoria: 'Contenido', titulo: 'Los ejemplos de normalización no corresponden con el taller', detalle: 'Los ejemplos de normalización vistos en clase no corresponden con los ejercicios propuestos para el taller.', moods: { metodologia: 3, contenido: 1, ritmo: 2 }, comentarios: {}, estado: 'rev', createdAt: daysAgo(6) },
+  { id: 'demo-3', studentUid: 'demo-est-02', studentNombre: 'Laura Díaz', subjectId: 'calculo-g1', subjectNombre: 'Cálculo Diferencial', grupo: 'Grupo 1', professorUid: 'doc-ruiz', categoria: 'Metodología', titulo: 'Falta retroalimentación detallada en las tareas', detalle: 'Falta retroalimentación detallada en las tareas entregadas, solo recibimos la nota.', moods: { metodologia: 0, contenido: 2, ritmo: 1 }, comentarios: {}, estado: 'ok', createdAt: daysAgo(12) }
 ];
 
-const STORAGE_KEY = 'nexo_local_db_v1';
+const STORAGE_KEY = 'nexo_local_db_v2';
 function loadLocalDb() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -184,15 +196,10 @@ function saveLocalDb(data) {
 
 let localDb = loadLocalDb();
 let currentProfile = null;
-let reportListeners = [];
 
-function notifyReportListeners(reportsList) {
-  reportListeners.forEach((fn) => {
-    try { fn(reportsList); } catch (e) { console.error(e); }
-  });
-}
-
-// Comprobación de salud del Backend Java
+// ===============================================================
+// BACKEND JAVA
+// ===============================================================
 async function checkJavaBackend() {
   try {
     const ctrl = new AbortController();
@@ -202,31 +209,98 @@ async function checkJavaBackend() {
     // En Hosting, /api/health se reescribe a Nexo.html (200 OK con HTML),
     // así que solo se considera activo si responde el JSON del backend.
     const data = res.ok ? await res.json().catch(() => null) : null;
-    if (data && data.status === 'ok') {
-      isJavaBackendActive = true;
-      console.log('[Nexo] Backend Java 17 detectado y activo en:', API_BASE);
-      return true;
-    }
+    isJavaBackendActive = Boolean(data && data.status === 'ok');
   } catch (e) {
     isJavaBackendActive = false;
   }
-  return false;
+  return isJavaBackendActive;
 }
 
-// Iniciar chequeo de inmediato
-checkJavaBackend();
+const javaReady = checkJavaBackend();
 
 // Token para el backend Java: ID token real de Firebase si hay sesión,
 // o el uid demo cuando el backend corre en modo Local Mock.
-async function bearerToken(me, fallback) {
+async function bearerToken(me) {
   if (auth?.currentUser) {
     try { return await auth.currentUser.getIdToken(); } catch (e) {}
   }
-  return me.token || me.uid || fallback;
+  return me?.token || me?.uid || 'demo-est-01';
+}
+
+async function javaFetch(path, options = {}) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${await bearerToken(currentProfile)}`,
+      ...(options.headers || {})
+    }
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Error ${res.status} en el backend Java`);
+  return data;
+}
+
+// Firestore solo se usa con un usuario autenticado en Firebase
+const useFirestore = () => Boolean(db && auth?.currentUser);
+
+// Consulta de reportes que respeta las reglas de seguridad según el rol
+function reportsQuery(me) {
+  const col = collection(db, 'reports');
+  if (me.rol === 'est') return query(col, where('studentUid', '==', me.uid));
+  if (me.rol === 'doc') return query(col, where('professorUid', '==', me.uid));
+  return col;
+}
+
+function visibleLocalReports(me) {
+  const list = localDb.reports.map(normalizeReport);
+  if (me.rol === 'est') return list.filter(r => r.studentUid === me.uid);
+  if (me.rol === 'doc') return list.filter(r => r.professorUid === me.uid);
+  return list;
+}
+
+function formatProfile(uid, data) {
+  const nombre = data.nombre || 'Usuario Javeriana';
+  const partes = nombre.trim().split(/\s+/);
+  const primer = partes[0] || 'Usuario';
+  const ini = partes.length > 1 ? (partes[0][0] + partes[1][0]).toUpperCase() : primer.slice(0, 2).toUpperCase();
+  return {
+    uid,
+    email: data.email || '',
+    nombre,
+    primerNombre: primer,
+    iniciales: ini,
+    rol: ROL_MAP[data.rol] && data.rol.length > 3 ? ROL_MAP[data.rol] : (data.rol || 'est')
+  };
+}
+
+async function loadFirebaseProfile(user, fallbackEmail) {
+  const ref = doc(db, 'users', user.uid);
+  const snap = await getDoc(ref);
+  if (snap.exists()) return formatProfile(user.uid, snap.data());
+
+  const email = (user.email || fallbackEmail || '').toLowerCase();
+  const nombre = email.split('@')[0].split('.').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+  // Todo perfil nuevo nace como estudiante; DOCENTE/DIRECCION se asignan desde el
+  // backend (AsignarRol) y las reglas impiden autoasignarlos.
+  const data = { email, nombre, rol: 'ESTUDIANTE', createdAt: serverTimestamp() };
+  await setDoc(ref, data);
+  return formatProfile(user.uid, data);
+}
+
+function translateAuthError(err) {
+  const code = err.code || '';
+  if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found') || code.includes('email-already-in-use')) {
+    return 'Correo institucional o contraseña incorrectos.';
+  }
+  if (code.includes('weak-password')) return 'La contraseña debe tener al menos 6 caracteres.';
+  if (code.includes('too-many-requests')) return 'Demasiados intentos. Espera un momento e inténtalo de nuevo.';
+  if (code.includes('network')) return 'Sin conexión con Firebase. Revisa tu internet.';
+  return err.message || 'No fue posible iniciar sesión.';
 }
 
 // ===============================================================
-// API PÚBLICA DE NEXO (Java + Firebase)
+// API PÚBLICA DE NEXO
 // ===============================================================
 export const NexoAPI = {
   get isJavaActive() { return isJavaBackendActive; },
@@ -238,111 +312,81 @@ export const NexoAPI = {
     return {
       java: isJavaBackendActive,
       firebase: this.isFirebaseActive,
-      backendType: isJavaBackendActive ? 'Java 17 (Maven)' : 'Firebase BaaS'
+      backendType: isJavaBackendActive ? 'Java 17 (Maven)' : (this.isFirebaseActive ? 'Firebase' : 'Local')
     };
   },
 
   // -------------------------------------------------------------
   // HU-01: Autenticación institucional con roles
   // -------------------------------------------------------------
+
+  /** Recupera la sesión de Firebase al recargar la página (o null si no hay). */
+  async restoreSession() {
+    if (!this.isFirebaseActive) return null;
+    const user = await new Promise(resolve => {
+      const off = onAuthStateChanged(auth, u => { off(); resolve(u); });
+    });
+    if (!user) return null;
+    try {
+      currentProfile = await loadFirebaseProfile(user);
+      return currentProfile;
+    } catch (e) {
+      console.warn('[Nexo] No se pudo recuperar el perfil:', e.message);
+      return null;
+    }
+  },
+
   async login(email, password, requestedRole = 'est') {
     const cleanEmail = (email || '').trim().toLowerCase();
-    
+
     if (!cleanEmail.endsWith('@javeriana.edu.co')) {
       throw new Error('Solo se permiten cuentas con correo institucional (@javeriana.edu.co).');
     }
     if (!password || password.length < 4) {
-      throw new Error('Ingresa una contraseña válida de al menos 4 caracteres.');
+      throw new Error('Ingresa una contraseña válida.');
     }
 
-    // 1. Probar primero con el Backend Java si está disponible
-    if (await checkJavaBackend()) {
-      try {
-        const res = await fetch(`${API_BASE}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: cleanEmail, password, role: requestedRole })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          currentProfile = data;
-          return currentProfile;
-        } else {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || 'Credenciales inválidas en backend Java');
-        }
-      } catch (err) {
-        if (!err.message.includes('Credenciales')) {
-          console.warn('[Nexo] Backend Java no respondió login, intentando fallback directo:', err.message);
-        } else {
-          throw err;
-        }
-      }
-    }
-
-    // 2. Fallback a Firebase Web SDK
+    // 1. Firebase Authentication (también da el token para el backend Java)
     if (this.isFirebaseActive) {
+      let credential;
       try {
-        let userCredential;
+        credential = await signInWithEmailAndPassword(auth, cleanEmail, password);
+      } catch (signInErr) {
+        if (signInErr.code !== 'auth/user-not-found' && signInErr.code !== 'auth/invalid-credential') {
+          throw new Error(translateAuthError(signInErr));
+        }
+        // Cuenta nueva: se registra como estudiante
         try {
-          userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
-        } catch (signInErr) {
-          if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential') {
-            userCredential = await createUserWithEmailAndPassword(auth, cleanEmail, password);
-          } else {
-            throw new Error(this._translateAuthError(signInErr));
-          }
+          credential = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+        } catch (createErr) {
+          throw new Error(translateAuthError(createErr));
         }
-
-        const user = userCredential.user;
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-
-        let profileData;
-        if (userDocSnap.exists()) {
-          profileData = userDocSnap.data();
-        } else {
-          const nombreParts = cleanEmail.split('@')[0].split('.');
-          const nombreEstimado = nombreParts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
-          profileData = {
-            email: cleanEmail,
-            nombre: nombreEstimado,
-            // Todo perfil nuevo nace como estudiante; los roles DOCENTE/DIRECCION
-            // se asignan desde el backend (AsignarRol) y las reglas impiden autoasignarlos.
-            rol: 'ESTUDIANTE',
-            createdAt: serverTimestamp()
-          };
-          await setDoc(userDocRef, profileData);
-        }
-
-        currentProfile = this._formatUserProfile(user.uid, profileData);
-        return currentProfile;
-      } catch (err) {
-        console.warn('[Nexo Firebase Auth]', err.message);
       }
+      currentProfile = await loadFirebaseProfile(credential.user, cleanEmail);
+      return currentProfile;
     }
 
-    // 3. Fallback local seguro
-    return this._loginLocalFallback(cleanEmail, requestedRole);
-  },
-
-  _loginLocalFallback(cleanEmail, requestedRole) {
-    if (DEFAULT_USERS[cleanEmail]) {
-      const u = DEFAULT_USERS[cleanEmail];
-      currentProfile = { ...u, rol: requestedRole || u.rol };
-    } else {
-      const base = cleanEmail.split('@')[0];
-      const name = base.split('.').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
-      const ini = name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase() || 'PU';
-      currentProfile = {
-        uid: 'user-' + base,
-        email: cleanEmail,
-        nombre: name,
-        primerNombre: name.split(' ')[0],
-        iniciales: ini,
-        rol: requestedRole || 'est'
-      };
+    // 2. Backend Java en modo Local Mock (sin Firebase en el cliente)
+    if (await checkJavaBackend()) {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, password, role: requestedRole })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'No fue posible iniciar sesión.');
+      currentProfile = { ...formatProfile(data.uid, data), token: data.token };
+      return currentProfile;
     }
+
+    // 3. Demo local
+    const base = DEFAULT_USERS[cleanEmail] || {
+      uid: 'user-' + cleanEmail.split('@')[0],
+      email: cleanEmail,
+      nombre: cleanEmail.split('@')[0].split('.').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' '),
+      rol: requestedRole
+    };
+    currentProfile = formatProfile(base.uid, { ...base, rol: DEFAULT_USERS[cleanEmail] ? base.rol : requestedRole });
     return currentProfile;
   },
 
@@ -355,339 +399,207 @@ export const NexoAPI = {
   },
 
   async me() {
-    if (currentProfile) return currentProfile;
-    currentProfile = DEFAULT_USERS['estudiante@javeriana.edu.co'];
     return currentProfile;
+  },
+
+  /** Perfil público de otro usuario (p. ej. el correo del docente para contactarlo). */
+  async profileOf(uid) {
+    if (!uid || !useFirestore()) return null;
+    try {
+      const snap = await getDoc(doc(db, 'users', uid));
+      return snap.exists() ? formatProfile(uid, snap.data()) : null;
+    } catch (e) {
+      return null;
+    }
   },
 
   // -------------------------------------------------------------
   // HU-02 & HU-03: Asignaturas inscritas / a cargo
   // -------------------------------------------------------------
   async subjects() {
-    const me = await this.me();
+    const me = currentProfile;
+    if (!me) return [];
+    await javaReady;
 
-    // 1. Backend Java
     if (isJavaBackendActive) {
       try {
-        const res = await fetch(`${API_BASE}/subjects`, {
-          headers: { 'Authorization': `Bearer ${await bearerToken(me, 'demo-est-01')}` }
-        });
-        if (res.ok) {
-          const list = await res.json();
-          if (Array.isArray(list) && list.length > 0) return list;
-        }
-      } catch (e) {}
+        const list = await javaFetch('/subjects');
+        if (Array.isArray(list)) return list.map(normalizeSubject);
+      } catch (e) {
+        console.warn('[Nexo] Backend Java /subjects:', e.message);
+      }
     }
 
-    // 2. Firebase Cloud Firestore
-    if (this.isFirebaseActive) {
-      try {
-        const snap = await getDocs(collection(db, 'subjects'));
-        if (!snap.empty) {
-          const list = [];
-          snap.forEach(d => list.push({ id: d.id, ...d.data() }));
-          return list;
-        }
-      } catch (e) {}
+    if (useFirestore()) {
+      const snap = await getDocs(collection(db, 'subjects'));
+      const list = [];
+      snap.forEach(d => list.push(normalizeSubject({ id: d.id, ...d.data() })));
+      if (me.rol === 'est') return list.filter(s => s.studentUids.includes(me.uid));
+      if (me.rol === 'doc') return list.filter(s => s.professorUid === me.uid);
+      return list;
     }
 
-    return localDb.subjects;
+    const list = localDb.subjects.map(normalizeSubject);
+    if (me.rol === 'est') return list.filter(s => s.studentUids.includes(me.uid));
+    if (me.rol === 'doc') return list.filter(s => s.professorUid === me.uid);
+    return list;
   },
 
   // -------------------------------------------------------------
   // HU-02: Creación de reportes de dificultades académicas
+  // payload: { subjectId, moods: {metodologia, contenido, ritmo} (0-4),
+  //            comentarios: {metodologia, contenido, ritmo}, detalle }
   // -------------------------------------------------------------
   async createReport(payload) {
-    const me = await this.me();
+    const me = currentProfile;
+    if (!me) throw new Error('Inicia sesión para enviar un reporte.');
     const detalle = (payload.detalle || '').trim();
 
     if (detalle.length < 20) {
-      throw new Error('La descripción debe tener al menos 20 caracteres (Criterio HU-02).');
+      throw new Error('La descripción debe tener al menos 20 caracteres.');
     }
+
+    const moods = {
+      metodologia: clampMood(payload.moods?.metodologia),
+      contenido: clampMood(payload.moods?.contenido),
+      ritmo: clampMood(payload.moods?.ritmo)
+    };
+    const comentarios = {};
+    for (const { key } of CATEGORIAS) {
+      const c = (payload.comentarios?.[key] || '').trim();
+      if (c) comentarios[key] = c;
+    }
+
+    await javaReady;
 
     // 1. Backend Java
     if (isJavaBackendActive) {
-      try {
-        const res = await fetch(`${API_BASE}/reports`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${await bearerToken(me, 'demo-est-01')}`
-          },
-          body: JSON.stringify({
-            subjectId: payload.subjectId,
-            moods: payload.moods,
-            detalle: detalle
-          })
-        });
-        if (res.ok) {
-          const created = await res.json();
-          localDb.reports.unshift(created);
-          saveLocalDb(localDb);
-          notifyReportListeners(localDb.reports);
-          return created;
-        }
-      } catch (e) {
-        console.warn('[Nexo] Error enviando a backend Java, usando fallback local:', e);
-      }
+      const created = await javaFetch('/reports', {
+        method: 'POST',
+        body: JSON.stringify({ subjectId: payload.subjectId, moods, comentarios, detalle })
+      });
+      return normalizeReport(created);
     }
 
-    // 2. Fallback de cálculo y persistencia local/Firestore
-    const allSubs = await this.subjects();
-    const subj = allSubs.find(s => s.id === payload.subjectId || s.nombre === payload.subjectId) || {
-      id: payload.subjectId || 'subj-poo',
-      nombre: payload.subjectNombre || 'Programación Orientada a Objetos',
-      grupo: 'G1',
-      professorUid: 'demo-doc-01'
-    };
+    // 2. Cálculo de categoría (la de peor valoración) y título
+    const subj = (await this.subjects()).find(s => s.id === payload.subjectId);
+    if (!subj) throw new Error('Selecciona una asignatura válida.');
 
-    const moods = payload.moods || { metodologia: 2, contenido: 2, ritmo: 2 };
-    const mMet = Number(moods.metodologia ?? 2);
-    const mCon = Number(moods.contenido ?? 2);
-    const mRit = Number(moods.ritmo ?? 2);
+    let categoria = CATEGORIAS[0];
+    for (const c of CATEGORIAS) if (moods[c.key] < moods[categoria.key]) categoria = c;
+    const limpio = detalle.replace(/\s+/g, ' ');
+    const titulo = limpio.length <= 65 ? limpio : limpio.slice(0, 65).replace(/\s\S*$/, '') + '…';
 
-    let peorCat = 'Metodología';
-    let menorScore = mMet;
-    if (mCon < menorScore) { menorScore = mCon; peorCat = 'Contenido'; }
-    if (mRit < menorScore) { menorScore = mRit; peorCat = 'Ritmo'; }
-
-    const titulo = detalle.length <= 65 ? detalle : detalle.slice(0, 65).replace(/\s\S*$/, '') + '…';
-    const nowIso = new Date().toISOString();
-
-    const createdReport = {
-      id: 'rep-' + Date.now(),
+    const data = {
       studentUid: me.uid,
       studentNombre: me.nombre,
       subjectId: subj.id,
-      asignatura: subj.nombre,
-      grupo: subj.grupo || 'G1',
-      professorUid: subj.professorUid || 'demo-doc-01',
-      categoria: peorCat,
-      titulo: titulo,
-      detalle: detalle,
-      moods: { metodologia: mMet, contenido: mCon, ritmo: mRit },
-      estado: 'pend',
-      createdAt: nowIso,
-      updatedAt: nowIso
+      subjectNombre: subj.nombre,
+      grupo: subj.grupo,
+      professorUid: subj.professorUid,
+      categoria: categoria.nombre,
+      titulo,
+      detalle,
+      moods,
+      comentarios
     };
 
-    if (this.isFirebaseActive) {
-      try {
-        await addDoc(collection(db, 'reports'), {
-          ...createdReport,
-          estado: 'PENDIENTE',
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-      } catch (e) {}
+    // 3. Cloud Firestore
+    if (useFirestore()) {
+      const ref = await addDoc(collection(db, 'reports'), {
+        ...data,
+        estado: 'PENDIENTE',
+        historial: [{ estado: 'PENDIENTE', por: me.uid, fecha: new Date().toISOString() }],
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      return normalizeReport({ id: ref.id, ...data, estado: 'PENDIENTE' });
     }
 
-    localDb.reports.unshift(createdReport);
+    // 4. Demo local
+    const local = { id: 'rep-' + Date.now(), ...data, estado: 'pend', createdAt: new Date().toISOString() };
+    localDb.reports.unshift(local);
     saveLocalDb(localDb);
-    notifyReportListeners(localDb.reports);
-    return createdReport;
+    return normalizeReport(local);
   },
 
   // -------------------------------------------------------------
-  // HU-03: Gestión y seguimiento de reportes en tiempo real
+  // HU-03: Consulta y seguimiento de reportes
   // -------------------------------------------------------------
   async reports() {
-    const me = await this.me();
+    const me = currentProfile;
+    if (!me) return [];
+    await javaReady;
 
-    // 1. Backend Java
     if (isJavaBackendActive) {
       try {
-        const res = await fetch(`${API_BASE}/reports`, {
-          headers: { 'Authorization': `Bearer ${await bearerToken(me, 'demo-doc-01')}` }
-        });
-        if (res.ok) {
-          const list = await res.json();
-          if (Array.isArray(list) && list.length > 0) return list;
-        }
-      } catch (e) {}
+        const list = await javaFetch('/reports');
+        if (Array.isArray(list)) return list.map(normalizeReport).sort(byDateDesc);
+      } catch (e) {
+        console.warn('[Nexo] Backend Java /reports:', e.message);
+      }
     }
 
-    // 2. Firebase Cloud Firestore
-    if (this.isFirebaseActive) {
-      try {
-        const q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          const list = [];
-          snap.forEach(d => {
-            const data = d.data();
-            list.push({
-              id: d.id,
-              ...data,
-              estado: EST_MAP[data.estado] || data.estado || 'pend',
-              createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : (data.createdAt || new Date().toISOString())
-            });
-          });
-          return list;
-        }
-      } catch (e) {}
+    if (useFirestore()) {
+      const snap = await getDocs(reportsQuery(me));
+      const list = [];
+      snap.forEach(d => list.push(normalizeReport({ id: d.id, ...d.data() })));
+      return list.sort(byDateDesc);
     }
 
-    return localDb.reports;
+    return visibleLocalReports(me).sort(byDateDesc);
   },
 
+  /** Escucha cambios de reportes en tiempo real. Devuelve la función para cancelar. */
   subscribeReports(callback) {
-    reportListeners.push(callback);
+    const me = currentProfile;
+    if (!me) return () => {};
 
-    // Polling ligero si Java Backend está activo para refresco reactivo
-    let pollInterval = null;
-    if (isJavaBackendActive) {
-      pollInterval = setInterval(async () => {
-        try {
-          const reps = await this.reports();
-          callback(reps);
-        } catch (e) {}
-      }, 3000);
+    if (useFirestore() && !isJavaBackendActive) {
+      return onSnapshot(reportsQuery(me), (snapshot) => {
+        const list = [];
+        snapshot.forEach(d => list.push(normalizeReport({ id: d.id, ...d.data() })));
+        callback(list.sort(byDateDesc));
+      }, (err) => console.warn('[Nexo] Tiempo real no disponible:', err.message));
     }
 
-    // Firestore Realtime snapshot si está disponible
-    if (this.isFirebaseActive) {
-      try {
-        const q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'));
-        return onSnapshot(q, (snapshot) => {
-          const list = [];
-          snapshot.forEach(d => {
-            const data = d.data();
-            list.push({
-              id: d.id,
-              ...data,
-              estado: EST_MAP[data.estado] || data.estado || 'pend',
-              createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : (data.createdAt || new Date().toISOString())
-            });
-          });
-          if (list.length > 0) {
-            localDb.reports = list;
-            saveLocalDb(localDb);
-          }
-          callback(localDb.reports);
-        });
-      } catch (e) {}
-    }
-
-    setTimeout(() => callback(localDb.reports), 0);
-    return () => {
-      if (pollInterval) clearInterval(pollInterval);
-      reportListeners = reportListeners.filter(l => l !== callback);
-    };
+    // Backend Java o demo local: refresco periódico
+    const timer = setInterval(async () => {
+      try { callback(await this.reports()); } catch (e) {}
+    }, 4000);
+    return () => clearInterval(timer);
   },
 
   async setStatus(reportId, newStatus) {
-    const me = await this.me();
-    const canonStatus = EST_MAP[newStatus] || newStatus || 'PENDIENTE';
+    const me = currentProfile;
+    const canonStatus = EST_MAP[newStatus] && newStatus.length <= 4 ? EST_MAP[newStatus] : newStatus;
     const uiStatus = EST_MAP[canonStatus] || 'pend';
-    const nowIso = new Date().toISOString();
+    await javaReady;
 
-    // 1. Backend Java
     if (isJavaBackendActive) {
-      try {
-        const res = await fetch(`${API_BASE}/reports/${reportId}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${await bearerToken(me, 'demo-doc-01')}`
-          },
-          body: JSON.stringify({ estado: uiStatus })
-        });
-        if (res.ok) {
-          const rep = localDb.reports.find(r => r.id === reportId);
-          if (rep) { rep.estado = uiStatus; saveLocalDb(localDb); notifyReportListeners(localDb.reports); }
-          return { id: reportId, estado: uiStatus };
-        }
-      } catch (e) {}
+      await javaFetch(`/reports/${encodeURIComponent(reportId)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ estado: uiStatus })
+      });
+      return { id: reportId, estado: uiStatus };
     }
 
-    // 2. Firebase Cloud Firestore
-    if (this.isFirebaseActive) {
-      try {
-        const repRef = doc(db, 'reports', reportId);
-        await updateDoc(repRef, {
-          estado: canonStatus,
-          updatedAt: serverTimestamp(),
-          historial: arrayUnion({ estado: canonStatus, por: me.uid, fecha: nowIso })
-        });
-      } catch (e) {}
+    if (useFirestore()) {
+      await updateDoc(doc(db, 'reports', reportId), {
+        estado: canonStatus,
+        updatedAt: serverTimestamp(),
+        historial: arrayUnion({ estado: canonStatus, por: me.uid, fecha: new Date().toISOString() })
+      });
+      return { id: reportId, estado: uiStatus };
     }
 
-    // 3. Almacenamiento local
     const rep = localDb.reports.find(r => r.id === reportId);
     if (rep) {
       rep.estado = uiStatus;
-      rep.updatedAt = nowIso;
+      rep.updatedAt = new Date().toISOString();
       saveLocalDb(localDb);
-      notifyReportListeners(localDb.reports);
     }
-
     return { id: reportId, estado: uiStatus };
-  },
-
-  // -------------------------------------------------------------
-  // HU-04: Resumen consolidado y métricas reactivas
-  // -------------------------------------------------------------
-  async getStats(filterSubjectId = null) {
-    const me = await this.me();
-
-    // 1. Backend Java
-    if (isJavaBackendActive) {
-      try {
-        const queryStr = filterSubjectId && filterSubjectId !== 'todos' ? `?subjectId=${filterSubjectId}` : '';
-        const res = await fetch(`${API_BASE}/stats${queryStr}`, {
-          headers: { 'Authorization': `Bearer ${await bearerToken(me, 'demo-doc-01')}` }
-        });
-        if (res.ok) {
-          return await res.json();
-        }
-      } catch (e) {}
-    }
-
-    // 2. Cálculo local / Firestore
-    const reports = await this.reports();
-    const filtered = filterSubjectId && filterSubjectId !== 'todos'
-      ? reports.filter(r => r.subjectId === filterSubjectId || r.asignatura === filterSubjectId)
-      : reports;
-
-    const total = filtered.length;
-    const pendientes = filtered.filter(r => r.estado === 'pend' || r.estado === 'PENDIENTE').length;
-    const enRevision = filtered.filter(r => r.estado === 'rev' || r.estado === 'EN_REVISION').length;
-    const atendidos = filtered.filter(r => r.estado === 'ok' || r.estado === 'ATENDIDO').length;
-    const tasaAtencion = total > 0 ? Math.round((atendidos / total) * 100) : 0;
-
-    return {
-      total,
-      pendientes,
-      enRevision,
-      atendidos,
-      tasaAtencion,
-      porCategoria: [
-        { nombre: 'Metodología', total: filtered.filter(r => r.categoria === 'Metodología').length, porcentaje: total > 0 ? Math.round((filtered.filter(r => r.categoria === 'Metodología').length / total) * 100) : 0 },
-        { nombre: 'Contenido', total: filtered.filter(r => r.categoria === 'Contenido').length, porcentaje: total > 0 ? Math.round((filtered.filter(r => r.categoria === 'Contenido').length / total) * 100) : 0 },
-        { nombre: 'Ritmo', total: filtered.filter(r => r.categoria === 'Ritmo').length, porcentaje: total > 0 ? Math.round((filtered.filter(r => r.categoria === 'Ritmo').length / total) * 100) : 0 }
-      ],
-      sinReportes: total === 0
-    };
-  },
-
-  _formatUserProfile(uid, data) {
-    const nombre = data.nombre || 'Usuario Javeriana';
-    const partes = nombre.trim().split(/\s+/);
-    const primer = partes[0] || 'Usuario';
-    const ini = partes.length > 1 ? (partes[0][0] + partes[1][0]).toUpperCase() : primer.slice(0, 2).toUpperCase();
-    return {
-      uid, email: data.email || '', nombre, primerNombre: primer, iniciales: ini,
-      rol: ROL_MAP[data.rol] || data.rol || 'est'
-    };
-  },
-
-  _translateAuthError(err) {
-    const code = err.code || '';
-    if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) {
-      return 'Correo institucional o contraseña incorrectos.';
-    }
-    return err.message || 'Error al autenticar.';
   }
 };
 

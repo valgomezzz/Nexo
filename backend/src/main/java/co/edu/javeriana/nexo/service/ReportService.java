@@ -42,7 +42,7 @@ public class ReportService {
     LOCAL_REPORTS.add(new Reporte(
         "rep-001", "demo-est-01", "Ana María Ruiz", "subj-poo",
         "Programación Orientada a Objetos", "G1", "demo-doc-01",
-        1, 2, 2, "Metodología",
+        1, 2, 2, Map.of(), "Metodología",
         "Ejercicios de herencia y polimorfismo muy extensos para el tiempo de clase",
         "Sentimos que los ejercicios de herencia múltiple y polimorfismo planteados en los talleres prácticos son sumamente extensos para resolver en el bloque de 2 horas. Sería de gran ayuda contar con retroalimentación previa.",
         Estado.PENDIENTE, ahora.minus(2, ChronoUnit.DAYS), ahora.minus(2, ChronoUnit.DAYS)
@@ -51,7 +51,7 @@ public class ReportService {
     LOCAL_REPORTS.add(new Reporte(
         "rep-002", "demo-est-01", "Ana María Ruiz", "subj-edd",
         "Estructuras de Datos y Algoritmos", "G1", "demo-doc-01",
-        2, 2, 1, "Ritmo",
+        3, 2, 0, Map.of(), "Ritmo",
         "Avance muy rápido en árboles binarios balanceados (AVL y Rojinegros)",
         "El ritmo en la última semana fue bastante acelerado al explicar rotaciones dobles en árboles AVL. Varios compañeros nos quedamos con dudas en el rastreo de punteros en memoria.",
         Estado.EN_REVISION, ahora.minus(4, ChronoUnit.DAYS), ahora.minus(1, ChronoUnit.DAYS)
@@ -60,7 +60,7 @@ public class ReportService {
     LOCAL_REPORTS.add(new Reporte(
         "rep-003", "demo-est-02", "Juan Diego Morales", "subj-poo",
         "Programación Orientada a Objetos", "G1", "demo-doc-01",
-        3, 1, 2, "Contenido",
+        3, 1, 2, Map.of(), "Contenido",
         "Discrepancia entre la versión del compilador local y las pruebas automáticas",
         "El entorno de entrega automática en GitHub Classroom evalúa con Java 21 mientras que la guía del laboratorio especifica Java 17, generando errores de compilación con las sintaxis de Switch expresiones.",
         Estado.ATENDIDO, ahora.minus(6, ChronoUnit.DAYS), ahora.minus(3, ChronoUnit.DAYS)
@@ -117,6 +117,15 @@ public class ReportService {
     int mCon = mood(moods, "contenido");
     int mRit = mood(moods, "ritmo");
 
+    // Comentarios opcionales por categoría (paso a paso del asistente de reporte)
+    Map<String, String> coment = new HashMap<>();
+    if (body.has("comentarios") && body.get("comentarios").isJsonObject()) {
+      for (String k : new String[] {"metodologia", "contenido", "ritmo"}) {
+        String c = texto(body.getAsJsonObject("comentarios"), k).trim();
+        if (!c.isEmpty()) coment.put(k, c);
+      }
+    }
+
     int[] valores = {mMet, mCon, mRit};
     int peor = 0;
     for (int i = 1; i < valores.length; i++) if (valores[i] < valores[peor]) peor = i;
@@ -127,7 +136,7 @@ public class ReportService {
 
     Reporte nuevoReporte = new Reporte(
         nuevoId, u.uid(), u.nombre(), a.id(), a.nombre(), a.grupo(), a.profesorUid(),
-        mMet, mCon, mRit, CATEGORIAS[peor], titulo, detalle, Estado.PENDIENTE,
+        mMet, mCon, mRit, coment, CATEGORIAS[peor], titulo, detalle, Estado.PENDIENTE,
         ahoraInst, ahoraInst
     );
 
@@ -143,6 +152,7 @@ public class ReportService {
         data.put("grupo", a.grupo());
         data.put("professorUid", a.profesorUid());
         data.put("moods", Map.of("metodologia", mMet, "contenido", mCon, "ritmo", mRit));
+        data.put("comentarios", coment);
         data.put("categoria", CATEGORIAS[peor]);
         data.put("titulo", titulo);
         data.put("detalle", detalle);
@@ -198,11 +208,7 @@ public class ReportService {
     for (int i = 0; i < LOCAL_REPORTS.size(); i++) {
       Reporte r = LOCAL_REPORTS.get(i);
       if (r.id().equals(id)) {
-        Reporte actualizado = new Reporte(
-            r.id(), r.studentUid(), r.studentNombre(), r.subjectId(), r.subjectNombre(),
-            r.grupo(), r.professorUid(), r.moodMetodologia(), r.moodContenido(), r.moodRitmo(),
-            r.categoria(), r.titulo(), r.detalle(), nuevo, r.createdAt(), Instant.now()
-        );
+        Reporte actualizado = r.conEstado(nuevo);
         LOCAL_REPORTS.set(i, actualizado);
         return actualizado;
       }
@@ -218,12 +224,12 @@ public class ReportService {
 
   private static int mood(JsonObject moods, String campo) {
     JsonElement e = moods.get(campo);
-    if (e == null || e.isJsonNull()) return 2;
+    if (e == null || e.isJsonNull()) return Reporte.MOOD_DEFAULT;
     try {
       int v = e.getAsInt();
-      return Math.max(1, Math.min(3, v));
+      return Math.max(Reporte.MOOD_MIN, Math.min(Reporte.MOOD_MAX, v));
     } catch (Exception ex) {
-      return 2;
+      return Reporte.MOOD_DEFAULT;
     }
   }
 

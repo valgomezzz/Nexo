@@ -1,1365 +1,1327 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="jave">
+<html lang="es">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nexo · Sistema de Feedback Académico PUJ</title>
+<title>Nexo · Tu voz académica</title>
+<meta name="description" content="Nexo · Pontificia Universidad Javeriana. Reporta dificultades académicas y dales seguimiento.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' rx='10' fill='%23832F2F'/%3E%3Ccircle cx='12.5' cy='10.5' r='3.2' fill='%23fff'/%3E%3Ccircle cx='23.5' cy='10.5' r='3.2' fill='%23A2CDAB'/%3E%3Cpath d='M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18' stroke='%23fff' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..800,0..100,0..1&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..800,0..100,0..1&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* =========================================================
-   SISTEMA DE DISEÑO NEXO (PUJ) - PALETAS Y TEMAS
-   ========================================================= */
-:root[data-theme="jave"] {
-  --bg:#EEF2F8; --sf:#FFFFFF; --sf2:#F3F6FB; --bd:#D5DEEB; --bd2:#C2CFE2; --tx:#132135; --mu:#4F5E77;
-  --dock:#132135; --dock-tx:#CEDBEE; --dock-mu:#8A9BB7; --dock-bd:#22344F; --dock-hover:#1A2B45;
-  --nav-on-bg:#E6B979; --nav-on-tx:#132135;
-  --pr:#355E96; --pr-hover:#2A4E80; --on-pr:#FFFFFF; --pr-soft:#E3EBF6; --pr-tx:#2A4E80;
-  --ac:#E6B979; --on-ac:#132135; --ac-soft:#F8EDDB; --ac-tx:#7A5218;
-  --neutral:#CEDBEE; --mint:#9FB6D8;
-  --pend:#D9952B; --rev:#867ED3; --ok:#3DA56A;
-  --pend-bg:#FDF4E7; --pend-tx:#8C580F; --rev-bg:#EFEBF9; --rev-tx:#4C448C; --ok-bg:#E4F5EB; --ok-tx:#1E6B3E;
-  --red:#D03B34; --amb:#D9952B; --grn:#3DA56A; --on-grn:#FFFFFF;
-  --sh:inset 0 1px 0 rgba(255,255,255,.9), 0 2px 4px rgba(19,33,53,.06), 0 8px 18px -6px rgba(19,33,53,.12);
-  --sh-lift:inset 0 1px 0 rgba(255,255,255,.9), 0 4px 8px rgba(19,33,53,.08), 0 18px 36px -10px rgba(19,33,53,.2);
-  --hero-bg:#132135; --hero-tx:#FFFFFF; --hero-mu:#CEDBEE; --hero-ac:#E6B979; --hero-line:rgba(230,185,121,.25);
-  --sw-track:#E3EBF6; --sw-on:#E6B979; --sw-on-tx:#132135; --sw-off:#4F5E77;
-  --av-bg:#355E96; --av-tx:#FFFFFF; --in-bg:#FFFFFF; --focus:rgba(53,94,150,.28);
-  --toast-bg:#132135; --toast-tx:#FFFFFF;
-  --hl-bg:#FFFFFF; --hl-fg:#132135; --hl-ac:#E6B979;
-  --font-display:'Fraunces',Georgia,serif;
-}
+/* ============================================================
+   BASE (común a todas las pantallas)
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Source Sans 3',system-ui,sans-serif;color:#2B1E1F;background:#F7F4F2;-webkit-font-smoothing:antialiased}
+.d{font-family:'Fraunces',Georgia,serif;font-variation-settings:'SOFT' 100,'WONK' 1;letter-spacing:-.02em;margin:0}
+a{text-decoration:none;color:inherit}
+button{font:inherit}
+h1,h2,h3,p{margin:0}
+:focus-visible{outline:3px solid rgba(131,47,47,.45);outline-offset:2px}
 
-:root[data-theme="claro"] {
-  --bg:#F7F4F2; --sf:#FFFFFF; --sf2:#F3EEEB; --bd:#E7DFDB; --bd2:#D9CEC9; --tx:#2B1E1F; --mu:#6B5E60;
-  --dock:#FFFFFF; --dock-tx:#3D2F31; --dock-mu:#7E7072; --dock-bd:#EEE7E4; --dock-hover:#F6EFEC;
-  --nav-on-bg:#832F2F; --nav-on-tx:#FFFFFF;
-  --pr:#832F2F; --pr-hover:#6E2626; --on-pr:#FFFFFF; --pr-soft:#F6EAEA; --pr-tx:#832F2F;
-  --ac:#B295B0; --on-ac:#2B1E1F; --ac-soft:#F1E9F0; --ac-tx:#62405F;
-  --neutral:#B1BEC4; --mint:#A2CDAB;
-  --pend:#D9952B; --rev:#B295B0; --ok:#6DAF7E;
-  --pend-bg:#FBEBD3; --pend-tx:#85500C; --rev-bg:#ECE3EB; --rev-tx:#62405F; --ok-bg:#E1F1E5; --ok-tx:#2A6A3D;
-  --red:#B3403A; --amb:#C98418; --grn:#4B9862; --on-grn:#FFFFFF;
-  --sh:inset 0 1px 0 rgba(255,255,255,.9), 0 1px 2px rgba(64,32,32,.06), 0 6px 14px -6px rgba(64,32,32,.12);
-  --sh-lift:inset 0 1px 0 rgba(255,255,255,.9), 0 2px 4px rgba(64,32,32,.08), 0 14px 28px -10px rgba(64,32,32,.2);
-  --hero-bg:#832F2F; --hero-tx:#FFFFFF; --hero-mu:#F1D9D9; --hero-ac:#A2CDAB; --hero-line:rgba(255,255,255,.22);
-  --sw-track:#F2ECE9; --sw-on:#FFFFFF; --sw-on-tx:#2B1E1F; --sw-off:#6B5E60;
-  --av-bg:#832F2F; --av-tx:#FFFFFF; --in-bg:#FFFFFF; --focus:rgba(131,47,47,.25);
-  --toast-bg:#2B1E1F; --toast-tx:#FFFFFF;
-  --hl-bg:#FFFFFF; --hl-fg:#832F2F; --hl-ac:#A2CDAB;
-  --font-display:'Fraunces',Georgia,serif;
-}
+.root{position:relative;overflow:hidden;min-height:100vh;background:radial-gradient(60% 50% at 85% 0%,rgba(178,149,176,.32),transparent 70%),radial-gradient(50% 50% at 0% 100%,rgba(162,205,171,.26),transparent 70%),#F7F4F2}
+.scene{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.orbit{position:absolute;border-radius:50%;animation:spinr linear infinite}
+.orbit i{position:absolute;top:-6px;left:50%;width:12px;height:12px;margin-left:-6px;border-radius:50%}
+@keyframes spinr{to{transform:rotate(360deg)}}
+.pulse{position:absolute;border-radius:50%;border:1.5px solid rgba(131,47,47,.3);animation:pls 6s ease-out infinite}
+@keyframes pls{from{transform:scale(1);opacity:.8}to{transform:scale(1.5);opacity:0}}
+.blob{position:absolute;border-radius:50%;filter:blur(80px);animation:drift 16s ease-in-out infinite}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,-30px)}}
+.z{position:relative;z-index:2}
+.glass{background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(255,255,255,.74));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.95);box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(64,32,32,.06),0 14px 28px -12px rgba(64,32,32,.2),0 44px 80px -32px rgba(64,32,32,.38)}
+.lift{transition:transform .25s,box-shadow .25s}.lift:hover{transform:translateY(-4px)}
+.mk{display:flex;align-items:center;justify-content:center;flex:none;width:52px;height:52px;border-radius:16px;color:#fff;font-weight:700;font-size:15px;background:linear-gradient(145deg,#A04545,#6E2626);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 10px 18px -6px rgba(110,38,38,.65)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;font-weight:700;font-size:15px;border:1.5px solid #D9CEC9;background:#fff;color:#2B1E1F;box-shadow:0 2px 4px rgba(64,32,32,.08);transition:transform .2s,box-shadow .2s,opacity .2s;cursor:pointer}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 20px -8px rgba(64,32,32,.3)}
+.btn.p{border:0;color:#fff;background:linear-gradient(180deg,#9A3A3A,#7A2A2A);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 14px 26px -10px rgba(131,47,47,.75)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.pill.pend{background:#FBEBD3;color:#85500C}
+.pill.rev{background:#ECE3EB;color:#62405F}
+.pill.ok{background:#E1F1E5;color:#2A6A3D}
+.muted{color:#6B5E60}
+.eyebrow{margin:0;font-weight:700;color:#832F2F;letter-spacing:.12em;text-transform:uppercase;font-size:13px}
+.h1{font-size:clamp(30px,3.2vw,46px);line-height:1.08;font-weight:600;margin-top:10px}
+.sub{margin:8px 0 0;font-size:16px;color:#6B5E60}
+@media (prefers-reduced-motion:reduce){.orbit,.pulse,.blob{animation-duration:160s}}
 
-:root[data-theme="oscuro"] {
-  --bg:#010F23; --sf:#071A36; --sf2:#0C2346; --bd:#173260; --bd2:#22427A; --tx:#EAF2FF; --mu:#97ABCB;
-  --dock:#000A19; --dock-tx:#D3E1F7; --dock-mu:#7E93B6; --dock-bd:#10234A; --dock-hover:#0A1C38;
-  --nav-on-bg:#0461E9; --nav-on-tx:#FFFFFF;
-  --pr:#0461E9; --pr-hover:#2E7BF0; --on-pr:#FFFFFF; --pr-soft:#0B2A5E; --pr-tx:#BED8FE;
-  --ac:#867ED3; --on-ac:#0A0B2A; --ac-soft:#1E2154; --ac-tx:#CFCAFB;
-  --neutral:#BED8FE; --mint:#3DD68C;
-  --pend:#FFB547; --rev:#867ED3; --ok:#3DD68C;
-  --pend-bg:#3A2A0C; --pend-tx:#FFC768; --rev-bg:#25225E; --rev-tx:#CFCAFB; --ok-bg:#0E3423; --ok-tx:#86E2A8;
-  --red:#FF6B6B; --amb:#FFB547; --grn:#3DD68C; --on-grn:#01210F;
-  --sh:inset 0 1px 0 rgba(190,216,254,.08), 0 1px 2px rgba(0,0,0,.4), 0 8px 18px -8px rgba(0,0,0,.5);
-  --sh-lift:inset 0 1px 0 rgba(190,216,254,.12), 0 2px 4px rgba(0,0,0,.45), 0 16px 32px -10px rgba(0,0,0,.6);
-  --hero-bg:#000A19; --hero-tx:#EAF2FF; --hero-mu:#97ABCB; --hero-ac:#0461E9; --hero-line:rgba(190,216,254,.16);
-  --sw-track:#0C1E3C; --sw-on:#0461E9; --sw-on-tx:#FFFFFF; --sw-off:#97ABCB;
-  --av-bg:#0461E9; --av-tx:#FFFFFF; --in-bg:#04142C; --focus:rgba(4,97,233,.45);
-  --toast-bg:#BED8FE; --toast-tx:#010F23;
-  --hl-bg:#EAF2FF; --hl-fg:#000A19; --hl-ac:#0461E9;
-  --font-display:'Fraunces',Georgia,serif;
-}
+/* ---------- Menú lateral (dock) ---------- */
+.app{display:flex;min-height:100vh}
+.dock{position:sticky;top:0;height:100vh;flex:0 0 268px;padding:28px 20px;display:flex;flex-direction:column;gap:28px;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.7));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-right:1px solid rgba(255,255,255,.9);box-shadow:24px 0 60px -34px rgba(64,32,32,.45);transition:flex-basis .35s ease,padding .35s ease,opacity .25s ease}
+.dock.closed{flex-basis:0;padding-left:0;padding-right:0;opacity:0;pointer-events:none;border-right-width:0}
+.dock-inner{position:relative;width:228px;flex:1 0 auto;display:flex;flex-direction:column;gap:24px}
+.nv{display:flex;align-items:center;gap:12px;min-height:48px;padding:0 16px;border-radius:14px;font-weight:600;color:#3D2F31;transition:background .2s;cursor:pointer}
+.nv:hover{background:#F6EFEC}
+.nv.on{color:#fff;background:linear-gradient(180deg,#9A3A3A,#7A2A2A);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 14px 24px -10px rgba(131,47,47,.7)}
+.round{width:38px;height:38px;border-radius:50%;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:#fff;color:#832F2F;box-shadow:inset 0 1px 0 #fff,0 8px 16px -8px rgba(64,32,32,.4)}
+.reopen{position:fixed;left:18px;top:18px;z-index:20;width:46px;height:46px}
+.out{width:46px;height:46px;border-radius:50%;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:#F6EAEA;color:#832F2F;box-shadow:inset 0 1px 0 #fff,0 6px 12px -6px rgba(131,47,47,.5);transition:all .25s}
+.out:hover{background:#832F2F;color:#fff;transform:rotate(-8deg) scale(1.08);box-shadow:0 12px 20px -8px rgba(131,47,47,.8)}
+.avatar{position:relative;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#2B1E1F;background:linear-gradient(145deg,#D5DEE3,#9FB0B8);border:3px solid #fff;box-shadow:0 8px 16px -6px rgba(64,32,32,.45);flex:none}
+.avatar i{position:absolute;right:-2px;bottom:-2px;width:13px;height:13px;border-radius:50%;background:#6DAF7E;border:2px solid #fff}
+.main{position:relative;z-index:2;flex:1;min-width:0;padding:44px 48px;display:flex;flex-direction:column;gap:28px}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--tx);
-  min-height: 100vh;
-  line-height: 1.5;
-  transition: background .25s ease, color .25s ease;
-  overflow-x: hidden;
-}
+/* ---------- Banners y listas ---------- */
+.banner{position:relative;overflow:hidden;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;padding:32px 36px;border-radius:30px;color:#fff;background:linear-gradient(135deg,#9A3A3A 0%,#6E2626 60%,#4F1C1C 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 4px rgba(64,32,32,.2),0 30px 60px -24px rgba(110,38,38,.75)}
+.banner .btn.w{position:relative;border:0;background:#fff;color:#832F2F;min-height:52px;padding:0 28px;box-shadow:0 16px 30px -12px rgba(0,0,0,.5)}
+.list{margin:0;padding:0;display:flex;flex-direction:column;gap:14px;list-style:none}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:16px;padding:16px 20px;border-radius:20px;background:#fff;box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(64,32,32,.06),0 16px 28px -16px rgba(64,32,32,.28)}
+.row.click{cursor:pointer}
+.sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:18px}
+.empty{padding:36px 20px;text-align:center;color:#6B5E60;font-size:16px}
 
-.display {
-  font-family: var(--font-display);
-  font-variation-settings: 'SOFT' 100, 'WONK' 1;
-  letter-spacing: -0.02em;
-}
+/* ---------- Docente / Dirección ---------- */
+.date-badge{display:flex;flex-direction:column;align-items:center;justify-content:center;width:58px;height:58px;border-radius:18px;background:linear-gradient(145deg,#fff,#F6EAEA);border:1.5px solid #E7DFDB;box-shadow:inset 0 1px 0 #fff,0 6px 14px -6px rgba(131,47,47,.25);color:#832F2F;flex:none}
+.date-badge strong{font-family:'Fraunces',Georgia,serif;font-size:22px;line-height:1;font-weight:700}
+.date-badge span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6B5E60}
+.tag-badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:600;background:#F3EEEB;color:#6B5E60}
+.sem-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.sem-badge i{width:8px;height:8px;border-radius:50%}
+.sem-badge.alto{background:#FCEBEB;color:#B3403A}.sem-badge.alto i{background:#B3403A;box-shadow:0 0 0 3px rgba(179,64,58,.25)}
+.sem-badge.medio{background:#FDF2E2;color:#C98418}.sem-badge.medio i{background:#C98418;box-shadow:0 0 0 3px rgba(201,132,24,.25)}
+.sem-badge.bajo{background:#E1F1E5;color:#2A6A3D}.sem-badge.bajo i{background:#4B9862;box-shadow:0 0 0 3px rgba(75,152,98,.25)}
+.stat-track{height:10px;border-radius:999px;background:#E7DFDB;overflow:hidden;position:relative}
+.stat-fill{height:100%;border-radius:999px;transition:width .4s}
+.bignum-val{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:clamp(64px,6vw,92px);line-height:.9;letter-spacing:-.04em;color:#832F2F}
+.nav-tab{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;font-size:14px;font-weight:600;border:1.5px solid #D9CEC9;background:#fff;color:#6B5E60;cursor:pointer;transition:all .2s;box-shadow:0 2px 4px rgba(64,32,32,.06)}
+.nav-tab:hover{border-color:#832F2F;color:#2B1E1F}
+.nav-tab.active{background:linear-gradient(180deg,#9A3A3A,#7A2A2A);color:#fff;border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 10px 20px -8px rgba(131,47,47,.65)}
+.nav-tab .badge{padding:2px 7px;border-radius:999px;font-size:11px;font-weight:700;background:rgba(0,0,0,.08);color:inherit}
+.nav-tab.active .badge{background:rgba(255,255,255,.25);color:#fff}
+.custom-select{padding:10px 38px 10px 18px;border-radius:999px;border:1.5px solid #D9CEC9;-webkit-appearance:none;appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23832F2F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;font:inherit;font-weight:600;font-size:14px;color:#2B1E1F;cursor:pointer;box-shadow:0 2px 4px rgba(64,32,32,.06);outline:none}
+.crumbs-nav{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#6B5E60;margin-bottom:12px}
+.crumbs-nav a{color:#832F2F;cursor:pointer}
+.crumbs-nav a:hover{text-decoration:underline}
+.seg{display:flex;height:18px;border-radius:999px;overflow:hidden;gap:3px;box-shadow:inset 0 1px 2px rgba(0,0,0,.1);background:#E7DFDB}
+.seg>div:first-child{border-radius:999px 0 0 999px}.seg>div:last-child{border-radius:0 999px 999px 0}
+.mini-seg{flex:2 1 160px;display:flex;height:12px;border-radius:999px;overflow:hidden;gap:2px;background:#E7DFDB}
+.legend{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding-top:12px;border-top:1px solid #E7DFDB}
+.legend .lbl{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600}
+.legend .lbl span{width:8px;height:8px;border-radius:50%}
+.g-hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px}
+.g-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.urg{display:flex;flex-wrap:wrap;align-items:center;gap:20px;padding:16px 20px;border-radius:18px;background:#fff;box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(64,32,32,.06)}
+.urg .num{text-align:right;min-width:60px}
 
-/* -------------------------------------------------------------
-   NAVBAR SUPERIOR & DEMO QUICK-BAR
-   ------------------------------------------------------------- */
-.app-header {
-  position: sticky; top: 0; z-index: 900;
-  background: var(--sf);
-  border-bottom: 1px solid var(--bd);
-  box-shadow: 0 1px 3px rgba(0,0,0,.04);
-}
-.header-inner {
-  max-width: 1280px; margin: 0 auto;
-  padding: 12px 24px;
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-}
-.brand {
-  display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: none; color: inherit;
-}
-.brand-name { font-size: 24px; font-weight: 700; color: var(--tx); }
-.brand-sub { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mu); margin-left: 2px; }
+/* Reporte expandible del docente */
+.rep{border-radius:20px;background:#fff;box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(64,32,32,.06),0 16px 28px -16px rgba(64,32,32,.28)}
+.rep-top{display:flex;align-items:center;gap:18px;padding:18px 22px;cursor:pointer}
+.rep-body{padding:0 22px 22px 98px;display:flex;flex-direction:column;gap:14px}
+.rep-faces{display:flex;flex-wrap:wrap;gap:22px}
+.rep-faces span{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#6B5E60}
+.quote{margin:0;font-size:16px;line-height:1.55;color:#2B1E1F}
+.coments{display:flex;flex-direction:column;gap:6px;font-size:14px;color:#3D2F31}
+.coments b{color:#832F2F}
+.status-wrap{position:relative;flex:none}
+.status-btn{border:0;cursor:pointer}
+.status-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:30;min-width:180px;padding:8px;border-radius:16px;background:#fff;border:1px solid #E7DFDB;box-shadow:0 24px 40px -16px rgba(64,32,32,.45);display:flex;flex-direction:column;gap:4px}
+.status-menu button{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:40px;padding:0 12px;border:0;border-radius:10px;background:transparent;font-weight:600;font-size:14px;color:#2B1E1F;cursor:pointer;text-align:left}
+.status-menu button:hover{background:#F6EFEC}
+.status-menu button .dot{width:10px;height:10px;border-radius:50%}
 
-.header-actions { display: flex; align-items: center; gap: 12px; }
+/* ---------- Asistente de reporte ---------- */
+.steps{display:flex;gap:8px}
+.steps span{flex:1;height:8px;border-radius:8px;background:#E7DFDB;box-shadow:inset 0 1px 2px rgba(64,32,32,.12);transition:background .3s}
+.steps span.on{background:linear-gradient(90deg,#9A3A3A,#832F2F);box-shadow:0 4px 10px -3px rgba(131,47,47,.6)}
+.moods{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.mood{display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 6px;border-radius:20px;cursor:pointer;font-weight:600;font-size:14px;color:#2B1E1F;transition:all .25s cubic-bezier(.3,1.5,.5,1);border:1.5px solid #E7DFDB;background:#fff;box-shadow:inset 0 1px 0 #fff,0 8px 16px -10px rgba(64,32,32,.3)}
+.mood.on{border:2px solid #832F2F;background:#F6EAEA;transform:translateY(-8px) scale(1.04);box-shadow:inset 0 1px 0 #fff,0 22px 30px -14px rgba(131,47,47,.55)}
+.field{font:inherit;font-weight:400;font-size:16px;padding:14px 16px;border:1.5px solid #D9CEC9;border-radius:16px;resize:vertical;background:#fff;box-shadow:inset 0 2px 4px rgba(64,32,32,.06);outline:none;color:#2B1E1F;width:100%}
+.field:focus{border-color:#832F2F;box-shadow:0 0 0 4px rgba(131,47,47,.18)}
+.pick{display:flex;align-items:center;gap:16px;width:100%;padding:16px 20px;border-radius:20px;cursor:pointer;text-align:left;border:1.5px solid #E7DFDB;background:#fff;color:#2B1E1F;box-shadow:inset 0 1px 0 #fff,0 8px 16px -10px rgba(64,32,32,.3);transition:all .2s}
+.pick:hover{border-color:#C9A9A9}
+.pick.on{border:2px solid #832F2F;background:#F6EAEA}
+.counter{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:#85500C}
+.counter.okc{color:#2A6A3D}
+.err{color:#B3403A;font-weight:600;font-size:14px}
 
-/* Status pill de Firebase */
-.fb-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 5px 12px; border-radius: 999px;
-  background: var(--sf2); border: 1px solid var(--bd);
-  font-size: 12px; font-weight: 600; color: var(--mu);
-}
-.fb-dot { width: 8px; height: 8px; border-radius: 50%; background: #3DA56A; box-shadow: 0 0 6px #3DA56A; }
+/* ---------- Landing ---------- */
+.landing{position:relative;display:flex;flex-direction:column;min-height:100vh;background:#6E2626;color:#fff;overflow:hidden}
+.landing .blob{filter:blur(70px);animation-duration:14s}
+.landing .lbtn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 26px;border-radius:999px;font-weight:700;font-size:16px;border:0;cursor:pointer;background:#fff;color:#832F2F;box-shadow:0 10px 24px -10px rgba(0,0,0,.5);transition:transform .2s}
+.landing .lbtn:hover{transform:translateY(-2px)}
+.landing .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(70% 70% at 70% 45%,#000,transparent);mask-image:radial-gradient(70% 70% at 70% 45%,#000,transparent)}
+.landing .stage{position:relative;width:420px;height:420px;max-width:100%;flex:0 0 auto;perspective:1400px}
+.landing .ring{position:absolute;left:50%;top:50%;border-radius:50%;border:1px dashed rgba(255,255,255,.35);animation:orb 30s linear infinite}
+.landing .ring i{position:absolute;top:-6px;left:50%;width:12px;height:12px;border-radius:50%;background:#A2CDAB;box-shadow:0 0 18px #A2CDAB}
+@keyframes orb{from{transform:translate(-50%,-50%) rotateX(72deg) rotate(0)}to{transform:translate(-50%,-50%) rotateX(72deg) rotate(360deg)}}
+.landing .float{position:absolute;inset:0;transform-style:preserve-3d;animation:fl 7s ease-in-out infinite}
+.landing .spin{position:absolute;inset:16%;transform-style:preserve-3d;animation:sp 16s linear infinite}
+.landing .layer{position:absolute;inset:0}.landing .layer svg{width:100%;height:100%;display:block;overflow:visible}
+.landing .glow{position:absolute;inset:8%;border-radius:50%;background:radial-gradient(circle,rgba(162,205,171,.5),transparent 65%);filter:blur(14px);animation:gl 7s ease-in-out infinite}
+@keyframes sp{from{transform:rotateX(-14deg) rotateY(0)}to{transform:rotateX(-14deg) rotateY(360deg)}}
+@keyframes fl{0%,100%{transform:translateY(-3%)}50%{transform:translateY(3%)}}
+@keyframes gl{0%,100%{opacity:.6;transform:scale(.94)}50%{opacity:1;transform:scale(1.06)}}
+.flow{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.flow .line{position:absolute;left:28px;right:0;top:28px;height:0;border-top:2px dashed rgba(255,255,255,.35);transform-origin:left;animation:linek 5.5s linear infinite}
+.flow .spark{position:absolute;top:22px;left:22px;width:12px;height:12px;border-radius:50%;background:#A2CDAB;box-shadow:0 0 22px 6px rgba(162,205,171,.7);opacity:0;animation:runk 5.5s linear infinite}
+.st{position:relative;display:flex;align-items:flex-start;gap:16px}
+.node{position:relative;flex:0 0 56px;height:56px;border-radius:50%;background:#832F2F;border:2px solid #A2CDAB;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 0 0 8px rgba(162,205,171,.12)}
+.node svg{stroke:currentColor}
+.node::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid #A2CDAB;opacity:0}
+.big{position:absolute;right:0;top:-18px;font-size:110px;line-height:1;font-weight:700;color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.14);pointer-events:none}
+.st.s1{animation:stk1 5.5s ease-out infinite}.st.s2{animation:stk2 5.5s ease-out infinite}.st.s3{animation:stk3 5.5s ease-out infinite}
+.node.n1{animation:hit1 5.5s ease-out infinite}.node.n1::after{animation:ring1 5.5s ease-out infinite}
+.node.n2{animation:hit2 5.5s ease-out infinite}.node.n2::after{animation:ring2 5.5s ease-out infinite}
+.node.n3{animation:hit3 5.5s ease-out infinite}.node.n3::after{animation:ring3 5.5s ease-out infinite}
+@keyframes stk1{0%,1.82%{opacity:0}6.36%{opacity:1}83.64%{opacity:1}92.73%,100%{opacity:0}}
+@keyframes stk2{0%,7.27%{opacity:0}11.82%{opacity:1}83.64%{opacity:1}92.73%,100%{opacity:0}}
+@keyframes stk3{0%,12.73%{opacity:0}17.27%{opacity:1}83.64%{opacity:1}92.73%,100%{opacity:0}}
+@keyframes linek{0%,1.82%{opacity:1;transform:scaleX(0)}17.27%{opacity:1;transform:scaleX(1)}83.64%{opacity:1;transform:scaleX(1)}92.73%,100%{opacity:0;transform:scaleX(1)}}
+@keyframes runk{0%,18.00%{left:22px;opacity:0}18.18%{left:22px;opacity:1}23.64%{left:calc((100% - 48px) / 3 + 46px);opacity:1}29.09%{left:calc((100% - 48px) * .6667 + 70px);opacity:1}34.55%,100%{left:calc((100% - 48px) * .6667 + 70px);opacity:0}}
+@keyframes hit1{0%,18.00%{background:#832F2F;color:#fff;transform:scale(1);box-shadow:0 0 0 8px rgba(162,205,171,.12)}18.18%{background:#A2CDAB;color:#2B1E1F;box-shadow:0 0 0 12px rgba(162,205,171,.3),0 0 34px 6px rgba(162,205,171,.75);transform:scale(.85)}20.36%{background:#A2CDAB;color:#2B1E1F;transform:scale(1.4) translateY(-10px)}22.55%{background:#A2CDAB;color:#2B1E1F;transform:scale(.92)}24.36%{background:#A2CDAB;color:#2B1E1F;transform:scale(1.15) translateY(-3px)}26.18%{background:#A2CDAB;color:#2B1E1F;box-shadow:0 0 0 12px rgba(162,205,171,.3),0 0 34px 6px rgba(162,205,171,.75);transform:scale(1)}83.64%{background:#A2CDAB;color:#2B1E1F;box-shadow:0 0 0 12px rgba(162,205,171,.3),0 0 34px 6px rgba(162,205,171,.75);transform:scale(1)}92.73%,100%{background:#832F2F;color:#fff;transform:scale(1);box-shadow:0 0 0 8px rgba(162,205,171,.12)}}
+@keyframes ring1{0%,18.00%{transform:scale(1);opacity:0}18.18%{transform:scale(1);opacity:.9}29.09%,100%{transform:scale(1.9);opacity:0}}
+@keyframes hit2{0%,23.45%{background:#832F2F;color:#fff;transform:scale(1);box-shadow:0 0 0 8px rgba(162,205,171,.12)}23.64%{background:#A2CDAB;color:#2B1E1F;box-shadow:0 0 0 12px rgba(162,205,171,.3),0 0 34px 6px rgba(162,205,171,.75);transform:scale(.85)}25.82%{background:#A2CDAB;color:#2B1E1F;transform:scale(1.4) translateY(-10px)}28.00%{background:#A2CDAB;color:#2B1E1F;transform:scale(.92)}29.82%{background:#A2CDAB;color:#2B1E1F;transform:scale(1.15) translateY(-3px)}31.64%{background:#A2CDAB;color:#2B1E1F;box-shadow:0 0 0 12px rgba(162,205,171,.3),0 0 34px 6px rgba(162,205,171,.75);transform:scale(1)}83.64%{background:#A2CDAB;color:#2B1E1F;box-shadow:0 0 0 12px rgba(162,205,171,.3),0 0 34px 6px rgba(162,205,171,.75);transform:scale(1)}92.73%,100%{background:#832F2F;color:#fff;transform:scale(1);box-shadow:0 0 0 8px rgba(162,205,171,.12)}}
+@keyframes ring2{0%,23.45%{transform:scale(1);opacity:0}23.64%{transform:scale(1);opacity:.9}34.55%,100%{transform:scale(1.9);opacity:0}}
+@keyframes hit3{0%,28.91%{background:#832F2F;color:#fff;transform:scale(1);box-shadow:0 0 0 8px rgba(162,205,171,.12)}29.09%{background:#A2CDAB;color:#2B1E1F;box-shadow:0 0 0 12px rgba(162,205,171,.3),0 0 34px 6px rgba(162,205,171,.75);transform:scale(.85)}31.27%{background:#A2CDAB;color:#2B1E1F;transform:scale(1.4) translateY(-10px)}33.45%{background:#A2CDAB;color:#2B1E1F;transform:scale(.92)}35.27%{background:#A2CDAB;color:#2B1E1F;transform:scale(1.15) translateY(-3px)}37.09%{background:#A2CDAB;color:#2B1E1F;box-shadow:0 0 0 12px rgba(162,205,171,.3),0 0 34px 6px rgba(162,205,171,.75);transform:scale(1)}83.64%{background:#A2CDAB;color:#2B1E1F;box-shadow:0 0 0 12px rgba(162,205,171,.3),0 0 34px 6px rgba(162,205,171,.75);transform:scale(1)}92.73%,100%{background:#832F2F;color:#fff;transform:scale(1);box-shadow:0 0 0 8px rgba(162,205,171,.12)}}
+@keyframes ring3{0%,28.91%{transform:scale(1);opacity:0}29.09%{transform:scale(1);opacity:.9}40.00%,100%{transform:scale(1.9);opacity:0}}
+@media (prefers-reduced-motion:reduce){.landing *{animation-duration:80s!important}}
 
-/* Selector de temas */
-.theme-switch {
-  display: flex; background: var(--sw-track); padding: 3px; border-radius: 999px; gap: 2px;
-}
-.theme-btn {
-  border: 0; background: transparent; padding: 4px 10px; border-radius: 999px;
-  font-size: 12px; font-weight: 600; color: var(--sw-off); cursor: pointer; transition: all .2s;
-}
-.theme-btn.active {
-  background: var(--sw-on); color: var(--sw-on-tx); box-shadow: 0 1px 3px rgba(0,0,0,.15);
-}
+/* ---------- Login ---------- */
+.login{display:flex;flex-wrap:wrap;min-height:100vh;background:#F7F4F2}
+.login .side{position:relative;overflow:hidden;flex:1 1 480px;min-width:0;min-height:560px;background:#6E2626;color:#fff;padding:40px 56px;display:flex;align-items:center;justify-content:center}
+.login .side .blob{filter:blur(70px);animation-duration:14s}
+.login .pulse.wh{border:1px solid rgba(255,255,255,.4);animation-duration:5s}
+.in{display:flex;align-items:center;gap:10px;min-height:52px;padding:0 16px;border:1.5px solid #D9CEC9;border-radius:14px;background:#fff;transition:box-shadow .2s,border-color .2s}
+.in:focus-within{border-color:#832F2F;box-shadow:0 0 0 4px rgba(131,47,47,.22)}
+.in input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:16px;color:#2B1E1F}
+.role{flex:1;min-height:48px;border-radius:12px;border:1.5px solid #E7DFDB;background:#F3EEEB;font:inherit;font-weight:600;color:#6B5E60;cursor:pointer;transition:all .2s}
+.role.on{background:#832F2F;color:#fff;border-color:#832F2F}
+.go{min-height:54px;border:0;border-radius:999px;background:#832F2F;color:#fff;font:inherit;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 14px 28px -12px rgba(131,47,47,.7);transition:transform .2s}
+.go:hover{transform:translateY(-2px);background:#6E2626}
+.go:disabled{opacity:.6;cursor:wait;transform:none}
+.rise{animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 
-/* Barra de navegación de pantallas de demostración */
-.demo-screens-bar {
-  background: var(--sf2);
-  border-bottom: 1px solid var(--bd);
-  padding: 6px 20px;
-  overflow-x: auto;
-  white-space: nowrap;
-  display: flex; align-items: center; gap: 8px;
-}
-.demo-bar-title {
-  font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--mu); margin-right: 6px; flex-shrink: 0;
-}
-.screen-tag {
-  display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
-  border: 1px solid var(--bd); background: var(--sf); color: var(--tx); cursor: pointer; text-decoration: none;
-  transition: all .15s; flex-shrink: 0;
-}
-.screen-tag:hover { border-color: var(--pr); color: var(--pr-tx); transform: translateY(-1px); }
-.screen-tag.active { background: var(--pr); color: var(--on-pr); border-color: var(--pr); }
+/* ---------- Toast y carga ---------- */
+#toasts{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none}
+.toast{padding:12px 20px;border-radius:999px;background:#2B1E1F;color:#fff;font-weight:600;font-size:15px;box-shadow:0 18px 40px -16px rgba(0,0,0,.6);animation:rise .35s cubic-bezier(.2,.7,.2,1) both}
+.toast.bad{background:#B3403A}
+.loader{min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;color:#6B5E60;font-weight:600}
+.loader .orbit{position:relative;width:70px;height:70px;border:2px dashed rgba(131,47,47,.35);animation-duration:3s}
 
-/* -------------------------------------------------------------
-   PANTALLA 1: LANDING PAGE
-   ------------------------------------------------------------- */
-.landing-hero {
-  position: relative; background: var(--hero-bg); color: var(--hero-tx);
-  overflow: hidden; padding: 60px 24px 80px; min-height: 82vh;
-  display: flex; flex-direction: column; justify-content: center;
+/* ---------- Responsivo ---------- */
+@media (max-width:1100px){.g-hero,.g-two{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:900px){
+  .app{flex-direction:column}
+  .dock{position:relative;height:auto;flex:none;width:100%;padding:18px 16px;gap:16px;border-right:0;box-shadow:0 18px 40px -30px rgba(64,32,32,.45)}
+  .dock.closed{flex-basis:auto;height:0;padding:0;opacity:0}
+  .dock-inner{width:100%;gap:14px}
+  .dock nav{flex-direction:row!important;flex-wrap:wrap}
+  .dock .me-card{margin-top:0}
+  .main{padding:28px 16px 40px}
+  .banner{padding:24px}
+  .rep-body{padding:0 18px 18px}
+  .moods{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
-.landing-grid {
-  position: absolute; inset: 0;
-  background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
-  pointer-events: none;
-}
-.landing-container {
-  max-width: 1200px; margin: 0 auto; width: 100%; position: relative; z-index: 10;
-}
-.landing-flex {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 48px;
-}
-.landing-content { flex: 1 1 520px; }
-.landing-title {
-  font-size: clamp(38px, 5vw, 64px); line-height: 1.08; font-weight: 700; margin-bottom: 20px;
-}
-.landing-lead {
-  font-size: clamp(20px, 2.2vw, 26px); color: var(--hero-mu); font-weight: 500; margin-bottom: 36px;
-}
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  min-height: 48px; padding: 0 26px; border-radius: 999px;
-  font-size: 16px; font-weight: 700; cursor: pointer; border: 0;
-  text-decoration: none; transition: transform .2s, box-shadow .2s;
-}
-.btn:hover { transform: translateY(-2px); }
-.btn-primary {
-  background: var(--pr); color: var(--on-pr);
-  box-shadow: 0 10px 24px -8px rgba(0,0,0,.3);
-}
-.btn-primary:hover { background: var(--pr-hover); }
-.btn-accent {
-  background: var(--hero-ac); color: #132135;
-  box-shadow: 0 10px 24px -8px rgba(230,185,121,.4);
-}
-.btn-white {
-  background: #FFFFFF; color: var(--tx);
-  box-shadow: 0 8px 20px -6px rgba(0,0,0,.25);
-}
-.btn-secondary {
-  background: var(--sf2); color: var(--tx); border: 1.5px solid var(--bd);
-}
-.btn-secondary:hover { background: var(--sf); border-color: var(--pr); }
-
-/* Logo 3D Animado */
-.stage-3d {
-  width: 380px; height: 380px; position: relative; flex: 0 0 auto;
-  perspective: 1200px; margin: 0 auto;
-}
-.orbit-ring {
-  position: absolute; border-radius: 50%; border: 1.5px dashed rgba(255,255,255,.28);
-  top: 50%; left: 50%; transform: translate(-50%, -50%);
-  animation: spin-orbit linear infinite;
-}
-.orbit-ring.r1 { width: 340px; height: 340px; animation-duration: 32s; }
-.orbit-ring.r2 { width: 260px; height: 260px; animation-duration: 22s; animation-direction: reverse; border-style: solid; border-color: var(--hero-ac); opacity: .45; }
-.orbit-ring i {
-  position: absolute; top: -6px; left: 50%; width: 12px; height: 12px; border-radius: 50%;
-  background: var(--hero-ac); box-shadow: 0 0 16px var(--hero-ac);
-}
-@keyframes spin-orbit { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
-
-.logo-core {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  animation: float-3d 6s ease-in-out infinite;
-}
-@keyframes float-3d { 0%, 100% { transform: translate(-50%, -50%) translateY(0); } 50% { transform: translate(-50%, -50%) translateY(-14px); } }
-
-/* Pasos interactivos (HU-02) */
-.flow-steps {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;
-  margin-top: 50px; padding-top: 40px; border-top: 1px solid var(--hero-line);
-}
-.step-card {
-  display: flex; align-items: flex-start; gap: 16px;
-}
-.step-num {
-  width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,.1);
-  border: 2px solid var(--hero-ac); display: flex; align-items: center; justify-content: center;
-  font-size: 20px; font-weight: 700; color: var(--hero-ac); flex-shrink: 0;
-}
-.step-info h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
-.step-info p { font-size: 14px; color: var(--hero-mu); line-height: 1.4; }
-
-/* -------------------------------------------------------------
-   PANTALLA 2: INICIAR SESIÓN (HU-01)
-   ------------------------------------------------------------- */
-.login-view {
-  min-height: calc(100vh - 110px);
-  display: flex; align-items: center; justify-content: center;
-  padding: 40px 20px;
-}
-.login-card {
-  max-width: 460px; width: 100%;
-  background: var(--sf); border: 1px solid var(--bd); border-radius: 24px;
-  padding: 38px 32px; box-shadow: var(--sh-lift);
-}
-.login-header { margin-bottom: 24px; text-align: left; }
-.login-header h2 { font-size: 32px; font-weight: 700; }
-.login-header p { color: var(--mu); font-size: 15px; margin-top: 4px; }
-
-.roles-selector {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 22px;
-}
-.role-chip {
-  padding: 10px 8px; border-radius: 12px; border: 1.5px solid var(--bd);
-  background: var(--sf2); color: var(--mu); font-size: 13px; font-weight: 700;
-  cursor: pointer; text-align: center; transition: all .2s;
-}
-.role-chip.selected {
-  background: var(--pr); border-color: var(--pr); color: var(--on-pr);
-  box-shadow: 0 4px 12px rgba(0,0,0,.15);
-}
-
-.form-group { margin-bottom: 18px; }
-.form-group label {
-  display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--tx);
-}
-.input-wrap {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--in-bg); border: 1.5px solid var(--bd); border-radius: 12px;
-  padding: 0 14px; min-height: 48px; transition: border-color .2s, box-shadow .2s;
-}
-.input-wrap:focus-within {
-  border-color: var(--pr); box-shadow: 0 0 0 3px var(--focus);
-}
-.input-wrap input, .input-wrap select, .input-wrap textarea {
-  width: 100%; border: 0; outline: 0; background: transparent; font-size: 15px;
-  color: var(--tx); font-family: inherit;
-}
-.demo-logins {
-  margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--bd);
-}
-.demo-logins-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--mu); margin-bottom: 8px; }
-.demo-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
-.demo-pill {
-  border: 1px solid var(--bd); background: var(--sf2); color: var(--tx);
-  padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer;
-}
-.demo-pill:hover { border-color: var(--pr); }
-
-/* -------------------------------------------------------------
-   PANEL COMÚN: CONTENEDOR, TABS Y TARJETAS
-   ------------------------------------------------------------- */
-.panel-view {
-  max-width: 1240px; margin: 0 auto; padding: 36px 24px 60px;
-}
-.panel-top {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-  gap: 16px; margin-bottom: 32px;
-}
-.panel-title h1 { font-size: 32px; font-weight: 700; }
-.panel-title p { color: var(--mu); font-size: 15px; margin-top: 2px; }
-
-/* Grid de asignaturas (HU-01, HU-02) */
-.subject-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;
-}
-.subject-card {
-  background: var(--sf); border: 1px solid var(--bd); border-radius: 18px;
-  padding: 24px; box-shadow: var(--sh); transition: transform .2s, box-shadow .2s;
-  display: flex; flex-direction: column; justify-content: space-between; gap: 18px;
-}
-.subject-card:hover { transform: translateY(-3px); box-shadow: var(--sh-lift); }
-.subj-code {
-  display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 700;
-  background: var(--pr-soft); color: var(--pr-tx); margin-bottom: 8px;
-}
-.subj-name { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-.subj-prof { font-size: 14px; color: var(--mu); }
-
-/* -------------------------------------------------------------
-   PANTALLA 4: ESTUDIANTE · NUEVO REPORTE (HU-02)
-   ------------------------------------------------------------- */
-.wizard-box {
-  max-width: 760px; margin: 0 auto;
-  background: var(--sf); border: 1px solid var(--bd); border-radius: 24px;
-  padding: 36px; box-shadow: var(--sh-lift);
-}
-.mood-group { margin-bottom: 24px; }
-.mood-label { font-weight: 600; font-size: 15px; margin-bottom: 8px; display: block; }
-.mood-pills { display: flex; gap: 10px; }
-.mood-pill {
-  flex: 1; padding: 12px 10px; border-radius: 14px; border: 1.5px solid var(--bd);
-  background: var(--sf2); font-size: 14px; font-weight: 600; cursor: pointer; text-align: center;
-  transition: all .15s;
-}
-.mood-pill.active {
-  background: var(--pr); border-color: var(--pr); color: var(--on-pr);
-}
-
-.char-counter {
-  display: flex; justify-content: space-between; font-size: 12px; color: var(--mu); margin-top: 6px;
-}
-.char-counter.valid { color: #3DA56A; font-weight: 600; }
-
-/* -------------------------------------------------------------
-   PANTALLA 5: ESTUDIANTE · REPORTE ENVIADO (HU-02)
-   ------------------------------------------------------------- */
-.success-card {
-  max-width: 580px; margin: 40px auto; text-align: center;
-  background: var(--sf); border: 1px solid var(--bd); border-radius: 24px;
-  padding: 48px 32px; box-shadow: var(--sh-lift);
-}
-.success-icon {
-  width: 80px; height: 80px; border-radius: 50%; background: #E4F5EB; color: #1E6B3E;
-  display: inline-flex; align-items: center; justify-content: center; font-size: 38px; margin-bottom: 20px;
-}
-.success-title { font-size: 32px; font-weight: 700; margin-bottom: 10px; }
-.success-desc { color: var(--mu); font-size: 16px; margin-bottom: 28px; }
-.receipt-box {
-  background: var(--sf2); border: 1px solid var(--bd); border-radius: 14px;
-  padding: 18px; text-align: left; margin-bottom: 30px; font-size: 14px;
-}
-.receipt-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
-.receipt-row:last-child { margin-bottom: 0; }
-.receipt-label { color: var(--mu); font-weight: 600; }
-.receipt-val { font-weight: 700; }
-
-/* -------------------------------------------------------------
-   PANTALLA 6: DOCENTE · REPORTES RECIBIDOS (HU-03)
-   ------------------------------------------------------------- */
-.tabs-row {
-  display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px;
-}
-.tab-btn {
-  padding: 8px 18px; border-radius: 10px; border: 1.5px solid var(--bd);
-  background: var(--sf); font-size: 14px; font-weight: 600; color: var(--mu);
-  cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all .15s;
-}
-.tab-btn.active {
-  background: var(--pr); border-color: var(--pr); color: var(--on-pr);
-}
-.tab-badge {
-  padding: 1px 7px; border-radius: 999px; font-size: 12px; font-weight: 700;
-  background: rgba(0,0,0,.08); color: inherit;
-}
-.tab-btn.active .tab-badge { background: rgba(255,255,255,.25); }
-
-.reports-list { display: flex; flex-direction: column; gap: 16px; }
-.report-card {
-  background: var(--sf); border: 1px solid var(--bd); border-radius: 18px;
-  padding: 22px 26px; box-shadow: var(--sh); transition: transform .2s;
-}
-.report-card:hover { transform: translateY(-2px); }
-.report-card-top {
-  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start;
-  gap: 12px; margin-bottom: 12px;
-}
-.rep-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.badge {
-  display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;
-  border-radius: 999px; font-size: 12px; font-weight: 700;
-}
-.badge-pend { background: var(--pend-bg); color: var(--pend-tx); }
-.badge-rev { background: var(--rev-bg); color: var(--rev-tx); }
-.badge-ok { background: var(--ok-bg); color: var(--ok-tx); }
-.badge-cat { background: var(--sf2); color: var(--tx); border: 1px solid var(--bd); }
-
-.report-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--tx); }
-.report-body { font-size: 15px; color: var(--mu); margin-bottom: 16px; line-height: 1.5; }
-
-.status-changer {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  padding-top: 14px; border-top: 1px solid var(--bd);
-}
-.status-changer-label { font-size: 13px; font-weight: 700; color: var(--mu); margin-right: 4px; }
-.status-pill-btn {
-  border: 1px solid var(--bd); background: var(--sf2); color: var(--tx);
-  padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
-  transition: all .15s;
-}
-.status-pill-btn:hover { border-color: var(--pr); }
-.status-pill-btn.current {
-  background: var(--pr); border-color: var(--pr); color: var(--on-pr); font-weight: 700;
-}
-
-/* -------------------------------------------------------------
-   PANTALLA 7: DOCENTE · ESTADÍSTICAS Y MÉTRICAS (HU-04)
-   ------------------------------------------------------------- */
-.stats-cards-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 30px;
-}
-.metric-card {
-  background: var(--sf); border: 1px solid var(--bd); border-radius: 18px;
-  padding: 22px; box-shadow: var(--sh);
-}
-.metric-label { font-size: 13px; font-weight: 700; color: var(--mu); text-transform: uppercase; margin-bottom: 6px; }
-.metric-num { font-size: 38px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
-.metric-sub { font-size: 13px; color: var(--mu); }
-
-.charts-row {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px;
-}
-.chart-box {
-  background: var(--sf); border: 1px solid var(--bd); border-radius: 18px;
-  padding: 24px; box-shadow: var(--sh);
-}
-.chart-title { font-size: 18px; font-weight: 700; margin-bottom: 18px; }
-.bar-item { margin-bottom: 14px; }
-.bar-label-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-.bar-track { height: 10px; background: var(--sf2); border-radius: 999px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 999px; transition: width .4s ease; }
-
-/* Toast flotante */
-.toast-notice {
-  position: fixed; bottom: 24px; right: 24px; z-index: 10000;
-  background: var(--toast-bg); color: var(--toast-tx);
-  padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 600;
-  box-shadow: 0 10px 30px rgba(0,0,0,.25); display: flex; align-items: center; gap: 8px;
-  animation: slide-up .25s ease-out;
-}
-@keyframes slide-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-.hidden { display: none !important; }
+@media (max-width:820px){.flow{grid-template-columns:1fr}.flow .line,.flow .spark{display:none}.landing .stage{width:300px;height:300px}}
+@media (max-width:560px){.login .side{padding:32px 20px;min-height:420px}.login .side .orbit,.login .side .pulse{display:none}.legend{gap:8px}.landing-inner{padding:20px 16px 32px!important}}
 </style>
 </head>
 <body>
+<div id="app"></div>
+<div id="toasts" role="status" aria-live="polite"></div>
 
-<!-- ENCABEZADO SUPERIOR -->
-<header class="app-header">
-  <div class="header-inner">
-    <a href="#" class="brand" data-screen="landing">
-      <svg width="34" height="34" viewBox="0 0 36 36" aria-hidden="true">
-        <rect width="36" height="36" rx="10" fill="var(--pr)"></rect>
-        <circle cx="12.5" cy="10.5" r="3.2" fill="var(--on-pr)"></circle>
-        <circle cx="23.5" cy="10.5" r="3.2" fill="var(--ac)"></circle>
-        <path d="M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18" stroke="var(--on-pr)" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
-      </svg>
-      <div>
-        <span class="brand-name display">nexo</span>
-        <span class="brand-sub">PUJ</span>
-      </div>
-    </a>
-
-    <div class="header-actions">
-      <!-- Indicador de conexión Firebase -->
-      <div class="fb-badge" title="Conectado directamente a Firebase Authentication y Cloud Firestore">
-        <span class="fb-dot"></span>
-        <span id="fbStatusText">Firebase BaaS</span>
-      </div>
-
-      <!-- Selector de tema -->
-      <div class="theme-switch" role="group" aria-label="Cambiar tema">
-        <button class="theme-btn active" data-theme-val="jave" title="Tema Javeriana">Jave</button>
-        <button class="theme-btn" data-theme-val="claro" title="Tema Claro">Claro</button>
-        <button class="theme-btn" data-theme-val="oscuro" title="Tema Oscuro">Oscuro</button>
-      </div>
-
-      <!-- Botón dinámico según sesión -->
-      <div id="headerAuthSlot"></div>
-    </div>
-  </div>
-
-  <!-- Barra de navegación rápida de las 10 pantallas (para evaluación) -->
-  <div class="demo-screens-bar">
-    <span class="demo-bar-title">Pantallas (10):</span>
-    <button class="screen-tag active" data-screen="landing">1. Landing</button>
-    <button class="screen-tag" data-screen="login">2. Login</button>
-    <button class="screen-tag" data-screen="est-asig">3. Estudiante: Asignaturas</button>
-    <button class="screen-tag" data-screen="est-nuevo">4. Estudiante: Nuevo Reporte</button>
-    <button class="screen-tag" data-screen="est-enviado">5. Estudiante: Reporte Enviado</button>
-    <button class="screen-tag" data-screen="doc-reportes">6. Docente: Reportes</button>
-    <button class="screen-tag" data-screen="doc-stats">7. Docente: Estadísticas</button>
-    <button class="screen-tag" data-screen="doc-asig">8. Docente: Asignaturas</button>
-    <button class="screen-tag" data-screen="dir-semanal">9. Dirección: Panorama</button>
-    <button class="screen-tag" data-screen="dir-grupo">10. Dirección: Detalle Grupo</button>
-  </div>
-</header>
-
-<!-- CONTENEDOR PRINCIPAL DE PANTALLAS -->
-<main id="appRoot"></main>
-
-<!-- CONTENEDOR PARA TOAST NOTIFICATIONS -->
-<div id="toastContainer"></div>
-
-<!-- LÓGICA DE LA APLICACIÓN & CONEXIÓN CON FIREBASE -->
 <script type="module">
-import { NexoAPI, ROL_MAP, EST_MAP, EST_LABELS } from './nexo-api.js';
+import { NexoAPI, EST_LABELS, MOOD_LABELS, CATEGORIAS } from './nexo-api.js';
 
-// Estado global de la vista
-const AppState = {
-  currentScreen: 'landing', // 'landing', 'login', 'est-asig', 'est-nuevo', 'est-enviado', 'doc-reportes', 'doc-stats', 'doc-asig', 'dir-semanal', 'dir-grupo'
-  theme: localStorage.getItem('nexo_theme') || 'jave',
-  user: null, // Perfil del usuario activo
-  selectedRole: 'est', // 'est', 'doc', 'dir'
-  loginEmail: 'estudiante@javeriana.edu.co',
-  loginPass: 'clave123',
-  loginLoading: false,
-  loginError: '',
-  
-  // Datos del nuevo reporte
-  newReportSubjectId: 'subj-poo',
-  newReportMoods: { metodologia: 2, contenido: 2, ritmo: 2 },
-  newReportDetail: '',
-  lastCreatedReport: null,
-  
-  // Filtros docentes
-  docFilterState: 'todos', // 'todos', 'pend', 'rev', 'ok'
-  docFilterSubject: 'todos',
-  
-  // Asignaturas y reportes cargados
+// ===============================================================
+// ESTADO DE LA APLICACIÓN
+// ===============================================================
+const S = {
+  screen: 'landing',
+  booting: true,
+  user: null,
   subjects: [],
-  reports: []
+  reports: [],
+  unsubscribe: null,
+  dockOpen: readPref('nexo_dock', '1') === '1',
+  login: { role: 'est', email: '', pass: '', error: '', loading: false },
+  wizard: null,
+  lastReport: null,
+  doc: { estado: 'todos', subject: 'todos', openId: null, menuId: null },
+  dir: { subjectId: null }
 };
 
-// ===============================================================
-// RENDERIZADO DE LAS 10 PANTALLAS
-// ===============================================================
+function readPref(k, def) { try { return localStorage.getItem(k) ?? def; } catch (e) { return def; } }
+function writePref(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
-// 1. PANTALLA 1: LANDING PAGE
+const SCREEN_ROLE = {
+  'est-asig': 'est', 'est-nuevo': 'est', 'est-enviado': 'est',
+  'doc-reportes': 'doc', 'doc-stats': 'doc', 'doc-asig': 'doc',
+  'dir-semanal': 'dir', 'dir-grupo': 'dir'
+};
+const roleOf = (u) => (u?.rol === 'adm' ? 'dir' : u?.rol);
+const homeOf = (u) => ({ est: 'est-asig', doc: 'doc-reportes', dir: 'dir-semanal' }[roleOf(u)] || 'landing');
+
+// ===============================================================
+// UTILIDADES
+// ===============================================================
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
+const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const MESES_L = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+function monday(d = new Date()) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+  return x;
+}
+function semesterStart(d = new Date()) {
+  return monday(new Date(d.getFullYear(), d.getMonth() >= 6 ? 7 : 1, 1));
+}
+const semestre = () => { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() >= 6 ? 2 : 1}`; };
+const weekOfSemester = (d = new Date()) => Math.max(1, Math.floor((monday(d) - semesterStart(d)) / (7 * 86400000)) + 1);
+function weekLabel() {
+  const m = monday();
+  const f = new Date(m); f.setDate(m.getDate() + 4);
+  const desde = m.getMonth() === f.getMonth() ? m.getDate() : `${m.getDate()} de ${MESES_L[m.getMonth()]}`;
+  return `Semana ${weekOfSemester()}, del ${desde} al ${f.getDate()} de ${MESES_L[f.getMonth()]}`;
+}
+const thisWeek = (iso) => new Date(iso) >= monday();
+const dayBadge = (iso) => { const d = new Date(iso); return `<div class="date-badge"><strong>${String(d.getDate()).padStart(2, '0')}</strong><span>${MESES[d.getMonth()]}</span></div>`; };
+const shortDate = (iso) => { const d = new Date(iso); return `${d.getDate()} ${MESES[d.getMonth()]}`; };
+const fullDate = (iso) => {
+  const d = new Date(iso);
+  const h = d.getHours() % 12 || 12;
+  return `${d.getDate()} ${MESES[d.getMonth()]}, ${h}:${String(d.getMinutes()).padStart(2, '0')} ${d.getHours() < 12 ? 'a. m.' : 'p. m.'}`;
+};
+const listJoin = (arr) => arr.length <= 1 ? (arr[0] || '') : `${arr.slice(0, -1).join(', ')} y ${arr[arr.length - 1]}`;
+
+const MK_COLORS = [
+  'linear-gradient(145deg,#A04545,#6E2626)',
+  'linear-gradient(145deg,#867ED3,#62405F)',
+  'linear-gradient(145deg,#4B9862,#2A6A3D)',
+  'linear-gradient(145deg,#D9952B,#85500C)',
+  'linear-gradient(145deg,#B1BEC4,#7E93B6)'
+];
+const mk = (text, i = 0, size) => `<span class="mk" style="background:${MK_COLORS[i % MK_COLORS.length]}${size ? `;width:${size}px;height:${size}px` : ''}">${esc(text)}</span>`;
+const statusPill = (estado, extra = '') => `<span class="pill ${estado}">${EST_LABELS[estado] || estado}${extra}</span>`;
+
+function counts(list) {
+  const c = { total: list.length, pend: 0, rev: 0, ok: 0 };
+  list.forEach(r => { c[r.estado] = (c[r.estado] || 0) + 1; });
+  return c;
+}
+function semaforo(c) {
+  if (!c.total) return { cls: 'bajo', label: 'Bajo' };
+  const ratio = c.pend / c.total;
+  if (ratio >= 0.5) return { cls: 'alto', label: 'Alto' };
+  if (ratio >= 0.25) return { cls: 'medio', label: 'Medio' };
+  return { cls: 'bajo', label: 'Bajo' };
+}
+const worstMood = (r) => Math.min(r.moods.metodologia, r.moods.contenido, r.moods.ritmo);
+
+// ===============================================================
+// ÍCONOS Y LOGO
+// ===============================================================
+const ICON = {
+  book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/>',
+  pen: '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  chart: '<path d="M3 3v18h18"/><path d="M8 17V11M13 17V7M18 17v-4"/>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+  x: '<path d="M18 6 6 18M6 6l12 12"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  down: '<path d="m6 9 6 6 6-6"/>',
+  right: '<path d="m9 18 6-6-6-6"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+  lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  chat: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  send: '<path d="m22 2-7 20-4-9-9-4z"/>'
+};
+const icon = (name, size = 20, extra = '') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${ICON[name]}</svg>`;
+
+function logo(size = 44, onDark = false) {
+  const bg = onDark ? '#fff' : '#832F2F';
+  const fg = onDark ? '#832F2F' : '#fff';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="10" fill="${bg}"/><circle cx="12.5" cy="10.5" r="3.2" fill="${fg}"/><circle cx="23.5" cy="10.5" r="3.2" fill="#A2CDAB"/><path d="M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18" stroke="${fg}" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+// Caritas de valoración (0 = Muy mal … 4 = Muy bien)
+const MOODS = [
+  { d: 'M8 17.2c1.2-1.7 2.5-2.5 4-2.5s2.8.8 4 2.5', brow: true, color: '#B3403A' },
+  { d: 'M8.5 16.2c1-.9 2.2-1.3 3.5-1.3s2.5.4 3.5 1.3', color: '#C98418' },
+  { d: 'M8.5 15.4h7', color: '#6B5E60' },
+  { d: 'M8.5 14.2c1 1.1 2.2 1.6 3.5 1.6s2.5-.5 3.5-1.6', color: '#832F2F' },
+  { d: 'M7.8 13.6c1.1 2.3 2.5 3.4 4.2 3.4s3.1-1.1 4.2-3.4z', filled: true, color: '#4B9862' }
+];
+function face(i, size = 34) {
+  const m = MOODS[Math.max(0, Math.min(4, i))];
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${m.color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${MOOD_LABELS[i]}" style="flex:none"><circle cx="12" cy="12" r="10"/><circle cx="9" cy="9.8" r="1.05" fill="${m.color}" stroke="none"/><circle cx="15" cy="9.8" r="1.05" fill="${m.color}" stroke="none"/>${m.brow ? '<path d="M7.6 7.4 10 8.2M16.4 7.4 14 8.2"/>' : ''}<path d="${m.d}" fill="${m.filled ? m.color : 'none'}"/></svg>`;
+}
+
+// ===============================================================
+// PIEZAS COMPARTIDAS
+// ===============================================================
+const SCENE_APP = `<div class="scene">
+  <div class="blob" style="width:440px;height:440px;background:#B295B0;opacity:.32;right:-120px;top:-100px"></div>
+  <div class="blob" style="width:380px;height:380px;background:#A2CDAB;opacity:.25;left:-100px;bottom:-80px;animation-delay:-7s"></div>
+  <div class="orbit" style="width:720px;height:720px;left:calc(55% - 360px);top:calc(45% - 360px);border:1px dashed rgba(131,47,47,.22);animation-duration:60s"><i style="background:#832F2F"></i></div>
+  <div class="orbit" style="width:440px;height:440px;left:calc(55% - 220px);top:calc(45% - 220px);border:1px dashed rgba(131,47,47,.26);animation-duration:38s"><i style="background:#6DAF7E"></i></div>
+  <div class="pulse" style="width:500px;height:500px;left:calc(55% - 250px);top:calc(45% - 250px)"></div>
+</div>`;
+
+const SCENE_CENTER = `<div class="scene">
+  <div class="blob" style="width:420px;height:420px;background:#B295B0;opacity:.35;right:-100px;top:-120px"></div>
+  <div class="blob" style="width:380px;height:380px;background:#A2CDAB;opacity:.28;left:-120px;bottom:-100px;animation-delay:-8s"></div>
+  <div class="orbit" style="width:980px;height:980px;left:calc(50% - 490px);top:calc(50% - 490px);border:1px dashed rgba(131,47,47,.24);animation-duration:80s"><i style="background:#832F2F"></i></div>
+  <div class="orbit" style="width:700px;height:700px;left:calc(50% - 350px);top:calc(50% - 350px);border:1px solid rgba(131,47,47,.2);animation-duration:56s;animation-direction:reverse"><i style="background:#B295B0"></i></div>
+  <div class="orbit" style="width:440px;height:440px;left:calc(50% - 220px);top:calc(50% - 220px);border:1px dashed rgba(131,47,47,.26);animation-duration:38s"><i style="background:#6DAF7E"></i></div>
+  <div class="pulse" style="width:700px;height:700px;left:calc(50% - 350px);top:calc(50% - 350px)"></div>
+</div>`;
+
+const NAVS = {
+  est: [['est-asig', 'Mis asignaturas', 'book'], ['est-nuevo', 'Nuevo reporte', 'pen']],
+  doc: [['doc-reportes', 'Reportes recibidos', 'inbox'], ['doc-stats', 'Estadísticas', 'chart'], ['doc-asig', 'Mis asignaturas', 'book']],
+  dir: [['dir-semanal', 'Panorama semanal', 'grid'], ['dir-grupo', 'Grupos y materias', 'users']]
+};
+
+function ringData() {
+  const rol = roleOf(S.user);
+  if (rol === 'est') {
+    const done = S.subjects.filter(s => S.reports.some(r => r.subjectId === s.id && thisWeek(r.createdAt))).length;
+    return { value: done, total: S.subjects.length, label: 'asignaturas reportadas esta semana' };
+  }
+  const c = counts(S.reports);
+  return { value: c.pend, total: c.total, label: rol === 'doc' ? 'reportes pendientes por atender' : 'reportes sin responder en el programa' };
+}
+
+function dock(active) {
+  const u = S.user;
+  const ring = ringData();
+  const dash = ring.total ? (138.2 * ring.value / ring.total).toFixed(1) : 0;
+  return `
+  <aside class="dock z ${S.dockOpen ? '' : 'closed'}" aria-label="Menú">
+    <div aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;pointer-events:none">
+      <div style="position:absolute;left:-60px;top:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(131,47,47,.22),transparent 68%)"></div>
+      <div style="position:absolute;inset:0;background-image:radial-gradient(rgba(131,47,47,.13) 1.2px,transparent 1.4px);background-size:18px 18px;-webkit-mask-image:linear-gradient(180deg,transparent 35%,#000 100%);mask-image:linear-gradient(180deg,transparent 35%,#000 100%)"></div>
+      <div class="orbit" style="width:300px;height:300px;left:-90px;bottom:-70px;border:1px dashed rgba(131,47,47,.3);animation-duration:40s"><i style="background:#832F2F"></i></div>
+      <div class="orbit" style="width:190px;height:190px;left:-35px;bottom:-15px;border:1px solid rgba(131,47,47,.22);animation-duration:26s;animation-direction:reverse"><i style="background:#B295B0"></i></div>
+    </div>
+    <div class="dock-inner">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <a href="#/landing" aria-label="Nexo, ir al inicio" style="display:flex">${logo(44)}</a>
+        <button class="round" data-act="toggle-dock" aria-label="Ocultar menú" title="Ocultar menú">${icon('menu', 18)}</button>
+      </div>
+      <nav aria-label="Principal" style="display:flex;flex-direction:column;gap:8px">
+        ${NAVS[roleOf(u)].map(([s, label, ic]) => `<a class="nv ${s === active ? 'on' : ''}" ${s === 'est-nuevo' ? 'data-act="new-report"' : `href="#/${s}"`}>${icon(ic)}${label}</a>`).join('')}
+      </nav>
+      <div class="ring-card" style="position:relative;overflow:hidden;border-radius:22px;padding:18px;color:#fff;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#9A3A3A,#5E2121);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 22px 34px -16px rgba(110,38,38,.8)">
+        <div class="orbit" style="width:120px;height:120px;right:-40px;top:-50px;border:1px dashed rgba(255,255,255,.3);animation-duration:24s"><i style="background:#A2CDAB"></i></div>
+        <svg width="56" height="56" viewBox="0 0 56 56" style="position:relative;flex:0 0 56px" aria-hidden="true"><circle cx="28" cy="28" r="22" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="6"/><circle cx="28" cy="28" r="22" fill="none" stroke="#A2CDAB" stroke-width="6" stroke-linecap="round" stroke-dasharray="${dash} 138.2" transform="rotate(-90 28 28)"/></svg>
+        <div style="position:relative"><div class="d" style="font-size:20px;font-weight:600">${ring.value} de ${ring.total}</div><div style="font-size:13px;color:#F1D9D9;line-height:1.3">${ring.label}</div></div>
+      </div>
+      <div class="me-card" style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 12px;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.7));box-shadow:inset 0 1px 0 #fff,0 16px 28px -14px rgba(64,32,32,.4)">
+        <span class="avatar" role="img" aria-label="${esc(u.nombre)}">${esc(u.iniciales)}<i></i></span>
+        <div style="flex:1;min-width:0;line-height:1.2"><div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(u.nombre)}</div><div style="font-size:12px;color:#6B5E60">${{ est: 'Estudiante', doc: 'Docente', dir: 'Dirección' }[roleOf(u)]}</div></div>
+        <button class="out" data-act="logout" aria-label="Cerrar sesión" title="Cerrar sesión">${icon('logout')}</button>
+      </div>
+    </div>
+  </aside>`;
+}
+
+function shell(active, content) {
+  return `<div class="root">${SCENE_APP}
+    <div class="app">
+      ${dock(active)}
+      ${S.dockOpen ? '' : `<button class="round reopen" data-act="toggle-dock" aria-label="Mostrar menú" title="Mostrar menú">${icon('menu', 20)}</button>`}
+      <main class="main">${content}</main>
+    </div>
+  </div>`;
+}
+
+// ===============================================================
+// 1. LANDING
+// ===============================================================
+function landingLayers() {
+  const D = 46, N = 12, R = 12, layers = [];
+  const add = (z, rf, o, ex = '') => layers.push({ t: `translateZ(${z.toFixed(1)}px) ${ex}`, rf, o, nc: '#832F2F', ac: '#A2CDAB' });
+  add(-D / 2, '#FFFFFF', 1, 'rotateY(180deg)');
+  for (let i = 1; i < N; i++) add(-D / 2 + (D * i) / N, '#A09A9A', 0);
+  add(D / 2, '#FFFFFF', 0);
+  for (let i = 1; i <= 3; i++) layers.push({ t: `translateZ(${(D / 2 + (R * i) / 4).toFixed(1)}px)`, rf: 'none', o: 1, nc: '#4F1C1C', ac: '#617B66' });
+  layers.push({ t: `translateZ(${D / 2 + R}px)`, rf: 'none', o: 1, nc: '#832F2F', ac: '#A2CDAB' });
+  return layers.map(l => `<div class="layer" style="transform:${l.t}"><svg viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="10" fill="${l.rf}"/><g opacity="${l.o}"><circle cx="12.5" cy="10.5" r="3.2" fill="${l.nc}"/><circle cx="23.5" cy="10.5" r="3.2" fill="${l.ac}"/><path d="M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18" stroke="${l.nc}" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>`).join('');
+}
+
 function renderLanding() {
+  const cta = S.user
+    ? `<a class="lbtn" href="#/${homeOf(S.user)}">Ir a mi panel</a>`
+    : `<a class="lbtn" href="#/login">Iniciar sesión</a>`;
+  const step = (n, ic, title, text) => `<div class="st s${n}"><span class="big d" aria-hidden="true">${n}</span><span class="node n${n}">${icon(ic, 26)}</span><div style="padding-top:2px;position:relative"><h3 class="d" style="font-size:24px;font-weight:600">${title}</h3><p style="margin:6px 0 0;color:#F1D9D9;font-size:16px;line-height:1.45;max-width:26ch">${text}</p></div></div>`;
   return `
-  <section class="landing-hero">
-    <div class="landing-grid"></div>
-    <div class="landing-container">
-      <div class="landing-flex">
-        <div class="landing-content">
-          <h1 class="landing-title display">Tu voz académica, escuchada a tiempo.</h1>
-          <p class="landing-lead display">Dilo hoy. Mejora mañana.</p>
-          <div style="display:flex;gap:14px;flex-wrap:wrap">
-            <button class="btn btn-accent" data-screen="login" style="font-size:17px;min-height:52px;padding:0 32px">
-              Ingresar al portal
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <button class="btn btn-white" data-screen="doc-reportes">
-              Ver panel docente
-            </button>
-          </div>
+  <div class="landing">
+    <div class="blob" style="width:560px;height:560px;background:#B295B0;opacity:.45;right:-140px;top:-100px"></div>
+    <div class="blob" style="width:440px;height:440px;background:#A2CDAB;opacity:.22;left:-140px;bottom:-80px;animation-delay:-6s"></div>
+    <div class="grid"></div>
+    <div class="landing-inner" style="position:relative;display:flex;flex-direction:column;flex:1;width:100%;max-width:1240px;margin:0 auto;padding:28px 40px 44px;gap:24px">
+      <nav style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+        <div role="img" aria-label="Nexo" style="display:flex">${logo(44, true)}</div>
+        ${cta}
+      </nav>
+      <div style="flex:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;min-height:0">
+        <div style="flex:1 1 460px;min-width:0">
+          <h1 class="d" style="font-size:clamp(44px,5.4vw,78px);line-height:1.02;font-weight:600;max-width:13ch;text-shadow:0 4px 30px rgba(0,0,0,.25)">Tu voz académica, escuchada a tiempo.</h1>
+          <p class="d" style="font-size:clamp(22px,2vw,28px);line-height:1.3;font-weight:500;color:#F1D9D9;margin:20px 0 0">Dilo hoy. Mejora mañana.</p>
         </div>
-
-        <div class="stage-3d">
-          <div class="orbit-ring r1"><i></i></div>
-          <div class="orbit-ring r2"></div>
-          <div class="logo-core">
-            <svg width="150" height="150" viewBox="0 0 36 36">
-              <rect width="36" height="36" rx="10" fill="var(--hl-bg)"></rect>
-              <circle cx="12.5" cy="10.5" r="3.2" fill="var(--hl-fg)"></circle>
-              <circle cx="23.5" cy="10.5" r="3.2" fill="var(--hl-ac)"></circle>
-              <path d="M10 27v-8.5a3 3 0 0 1 5.6-1.5L20.4 25a3 3 0 0 0 5.6-1.5V18" stroke="var(--hl-fg)" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-          </div>
+        <div class="stage">
+          <div class="ring" style="width:98%;height:98%"><i></i></div>
+          <div class="ring" style="width:72%;height:72%;animation-duration:20s;animation-direction:reverse"><i style="background:#B295B0;box-shadow:0 0 18px #B295B0"></i></div>
+          <div class="glow"></div>
+          <div class="float"><div class="spin">${landingLayers()}</div></div>
         </div>
       </div>
-
-      <div class="flow-steps">
-        <div class="step-card">
-          <div class="step-num display">1</div>
-          <div class="step-info">
-            <h3 class="display">Elige la materia</h3>
-            <p>Selecciona el curso o laboratorio sobre el que quieres retroalimentar.</p>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-num display">2</div>
-          <div class="step-info">
-            <h3 class="display">Cuéntanos</h3>
-            <p>Describe con claridad las dificultades en metodología, contenido o ritmo.</p>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-num display">3</div>
-          <div class="step-info">
-            <h3 class="display">Envía y listo</h3>
-            <p>El docente lo recibe de inmediato en su panel y actualiza su estado.</p>
-          </div>
-        </div>
+      <div class="flow">
+        <div class="line"></div><div class="spark"></div>
+        ${step(1, 'book', 'Elige la materia', 'Selecciona el curso sobre el que quieres hablar.')}
+        ${step(2, 'chat', 'Cuéntanos', 'Cuenta qué pasa y cómo te sientes, a tu ritmo.')}
+        ${step(3, 'send', 'Envía y listo', 'Un reporte toma menos de dos minutos.')}
       </div>
     </div>
-  </section>`;
+  </div>`;
 }
 
-// 2. PANTALLA 2: INICIAR SESIÓN (HU-01)
+// ===============================================================
+// 2. INICIAR SESIÓN
+// ===============================================================
 function renderLogin() {
+  const L = S.login;
+  const roleBtn = (r, label) => `<button type="button" class="role ${L.role === r ? 'on' : ''}" data-act="login-role" data-val="${r}" aria-pressed="${L.role === r}">${label}</button>`;
   return `
-  <section class="login-view">
-    <div class="login-card">
-      <div class="login-header">
-        <h2 class="display">Iniciar sesión</h2>
-        <p>Accede con tus credenciales institucionales PUJ.</p>
-      </div>
-
-      <div class="roles-selector">
-        <button type="button" class="role-chip ${AppState.selectedRole === 'est' ? 'selected' : ''}" data-role="est">Estudiante</button>
-        <button type="button" class="role-chip ${AppState.selectedRole === 'doc' ? 'selected' : ''}" data-role="doc">Docente</button>
-        <button type="button" class="role-chip ${AppState.selectedRole === 'dir' ? 'selected' : ''}" data-role="dir">Dirección</button>
-      </div>
-
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="inputEmail">Correo institucional</label>
-          <div class="input-wrap">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--mu)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            <input type="email" id="inputEmail" value="${AppState.loginEmail}" placeholder="ejemplo@javeriana.edu.co" required>
-          </div>
+  <div class="login">
+    <section class="side">
+      <div class="blob" style="width:460px;height:460px;background:#B295B0;opacity:.4;right:-140px;top:-100px"></div>
+      <div class="blob" style="width:380px;height:380px;background:#A2CDAB;opacity:.2;left:-120px;bottom:-80px;animation-delay:-6s"></div>
+      <a href="#/landing" aria-label="Nexo, volver al inicio" style="position:absolute;left:clamp(20px,4vw,56px);top:40px;display:flex">${logo(44, true)}</a>
+      <div style="position:relative;width:min(520px,100%);aspect-ratio:1;flex:0 0 auto;display:flex;align-items:center;justify-content:center">
+        <div class="orbit" style="width:100%;height:100%;left:0;top:0;border:1px dashed rgba(255,255,255,.3);animation-duration:48s"><i style="background:#A2CDAB;box-shadow:0 0 16px #A2CDAB"></i></div>
+        <div class="orbit" style="width:70%;height:70%;left:15%;top:15%;border:1px solid rgba(255,255,255,.24);animation-duration:30s;animation-direction:reverse"><i style="background:#B295B0;box-shadow:0 0 16px #B295B0"></i></div>
+        <div class="pulse wh" style="width:70%;height:70%;left:15%;top:15%"></div>
+        <div style="position:relative;width:250px;text-align:center">
+          <h1 class="d" style="font-size:30px;line-height:1.12;font-weight:600">Tu voz académica, escuchada a tiempo.</h1>
+          <div style="width:44px;height:3px;border-radius:3px;background:#A2CDAB;margin:16px auto"></div>
+          <p class="d" style="font-size:19px;line-height:1.3;color:#F1D9D9;font-weight:500">Dilo hoy. Mejora mañana.</p>
         </div>
-
-        <div class="form-group">
-          <label for="inputPassword">Contraseña</label>
-          <div class="input-wrap">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--mu)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <input type="password" id="inputPassword" value="${AppState.loginPass}" placeholder="Tu contraseña" required>
-          </div>
+      </div>
+      <p style="position:absolute;left:0;right:0;bottom:36px;text-align:center;color:#F1D9D9;font-size:14px">Un reporte toma menos de dos minutos.</p>
+    </section>
+    <section style="position:relative;overflow:hidden;flex:1 1 440px;min-width:0;display:flex;align-items:center;justify-content:center;padding:48px 20px">
+      <div class="orbit" style="width:520px;height:520px;left:calc(50% - 260px);top:calc(50% - 260px);border:1px dashed rgba(131,47,47,.28);animation-duration:48s"><i style="background:#832F2F"></i></div>
+      <div class="orbit" style="width:360px;height:360px;left:calc(50% - 180px);top:calc(50% - 180px);border:1px solid rgba(131,47,47,.22);animation-duration:30s;animation-direction:reverse"><i style="background:#B295B0"></i></div>
+      <div class="pulse" style="width:360px;height:360px;left:calc(50% - 180px);top:calc(50% - 180px);border-color:rgba(131,47,47,.35)"></div>
+      <form id="loginForm" class="rise" novalidate style="position:relative;width:100%;max-width:440px;display:flex;flex-direction:column;gap:20px;padding:36px 34px;border-radius:28px;background:#fff;border:1px solid #E7DFDB;box-shadow:0 2px 4px rgba(64,32,32,.08),0 30px 60px -24px rgba(64,32,32,.35)">
+        <a href="#/landing" style="color:#832F2F;font-weight:600;font-size:15px">← Volver al inicio</a>
+        <h2 class="d" style="font-size:40px;line-height:1.05;font-weight:600">Iniciar sesión</h2>
+        <div style="display:flex;gap:8px" role="group" aria-label="Tipo de cuenta">
+          ${roleBtn('est', 'Estudiante')}${roleBtn('doc', 'Docente')}${roleBtn('dir', 'Dirección')}
         </div>
-
-        ${AppState.loginError ? `<p style="color:var(--red);font-size:13px;font-weight:600;margin-bottom:14px">${AppState.loginError}</p>` : ''}
-
-        <button type="submit" class="btn btn-primary" style="width:100%;min-height:50px" ${AppState.loginLoading ? 'disabled' : ''}>
-          ${AppState.loginLoading ? 'Conectando con Firebase…' : 'Ingresar'}
-        </button>
+        <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:15px">Correo institucional
+          <span class="in"><span style="color:#6B5E60;display:flex">${icon('mail')}</span><input id="loginEmail" type="email" autocomplete="username" placeholder="ejemplo@javeriana.edu.co" value="${esc(L.email)}" required></span></label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:15px">Contraseña
+          <span class="in"><span style="color:#6B5E60;display:flex">${icon('lock')}</span><input id="loginPass" type="password" autocomplete="current-password" placeholder="Tu contraseña" value="${esc(L.pass)}" required></span></label>
+        ${L.error ? `<p class="err" role="alert">${esc(L.error)}</p>` : ''}
+        <button class="go" type="submit" ${L.loading ? 'disabled' : ''}>${L.loading ? 'Ingresando…' : 'Ingresar'}</button>
       </form>
-
-      <div class="demo-logins">
-        <div class="demo-logins-title">Acceso rápido con cuentas de prueba:</div>
-        <div class="demo-buttons">
-          <button class="demo-pill" data-demo-user="est">👤 Estudiante (Ana Ruiz)</button>
-          <button class="demo-pill" data-demo-user="doc">👨‍🏫 Docente (Dr. Mendoza)</button>
-          <button class="demo-pill" data-demo-user="dir">🏛️ Dirección (Dra. Gómez)</button>
-        </div>
-      </div>
-    </div>
-  </section>`;
+    </section>
+  </div>`;
 }
 
-// 3. PANTALLA 3: ESTUDIANTE · MIS ASIGNATURAS (HU-01, HU-02)
+// ===============================================================
+// 3. ESTUDIANTE · MIS ASIGNATURAS
+// ===============================================================
 function renderEstAsig() {
-  const user = AppState.user || { nombre: 'Ana María Ruiz', email: 'estudiante@javeriana.edu.co' };
-  return `
-  <section class="panel-view">
-    <div class="panel-top">
-      <div class="panel-title">
-        <h1 class="display">Mis asignaturas inscritas</h1>
-        <p>Semestre 2026-2 · Selecciona una asignatura para reportar dificultades o inquietudes.</p>
-      </div>
-      <button class="btn btn-primary" data-screen="est-nuevo">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        Nuevo reporte
-      </button>
-    </div>
+  const u = S.user;
+  const lastThisWeek = (s) => S.reports.find(r => r.subjectId === s.id && thisWeek(r.createdAt));
+  const faltan = S.subjects.filter(s => !lastThisWeek(s)).length;
+  const titulo = !S.subjects.length
+    ? `Hola, ${esc(u.primerNombre)}. Aún no tienes asignaturas inscritas.`
+    : faltan
+      ? `Hola, ${esc(u.primerNombre)}. Te ${faltan === 1 ? 'falta 1 asignatura' : `faltan ${faltan} asignaturas`} por reportar.`
+      : `Hola, ${esc(u.primerNombre)}. Reportaste todas tus asignaturas esta semana.`;
 
-    <div class="subject-grid">
-      ${AppState.subjects.map(s => `
-        <div class="subject-card">
-          <div>
-            <span class="subj-code">${s.codigo || 'PUJ'} · ${s.grupo || 'G1'}</span>
-            <h3 class="subj-name">${s.nombre}</h3>
-            <p class="subj-prof">Docente: <strong>${s.profesor}</strong></p>
-          </div>
-          <button class="btn btn-secondary" data-action="crear-reporte-asig" data-subj-id="${s.id}" style="width:100%">
-            Crear reporte sobre esta materia
-          </button>
-        </div>
-      `).join('')}
-    </div>
-  </section>`;
+  const rows = S.subjects.map((s, i) => {
+    const last = lastThisWeek(s);
+    return `<li class="row lift">
+      ${mk(s.abreviatura, i)}
+      <div style="flex:1 1 220px;min-width:0"><div style="font-weight:700;font-size:17px">${esc(s.nombre)}</div><div style="font-size:14px;color:#6B5E60;margin-top:2px">${esc(s.profesor)}, ${esc(s.grupo)}</div></div>
+      ${last
+        ? `<span class="pill ok">${icon('check', 14)}Reportada el ${shortDate(last.createdAt)}</span><button class="btn" data-act="report-subject" data-id="${esc(s.id)}">Reportar otra vez</button>`
+        : `<span class="pill pend">Sin reporte esta semana</span><button class="btn p" data-act="report-subject" data-id="${esc(s.id)}">Reportar</button>`}
+    </li>`;
+  }).join('');
+
+  const mine = S.reports.slice(0, 6).map(r => `<li class="row" style="box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(64,32,32,.06)">
+      ${dayBadge(r.createdAt)}
+      <div style="flex:1 1 220px;min-width:0"><div style="font-weight:700;font-size:16px">${esc(r.titulo)}</div><div style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:#832F2F">${esc(r.asignatura)}</span><span class="tag-badge">${esc(r.categoria)}</span></div></div>
+      ${statusPill(r.estado)}
+    </li>`).join('');
+
+  return shell('est-asig', `
+    <header><p class="eyebrow">${weekLabel()}</p><h1 class="d h1" style="max-width:22ch">${titulo}</h1></header>
+    <section class="banner">
+      <div class="orbit" style="width:300px;height:300px;right:-60px;top:-110px;border:1px dashed rgba(255,255,255,.35);animation-duration:30s"><i style="background:#A2CDAB"></i></div>
+      <div class="orbit" style="width:190px;height:190px;right:-5px;top:-55px;border:1px solid rgba(255,255,255,.28);animation-duration:20s;animation-direction:reverse"><i style="background:#B295B0"></i></div>
+      <div style="position:relative;max-width:46ch"><h2 class="d" style="font-size:28px;font-weight:600">¿Cómo te fue esta semana?</h2><p style="margin:8px 0 0;color:#F1D9D9;font-size:16px;line-height:1.45">Elige una asignatura y responde tres preguntas rápidas. Tu docente verá el reporte y podrá responder.</p></div>
+      <button class="btn w" data-act="new-report">Hacer un reporte</button>
+    </section>
+    <section class="glass" style="border-radius:30px;padding:28px 28px 32px">
+      <div class="sec-head"><h2 class="d" style="font-size:24px;font-weight:600">Tus asignaturas</h2><span style="font-size:14px;color:#6B5E60">${plural(S.subjects.length, 'asignatura', 'asignaturas')} este semestre</span></div>
+      ${rows ? `<ul class="list">${rows}</ul>` : `<p class="empty">Cuando te inscriban en asignaturas aparecerán aquí.</p>`}
+    </section>
+    ${mine ? `<section class="glass" style="border-radius:30px;padding:28px 28px 32px">
+      <div class="sec-head"><h2 class="d" style="font-size:24px;font-weight:600">Tus reportes recientes</h2><span style="font-size:14px;color:#6B5E60">Así va el seguimiento de tu docente</span></div>
+      <ul class="list">${mine}</ul>
+    </section>` : ''}
+  `);
 }
 
-// 4. PANTALLA 4: ESTUDIANTE · NUEVO REPORTE (HU-02)
-function renderEstNuevo() {
-  const currentChars = (AppState.newReportDetail || '').length;
-  const isValidLength = currentChars >= 20;
+// ===============================================================
+// 4. ESTUDIANTE · NUEVO REPORTE (asistente de 5 pasos)
+// ===============================================================
+const WIZ_STEPS = [
+  { name: 'Asignatura' },
+  { name: 'Metodología', key: 'metodologia', q: '¿Cómo te ha ido con la metodología?', help: 'Piensa en cómo se desarrollan las clases, las explicaciones del docente y las dinámicas de grupo.' },
+  { name: 'Contenido', key: 'contenido', q: '¿Qué tan claro ha sido el contenido?', help: 'Piensa en los temas, los materiales y los ejemplos que se ven en clase.' },
+  { name: 'Ritmo', key: 'ritmo', q: '¿Cómo sientes el ritmo de la clase?', help: 'Piensa en la velocidad con la que se avanza y el tiempo que tienes para practicar.' },
+  { name: 'Tu mensaje' }
+];
 
-  return `
-  <section class="panel-view">
-    <div class="panel-top" style="justify-content:center;text-align:center;margin-bottom:20px">
-      <div class="panel-title">
-        <h1 class="display">Crear reporte de dificultad</h1>
-        <p>Tu reporte ayuda al docente a ajustar el ritmo y metodología del curso.</p>
-      </div>
-    </div>
-
-    <div class="wizard-box">
-      <form id="newReportForm">
-        <div class="form-group">
-          <label for="selectSubject">Asignatura</label>
-          <div class="input-wrap">
-            <select id="selectSubject">
-              ${AppState.subjects.map(s => `
-                <option value="${s.id}" ${s.id === AppState.newReportSubjectId ? 'selected' : ''}>${s.nombre} (${s.profesor})</option>
-              `).join('')}
-            </select>
-          </div>
-        </div>
-
-        <div class="mood-group">
-          <label class="mood-label">1. Metodología de clase</label>
-          <div class="mood-pills">
-            <button type="button" class="mood-pill ${AppState.newReportMoods.metodologia === 1 ? 'active' : ''}" data-mood="metodologia" data-val="1">Difícil de seguir</button>
-            <button type="button" class="mood-pill ${AppState.newReportMoods.metodologia === 2 ? 'active' : ''}" data-mood="metodologia" data-val="2">Adecuada</button>
-            <button type="button" class="mood-pill ${AppState.newReportMoods.metodologia === 3 ? 'active' : ''}" data-mood="metodologia" data-val="3">Muy clara</button>
-          </div>
-        </div>
-
-        <div class="mood-group">
-          <label class="mood-label">2. Complejidad del contenido</label>
-          <div class="mood-pills">
-            <button type="button" class="mood-pill ${AppState.newReportMoods.contenido === 1 ? 'active' : ''}" data-mood="contenido" data-val="1">Muy complejo</button>
-            <button type="button" class="mood-pill ${AppState.newReportMoods.contenido === 2 ? 'active' : ''}" data-mood="contenido" data-val="2">Nivel esperado</button>
-            <button type="button" class="mood-pill ${AppState.newReportMoods.contenido === 3 ? 'active' : ''}" data-mood="contenido" data-val="3">Manejable</button>
-          </div>
-        </div>
-
-        <div class="mood-group">
-          <label class="mood-label">3. Ritmo de las sesiones</label>
-          <div class="mood-pills">
-            <button type="button" class="mood-pill ${AppState.newReportMoods.ritmo === 1 ? 'active' : ''}" data-mood="ritmo" data-val="1">Demasiado rápido</button>
-            <button type="button" class="mood-pill ${AppState.newReportMoods.ritmo === 2 ? 'active' : ''}" data-mood="ritmo" data-val="2">Equilibrado</button>
-            <button type="button" class="mood-pill ${AppState.newReportMoods.ritmo === 3 ? 'active' : ''}" data-mood="ritmo" data-val="3">Tranquilo</button>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="reportDetail">Descripción detallada de la dificultad</label>
-          <div class="input-wrap" style="align-items:flex-start;padding:12px">
-            <textarea id="reportDetail" rows="4" placeholder="Explica con ejemplos concretos qué tema o actividad representó una dificultad..." required>${AppState.newReportDetail}</textarea>
-          </div>
-          <div class="char-counter ${isValidLength ? 'valid' : ''}">
-            <span>${isValidLength ? '✓ Longitud válida' : 'Mínimo 20 caracteres requeridos (Criterio HU-02)'}</span>
-            <span>${currentChars} / 20</span>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:12px;margin-top:28px">
-          <button type="button" class="btn btn-secondary" data-screen="est-asig" style="flex:1">Cancelar</button>
-          <button type="submit" class="btn btn-primary" style="flex:2" ${!isValidLength ? 'disabled' : ''}>
-            Enviar reporte a Firebase
-          </button>
-        </div>
-      </form>
-    </div>
-  </section>`;
-}
-
-// 5. PANTALLA 5: ESTUDIANTE · REPORTE ENVIADO (HU-02)
-function renderEstEnviado() {
-  const rep = AppState.lastCreatedReport || {
-    id: 'rep-001',
-    asignatura: 'Programación Orientada a Objetos',
-    createdAt: new Date().toISOString(),
-    estado: 'pend'
+function newWizard(subjectId = null) {
+  return {
+    step: subjectId ? 2 : 1,
+    subjectId,
+    moods: { metodologia: null, contenido: null, ritmo: null },
+    comentarios: { metodologia: '', contenido: '', ritmo: '' },
+    detalle: '',
+    sending: false,
+    error: ''
   };
-
-  const fechaFormat = new Date(rep.createdAt).toLocaleString('es-CO', {
-    dateStyle: 'medium', timeStyle: 'short'
-  });
-
-  return `
-  <section class="panel-view">
-    <div class="success-card">
-      <div class="success-icon">✓</div>
-      <h1 class="success-title display">¡Reporte enviado exitosamente!</h1>
-      <p class="success-desc">Tu observación fue registrada en Cloud Firestore y asignada al docente para seguimiento.</p>
-
-      <div class="receipt-box">
-        <div class="receipt-row">
-          <span class="receipt-label">Folio del reporte:</span>
-          <span class="receipt-val">${rep.id}</span>
-        </div>
-        <div class="receipt-row">
-          <span class="receipt-label">Asignatura:</span>
-          <span class="receipt-val">${rep.asignatura}</span>
-        </div>
-        <div class="receipt-row">
-          <span class="receipt-label">Fecha y hora:</span>
-          <span class="receipt-val">${fechaFormat}</span>
-        </div>
-        <div class="receipt-row">
-          <span class="receipt-label">Estado inicial:</span>
-          <span class="badge badge-pend">Pendiente</span>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:12px;justify-content:center">
-        <button class="btn btn-primary" data-screen="est-asig">Volver a mis asignaturas</button>
-        <button class="btn btn-secondary" data-screen="est-nuevo">Crear otro reporte</button>
-      </div>
-    </div>
-  </section>`;
 }
 
-// 6. PANTALLA 6: DOCENTE · REPORTES RECIBIDOS (HU-03)
+function renderEstNuevo() {
+  const W = S.wizard || (S.wizard = newWizard());
+  const st = WIZ_STEPS[W.step - 1];
+  const subj = S.subjects.find(s => s.id === W.subjectId);
+  let body = '';
+  let canNext = true;
+
+  if (W.step === 1) {
+    canNext = Boolean(subj);
+    body = `
+      <div><h1 class="d" style="font-size:clamp(28px,3vw,38px);line-height:1.1;font-weight:600">¿Sobre qué asignatura quieres hablar?</h1>
+      <p style="margin:12px 0 0;color:#6B5E60;font-size:17px;line-height:1.5">Elige el curso. Solo tu docente y la dirección del programa verán tu reporte.</p></div>
+      <div role="radiogroup" aria-label="Asignatura" style="display:flex;flex-direction:column;gap:12px">
+        ${S.subjects.length ? S.subjects.map((s, i) => `<button type="button" role="radio" aria-checked="${s.id === W.subjectId}" class="pick ${s.id === W.subjectId ? 'on' : ''}" data-act="pick-subject" data-id="${esc(s.id)}">
+          ${mk(s.abreviatura, i, 46)}<span style="flex:1;min-width:0"><span style="display:block;font-weight:700;font-size:17px">${esc(s.nombre)}</span><span style="display:block;font-size:14px;color:#6B5E60;margin-top:2px">${esc(s.profesor)}, ${esc(s.grupo)}</span></span>
+          ${s.id === W.subjectId ? `<span style="color:#832F2F;display:flex">${icon('check', 22)}</span>` : ''}
+        </button>`).join('') : `<p class="empty">No tienes asignaturas inscritas todavía.</p>`}
+      </div>`;
+  } else if (st.key) {
+    const sel = W.moods[st.key];
+    canNext = sel !== null;
+    body = `
+      <div><h1 class="d" style="font-size:clamp(28px,3vw,38px);line-height:1.1;font-weight:600">${st.q}</h1>
+      <p style="margin:12px 0 0;color:#6B5E60;font-size:17px;line-height:1.5">${st.help}</p></div>
+      <div role="radiogroup" aria-label="Tu valoración" class="moods">
+        ${MOOD_LABELS.map((label, i) => `<button type="button" role="radio" aria-checked="${sel === i}" class="mood ${sel === i ? 'on' : ''}" data-act="pick-mood" data-key="${st.key}" data-val="${i}">${face(i, 44)}${label}</button>`).join('')}
+      </div>
+      <label style="display:flex;flex-direction:column;gap:8px;font-weight:600;font-size:15px">¿Quieres agregar algo? <span style="font-weight:500;color:#6B5E60;margin-top:-6px">Es opcional.</span>
+        <textarea class="field" rows="3" data-field="coment" data-key="${st.key}" placeholder="Un ejemplo concreto ayuda a que el docente entienda.">${esc(W.comentarios[st.key])}</textarea></label>`;
+  } else {
+    const len = W.detalle.trim().length;
+    canNext = len >= 20 && !W.sending;
+    body = `
+      <div><h1 class="d" style="font-size:clamp(28px,3vw,38px);line-height:1.1;font-weight:600">Cuéntanos qué está pasando</h1>
+      <p style="margin:12px 0 0;color:#6B5E60;font-size:17px;line-height:1.5">Describe la dificultad con tus palabras. Con esto tu docente sabrá qué ajustar.</p></div>
+      <div style="display:flex;justify-content:space-around;flex-wrap:wrap;gap:12px;padding:16px;border-radius:20px;background:#fff;border:1.5px solid #E7DFDB">
+        ${CATEGORIAS.map(c => `<button type="button" data-act="wiz-goto" data-step="${CATEGORIAS.indexOf(c) + 2}" title="Cambiar" style="display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;color:#6B5E60;font-weight:600;border:0;background:none;cursor:pointer">${face(W.moods[c.key] ?? 2, 34)}${c.nombre}</button>`).join('')}
+      </div>
+      <label style="display:flex;flex-direction:column;gap:8px;font-weight:600;font-size:15px">Tu mensaje
+        <textarea class="field" rows="5" data-field="detalle" placeholder="Por ejemplo: los talleres son muy extensos para el tiempo de clase y no alcanzamos a resolver dudas.">${esc(W.detalle)}</textarea></label>
+      <div class="counter ${len >= 20 ? 'okc' : ''}" id="wizCounter"><span>${len >= 20 ? '✓ Listo para enviar' : 'Escribe al menos 20 caracteres'}</span><span>${len} / 20</span></div>
+      ${W.error ? `<p class="err" role="alert">${esc(W.error)}</p>` : ''}`;
+  }
+
+  const last = W.step === 5;
+  return `<div class="root">${SCENE_CENTER}
+    <div class="z" style="max-width:820px;margin:0 auto;padding:32px 20px 48px;display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px"><a href="#/est-asig" aria-label="Nexo" style="display:flex">${logo(44)}</a><a class="btn" href="#/est-asig">${icon('x', 18)}Salir del reporte</a></div>
+      <div>
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:14px;color:#6B5E60;margin-bottom:10px"><span>Paso ${W.step} de 5: <strong style="color:#2B1E1F">${st.name}</strong></span><span>${subj ? esc(subj.nombre) : ''}</span></div>
+        <div class="steps" aria-hidden="true">${WIZ_STEPS.map((_, i) => `<span class="${i < W.step ? 'on' : ''}"></span>`).join('')}</div>
+      </div>
+      <section class="glass" style="border-radius:32px;padding:clamp(24px,4vw,40px);display:flex;flex-direction:column;gap:28px">
+        ${body}
+        <div style="display:flex;justify-content:space-between;gap:12px">
+          ${W.step === 1 ? `<a class="btn" href="#/est-asig">Atrás</a>` : `<button class="btn" data-act="wiz-back">Atrás</button>`}
+          <button class="btn p" id="wizNext" data-act="${last ? 'wiz-send' : 'wiz-next'}" style="min-height:50px;padding:0 30px" ${canNext ? '' : 'disabled'}>${last ? (W.sending ? 'Enviando…' : 'Enviar reporte') : 'Continuar'}</button>
+        </div>
+      </section>
+    </div>
+  </div>`;
+}
+
+// ===============================================================
+// 5. ESTUDIANTE · REPORTE ENVIADO
+// ===============================================================
+function renderEstEnviado() {
+  const r = S.lastReport;
+  if (!r) { location.hash = '#/est-asig'; return ''; }
+  return `<div class="root">${SCENE_CENTER}
+    <div class="z" style="max-width:640px;margin:0 auto;padding:32px 20px 48px;display:flex;flex-direction:column;gap:28px;align-items:center;text-align:center">
+      <div style="align-self:flex-start"><a href="#/est-asig" aria-label="Nexo" style="display:flex">${logo(44)}</a></div>
+      <div style="position:relative;width:112px;height:112px;display:flex;align-items:center;justify-content:center"><div class="pulse" style="width:112px;height:112px;left:0;top:0;border-color:rgba(75,152,98,.5)"></div><span style="width:96px;height:96px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#fff,#E1F1E5);box-shadow:inset 0 1px 0 #fff,0 24px 40px -16px rgba(75,152,98,.7)">${face(4, 56)}</span></div>
+      <div><h1 class="d" style="font-size:clamp(34px,4vw,48px);font-weight:600;line-height:1.05">Tu reporte fue enviado</h1><p style="margin:14px 0 0;color:#6B5E60;font-size:17px;line-height:1.5">${esc(S.user.primerNombre)}, gracias. Verás aquí cuando tu docente cambie el estado del reporte.</p></div>
+      <div class="glass lift" style="width:100%;max-width:460px;border-radius:26px;padding:24px 28px;display:flex;flex-direction:column;gap:18px;transform:rotate(-1.2deg)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:left"><span class="d" style="font-size:22px;font-weight:600">${esc(r.asignatura)}</span>${statusPill(r.estado)}</div>
+        <div style="display:flex;justify-content:space-around">
+          ${CATEGORIAS.map(c => `<span style="display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;color:#6B5E60;font-weight:600">${face(r.moods[c.key], 34)}${c.nombre}</span>`).join('')}
+        </div>
+        <div aria-hidden="true" style="position:relative;border-top:2px dashed #D9CEC9;margin:2px -28px"><span style="position:absolute;left:-12px;top:-13px;width:24px;height:24px;border-radius:50%;background:#F7F4F2;box-shadow:inset -2px 0 3px rgba(64,32,32,.12)"></span><span style="position:absolute;right:-12px;top:-13px;width:24px;height:24px;border-radius:50%;background:#F7F4F2;box-shadow:inset 2px 0 3px rgba(64,32,32,.12)"></span></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;font-size:15px"><span style="color:#6B5E60">Enviado</span><strong>${fullDate(r.createdAt)}</strong></div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center"><a class="btn" href="#/est-asig">Volver a mis asignaturas</a><button class="btn p" data-act="new-report">Hacer otro reporte</button></div>
+    </div>
+  </div>`;
+}
+
+// ===============================================================
+// 6. DOCENTE · REPORTES RECIBIDOS
+// ===============================================================
+function statusControl(r) {
+  const open = S.doc.menuId === r.id;
+  const dots = { pend: '#D9952B', rev: '#B295B0', ok: '#6DAF7E' };
+  return `<div class="status-wrap">
+    <button class="status-btn pill ${r.estado}" data-act="status-menu" data-id="${esc(r.id)}" aria-haspopup="true" aria-expanded="${open}" title="Cambiar estado">${EST_LABELS[r.estado]} ${icon('down', 12, 'stroke-width="2.5"')}</button>
+    ${open ? `<div class="status-menu" role="menu">${['pend', 'rev', 'ok'].map(e => `<button role="menuitem" data-act="set-status" data-id="${esc(r.id)}" data-val="${e}"><span style="display:flex;align-items:center;gap:10px"><span class="dot" style="background:${dots[e]}"></span>${EST_LABELS[e]}</span>${e === r.estado ? icon('check', 16) : ''}</button>`).join('')}</div>` : ''}
+  </div>`;
+}
+
+function reportDetail(r) {
+  const coments = CATEGORIAS.filter(c => r.comentarios[c.key]).map(c => `<div><b>${c.nombre}:</b> ${esc(r.comentarios[c.key])}</div>`).join('');
+  return `<div class="rep-body">
+    <div class="rep-faces">${CATEGORIAS.map(c => `<span>${face(r.moods[c.key], 28)}${c.nombre} · ${MOOD_LABELS[r.moods[c.key]]}</span>`).join('')}</div>
+    <p class="quote">“${esc(r.detalle)}”</p>
+    ${coments ? `<div class="coments">${coments}</div>` : ''}
+  </div>`;
+}
+
 function renderDocReportes() {
-  const filtered = AppState.reports.filter(r => {
-    const matchState = AppState.docFilterState === 'todos' || r.estado === AppState.docFilterState;
-    const matchSubj = AppState.docFilterSubject === 'todos' || r.subjectId === AppState.docFilterSubject;
-    return matchState && matchSubj;
-  });
+  const u = S.user;
+  const D = S.doc;
+  const bySubject = D.subject === 'todos' ? S.reports : S.reports.filter(r => r.subjectId === D.subject);
+  const c = counts(bySubject);
+  const all = counts(S.reports);
+  const list = D.estado === 'todos' ? bySubject : bySubject.filter(r => r.estado === D.estado);
+  const pendSubjects = [...new Set(S.reports.filter(r => r.estado === 'pend').map(r => r.asignatura))];
+  const subjOptions = S.subjects.length ? S.subjects : [...new Map(S.reports.map(r => [r.subjectId, { id: r.subjectId, nombre: r.asignatura }])).values()];
+  const tab = (val, label, n) => `<button class="nav-tab ${D.estado === val ? 'active' : ''}" data-act="doc-tab" data-val="${val}">${label} <span class="badge">${n}</span></button>`;
 
-  const countTodos = AppState.reports.length;
-  const countPend = AppState.reports.filter(r => r.estado === 'pend').length;
-  const countRev = AppState.reports.filter(r => r.estado === 'rev').length;
-  const countOk = AppState.reports.filter(r => r.estado === 'ok').length;
-
-  return `
-  <section class="panel-view">
-    <div class="panel-top">
-      <div class="panel-title">
-        <h1 class="display">Reportes académicos recibidos</h1>
-        <p>Monitoreo en tiempo real de dificultades reportadas por los estudiantes.</p>
+  const items = list.map(r => `<li class="rep lift">
+    <div class="rep-top" data-act="toggle-report" data-id="${esc(r.id)}" aria-expanded="${D.openId === r.id}">
+      ${dayBadge(r.createdAt)}
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:17px;color:#2B1E1F">${esc(r.titulo)}</div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:#832F2F">${esc(r.asignatura)}</span><span class="tag-badge">${esc(r.categoria)}</span><span style="font-size:13px;color:#6B5E60">${esc(r.grupo)}</span></div>
       </div>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-secondary" data-screen="doc-stats">Ver estadísticas</button>
-        <button class="btn btn-secondary" data-screen="doc-asig">Mis cursos</button>
-      </div>
+      ${statusControl(r)}
     </div>
+    ${D.openId === r.id ? reportDetail(r) : ''}
+  </li>`).join('');
 
-    <!-- Pestañas de estado (HU-03) -->
-    <div class="tabs-row">
-      <button class="tab-btn ${AppState.docFilterState === 'todos' ? 'active' : ''}" data-doc-filter="todos">
-        Todos <span class="tab-badge">${countTodos}</span>
-      </button>
-      <button class="tab-btn ${AppState.docFilterState === 'pend' ? 'active' : ''}" data-doc-filter="pend">
-        Pendientes <span class="tab-badge">${countPend}</span>
-      </button>
-      <button class="tab-btn ${AppState.docFilterState === 'rev' ? 'active' : ''}" data-doc-filter="rev">
-        En revisión <span class="tab-badge">${countRev}</span>
-      </button>
-      <button class="tab-btn ${AppState.docFilterState === 'ok' ? 'active' : ''}" data-doc-filter="ok">
-        Atendidos <span class="tab-badge">${countOk}</span>
-      </button>
+  return shell('doc-reportes', `
+    <header>
+      <p class="eyebrow">${weekLabel()} · Semestre ${semestre()}</p>
+      <h1 class="d h1" style="max-width:26ch">Hola, ${esc(u.primerNombre)}. ${all.pend ? `Tienes ${plural(all.pend, 'reporte pendiente', 'reportes pendientes')}.` : 'Estás al día con tus reportes.'}</h1>
+      <p class="sub">Cambia el estado de cada reporte para que el estudiante sepa que lo leíste.</p>
+    </header>
+    ${all.pend ? `<section class="banner" style="padding:30px 36px">
+      <div class="orbit" style="width:260px;height:260px;right:-40px;top:-90px;border:1px dashed rgba(255,255,255,.3);animation-duration:28s"><i style="background:#A2CDAB"></i></div>
+      <div style="position:relative;max-width:48ch"><h2 class="d" style="font-size:26px;font-weight:600">${all.pend === 1 ? '1 reporte requiere tu respuesta' : `${all.pend} reportes requieren tu respuesta`}</h2><p style="margin:6px 0 0;color:#F1D9D9;font-size:15px;line-height:1.45">Los estudiantes de ${esc(listJoin(pendSubjects))} esperan seguimiento sobre las barreras reportadas.</p></div>
+      <button class="btn w" data-act="doc-tab" data-val="pend" style="min-height:48px;padding:0 24px">Responder pendientes</button>
+    </section>` : ''}
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">${tab('todos', 'Todos', c.total)}${tab('pend', 'Pendientes', c.pend)}${tab('rev', 'En revisión', c.rev)}${tab('ok', 'Atendidos', c.ok)}</div>
+      <select class="custom-select" id="docSubject" aria-label="Filtrar por asignatura">
+        <option value="todos">Todas las asignaturas</option>
+        ${subjOptions.map(s => `<option value="${esc(s.id)}" ${D.subject === s.id ? 'selected' : ''}>${esc(s.nombre)}</option>`).join('')}
+      </select>
     </div>
+    <section class="glass" style="border-radius:30px;padding:28px 28px 32px">
+      <div class="sec-head"><h2 class="d" style="font-size:24px;font-weight:600">Reportes de tus asignaturas</h2><span style="font-size:14px;color:#6B5E60">${plural(list.length, 'reporte', 'reportes')}${D.estado !== 'todos' ? ' en este filtro' : ' en total'}</span></div>
+      ${items ? `<ul class="list">${items}</ul>` : `<p class="empty">No hay reportes con este filtro.</p>`}
+    </section>
+  `);
+}
 
-    <!-- Lista de reportes -->
-    <div class="reports-list">
-      ${filtered.length === 0 ? `
-        <div style="background:var(--sf);border:1px solid var(--bd);border-radius:18px;padding:48px;text-align:center">
-          <p style="font-size:18px;font-weight:600;color:var(--mu)">Sin reportes registrados con este filtro.</p>
-        </div>
-      ` : filtered.map(r => `
-        <div class="report-card">
-          <div class="report-card-top">
-            <div class="rep-meta">
-              <span class="badge ${r.estado === 'pend' ? 'badge-pend' : r.estado === 'rev' ? 'badge-rev' : 'badge-ok'}">
-                ● ${EST_LABELS[r.estado] || r.estado}
-              </span>
-              <span class="badge badge-cat">${r.categoria || 'Metodología'}</span>
-              <span style="font-size:13px;font-weight:600;color:var(--mu)">${r.asignatura} (${r.grupo || 'G1'})</span>
-            </div>
-            <span style="font-size:12px;color:var(--mu)">${new Date(r.createdAt).toLocaleDateString('es-CO')}</span>
-          </div>
-
-          <h3 class="report-title">${r.titulo}</h3>
-          <p class="report-body">${r.detalle}</p>
-
-          <!-- Modificación reactiva del estado (HU-03) -->
-          <div class="status-changer">
-            <span class="status-changer-label">Cambiar estado en Firestore:</span>
-            <button class="status-pill-btn ${r.estado === 'pend' ? 'current' : ''}" data-action="set-status" data-id="${r.id}" data-new-status="pend">Pendiente</button>
-            <button class="status-pill-btn ${r.estado === 'rev' ? 'current' : ''}" data-action="set-status" data-id="${r.id}" data-new-status="rev">En revisión</button>
-            <button class="status-pill-btn ${r.estado === 'ok' ? 'current' : ''}" data-action="set-status" data-id="${r.id}" data-new-status="ok">Atendido</button>
-          </div>
-        </div>
-      `).join('')}
-    </div>
+// ===============================================================
+// BLOQUES DE ESTADÍSTICAS (docente y dirección)
+// ===============================================================
+function statusOverview(c, caption) {
+  const seg = c.total
+    ? [['pend', '#D9952B'], ['rev', '#B295B0'], ['ok', '#6DAF7E']].filter(([k]) => c[k]).map(([k, col]) => `<div style="flex:${c[k]};background:${col}" title="${c[k]} ${EST_LABELS[k]}"></div>`).join('')
+    : '';
+  const lg = (n, label, col, txt) => `<div><div class="d" style="font-size:26px;font-weight:700">${n}</div><div class="lbl" style="color:${txt}"><span style="background:${col}"></span>${label}</div></div>`;
+  return `<section class="glass" style="border-radius:30px;padding:32px;display:flex;flex-direction:column;justify-content:space-between;gap:24px">
+    <div><div class="bignum-val">${c.total}</div><div style="font-size:16px;color:#6B5E60;margin-top:4px">${caption}</div></div>
+    <div class="seg">${seg}</div>
+    <div class="legend">${lg(c.pend, 'Pendientes', '#D9952B', '#85500C')}${lg(c.rev, 'En revisión', '#B295B0', '#62405F')}${lg(c.ok, 'Atendidos', '#6DAF7E', '#2A6A3D')}</div>
   </section>`;
 }
 
-// 7. PANTALLA 7: DOCENTE · ESTADÍSTICAS Y MÉTRICAS (HU-04)
-function renderDocStats() {
-  const total = AppState.reports.length;
-  const pend = AppState.reports.filter(r => r.estado === 'pend').length;
-  const rev = AppState.reports.filter(r => r.estado === 'rev').length;
-  const ok = AppState.reports.filter(r => r.estado === 'ok').length;
-  const tasa = total > 0 ? Math.round((ok / total) * 100) : 0;
-
-  const catMet = AppState.reports.filter(r => r.categoria === 'Metodología').length;
-  const catCon = AppState.reports.filter(r => r.categoria === 'Contenido').length;
-  const catRit = AppState.reports.filter(r => r.categoria === 'Ritmo').length;
-
-  const pctMet = total > 0 ? Math.round((catMet / total) * 100) : 0;
-  const pctCon = total > 0 ? Math.round((catCon / total) * 100) : 0;
-  const pctRit = total > 0 ? Math.round((catRit / total) * 100) : 0;
-
-  return `
-  <section class="panel-view">
-    <div class="panel-top">
-      <div class="panel-title">
-        <h1 class="display">Métricas y analítica consolidada</h1>
-        <p>Recálculo automático y reactivo ante cualquier actualización en Firestore.</p>
-      </div>
-      <button class="btn btn-secondary" data-screen="doc-reportes">Volver a reportes</button>
-    </div>
-
-    <!-- Bloque de contadores numéricos (HU-04) -->
-    <div class="stats-cards-grid">
-      <div class="metric-card">
-        <div class="metric-label">Total Recibidos</div>
-        <div class="metric-num display">${total}</div>
-        <div class="metric-sub">Todas las materias a cargo</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label" style="color:var(--pend)">Pendientes</div>
-        <div class="metric-num display" style="color:var(--pend)">${pend}</div>
-        <div class="metric-sub">Por revisar</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label" style="color:var(--rev)">En Revisión</div>
-        <div class="metric-num display" style="color:var(--rev)">${rev}</div>
-        <div class="metric-sub">En ajuste pedagógico</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label" style="color:var(--ok)">Atendidos</div>
-        <div class="metric-num display" style="color:var(--ok)">${ok}</div>
-        <div class="metric-sub">${tasa}% resueltos</div>
-      </div>
-    </div>
-
-    <!-- Gráficos dinámicos -->
-    <div class="charts-row">
-      <div class="chart-box">
-        <h3 class="chart-title">Distribución por categoría de dificultad</h3>
-        <div class="bar-item">
-          <div class="bar-label-row"><span>Metodología de clase</span> <span>${catMet} (${pctMet}%)</span></div>
-          <div class="bar-track"><div class="bar-fill" style="width:${pctMet}%;background:var(--pr)"></div></div>
-        </div>
-        <div class="bar-item">
-          <div class="bar-label-row"><span>Complejidad de contenido</span> <span>${catCon} (${pctCon}%)</span></div>
-          <div class="bar-track"><div class="bar-fill" style="width:${pctCon}%;background:var(--ac)"></div></div>
-        </div>
-        <div class="bar-item">
-          <div class="bar-label-row"><span>Ritmo de avance</span> <span>${catRit} (${pctRit}%)</span></div>
-          <div class="bar-track"><div class="bar-fill" style="width:${pctRit}%;background:#E6B979"></div></div>
-        </div>
-      </div>
-
-      <div class="chart-box">
-        <h3 class="chart-title">Estado de atención general</h3>
-        <div class="bar-item">
-          <div class="bar-label-row"><span>Atendidos y resueltos</span> <span>${ok}</span></div>
-          <div class="bar-track"><div class="bar-fill" style="width:${tasa}%;background:#3DA56A"></div></div>
-        </div>
-        <div class="bar-item">
-          <div class="bar-label-row"><span>En proceso de ajuste</span> <span>${rev}</span></div>
-          <div class="bar-track"><div class="bar-fill" style="width:${total > 0 ? (rev/total)*100 : 0}%;background:#867ED3"></div></div>
-        </div>
-        <div class="bar-item">
-          <div class="bar-label-row"><span>Pendientes por abrir</span> <span>${pend}</span></div>
-          <div class="bar-track"><div class="bar-fill" style="width:${total > 0 ? (pend/total)*100 : 0}%;background:#D9952B"></div></div>
-        </div>
-      </div>
-    </div>
-  </section>`;
-}
-
-// 8. PANTALLA 8: DOCENTE · MIS ASIGNATURAS
-function renderDocAsig() {
-  return `
-  <section class="panel-view">
-    <div class="panel-top">
-      <div class="panel-title">
-        <h1 class="display">Docente · Mis cursos asignados</h1>
-        <p>Pontificia Universidad Javeriana · Facultad de Ingeniería.</p>
-      </div>
-      <button class="btn btn-primary" data-screen="doc-reportes">Ver todos los reportes</button>
-    </div>
-
-    <div class="subject-grid">
-      ${AppState.subjects.map(s => {
-        const count = AppState.reports.filter(r => r.subjectId === s.id).length;
-        return `
-        <div class="subject-card">
-          <div>
-            <span class="subj-code">${s.codigo} · ${s.grupo}</span>
-            <h3 class="subj-name">${s.nombre}</h3>
-            <p class="subj-prof">Estudiantes matriculados: <strong>28</strong></p>
-            <p style="margin-top:8px;font-size:13px;color:var(--mu)">Reportes recibidos en el semestre: <strong>${count}</strong></p>
-          </div>
-          <button class="btn btn-secondary" data-screen="doc-reportes">Filtrar reportes de este curso</button>
-        </div>`;
+function categoryBlock(list, title, labels) {
+  const total = list.length;
+  const fills = ['linear-gradient(90deg,#9A3A3A,#832F2F)', 'linear-gradient(90deg,#B295B0,#867ED3)', 'linear-gradient(90deg,#A2CDAB,#6DAF7E)'];
+  return `<section class="glass" style="border-radius:30px;padding:32px;display:flex;flex-direction:column;gap:20px">
+    <h2 class="d" style="font-size:22px;font-weight:600">${title}</h2>
+    <div style="display:flex;flex-direction:column;gap:18px">
+      ${CATEGORIAS.map((c, i) => {
+        const pct = total ? Math.round(list.filter(r => r.categoria === c.nombre).length * 100 / total) : 0;
+        return `<div><div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:6px"><span>${labels[i]}</span><span>${pct} %</span></div><div class="stat-track"><div class="stat-fill" style="width:${pct}%;background:${fills[i]}"></div></div></div>`;
       }).join('')}
     </div>
   </section>`;
 }
 
-// 9. PANTALLA 9: DIRECCIÓN · PANORAMA SEMANAL
-function renderDirSemanal() {
-  return `
-  <section class="panel-view">
-    <div class="panel-top">
-      <div class="panel-title">
-        <h1 class="display">Dirección · Panorama general del programa</h1>
-        <p>Consolidado estratégico de seguimiento docente y alertas tempranas.</p>
-      </div>
-      <button class="btn btn-primary" data-screen="dir-grupo">Ver detalle de grupo</button>
-    </div>
-
-    <div class="stats-cards-grid">
-      <div class="metric-card">
-        <div class="metric-label">Reportes Semestrales</div>
-        <div class="metric-num display">${AppState.reports.length}</div>
-        <div class="metric-sub">5 asignaturas monitoreadas</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Tasa de Respuesta</div>
-        <div class="metric-num display" style="color:var(--ok)">88%</div>
-        <div class="metric-sub">Tiempo promedio: 1.8 días</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Cursos con Alertas</div>
-        <div class="metric-num display" style="color:var(--pend)">2</div>
-        <div class="metric-sub">POO & Estructuras de Datos</div>
-      </div>
-    </div>
-  </section>`;
+function subjectGroups(list) {
+  const map = new Map();
+  for (const r of list) {
+    if (!map.has(r.subjectId)) map.set(r.subjectId, { id: r.subjectId, nombre: r.asignatura, grupo: r.grupo, reports: [] });
+    map.get(r.subjectId).reports.push(r);
+  }
+  for (const s of S.subjects) if (!map.has(s.id)) map.set(s.id, { id: s.id, nombre: s.nombre, grupo: s.grupo, reports: [] });
+  return [...map.values()].map(g => {
+    const subj = S.subjects.find(s => s.id === g.id);
+    return { ...g, abreviatura: subj?.abreviatura || g.nombre.slice(0, 2).toUpperCase(), profesor: subj?.profesor || '', professorUid: subj?.professorUid || g.reports[0]?.professorUid, c: counts(g.reports) };
+  }).sort((a, b) => b.c.pend - a.c.pend || (b.c.pend / (b.c.total || 1)) - (a.c.pend / (a.c.total || 1)) || b.c.total - a.c.total);
 }
 
-// 10. PANTALLA 10: DIRECCIÓN · DETALLE DE GRUPO
-function renderDirGrupo() {
-  return `
-  <section class="panel-view">
-    <div class="panel-top">
-      <div class="panel-title">
-        <h1 class="display">Dirección · Detalle de Grupo G1 (POO)</h1>
-        <p>Docente a cargo: Dr. Carlos Mendoza · 32 estudiantes activos.</p>
-      </div>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-secondary" data-screen="dir-semanal">Volver al panorama</button>
-        <button class="btn btn-primary" onclick="alert('Notificación enviada al docente via correo institucional.')">Contactar docente</button>
-      </div>
-    </div>
-
-    <div class="chart-box" style="margin-bottom:24px">
-      <h3 class="chart-title">Desglose de dificultades en el grupo</h3>
-      <div class="bar-item">
-        <div class="bar-label-row"><span>Laboratorios extensos (Metodología)</span> <span>5 reportes</span></div>
-        <div class="bar-track"><div class="bar-fill" style="width:65%;background:var(--pr)"></div></div>
-      </div>
-      <div class="bar-item">
-        <div class="bar-label-row"><span>Sintaxis y compiladores (Contenido)</span> <span>3 reportes</span></div>
-        <div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--ac)"></div></div>
-      </div>
-    </div>
-  </section>`;
+function urgencyRow(g, i, subtitle, act) {
+  const sem = semaforo(g.c);
+  const pendColor = { alto: '#B3403A', medio: '#C98418', bajo: '#2A6A3D' }[sem.cls];
+  const bar = g.c.total ? [['pend', '#D9952B'], ['rev', '#B295B0'], ['ok', '#6DAF7E']].map(([k, col]) => `<div style="flex:${g.c[k]};background:${col}"></div>`).join('') : '';
+  return `<div class="urg lift" ${act ? `data-act="${act}" data-id="${esc(g.id)}" style="cursor:pointer"` : ''}>
+    ${mk(g.abreviatura, i, 46)}
+    <div style="flex:1 1 200px;min-width:0"><div style="font-weight:700;font-size:16px">${esc(g.nombre)}</div><div style="font-size:13px;color:#6B5E60">${subtitle}</div></div>
+    <div class="mini-seg">${bar}</div>
+    <div class="num"><strong>${g.c.total}</strong> <small class="muted">total</small></div>
+    <div class="num" style="min-width:70px"><strong style="color:${pendColor}">${g.c.pend}</strong> <small class="muted">pend.</small></div>
+    <span class="sem-badge ${sem.cls}"><i></i>${sem.label}</span>
+    ${act ? `<span class="muted" style="display:flex">${icon('right', 18, 'stroke-width="2.5"')}</span>` : ''}
+  </div>`;
 }
 
 // ===============================================================
-// ROUTER & DISPATCHER PRINCIPAL
+// 7. DOCENTE · ESTADÍSTICAS
 // ===============================================================
-function renderApp() {
-  const root = document.getElementById('appRoot');
-  const authSlot = document.getElementById('headerAuthSlot');
+function renderDocStats() {
+  const list = S.reports;
+  const c = counts(list);
+  const groups = subjectGroups(list);
+  const top = groups.find(g => g.c.pend > 0);
 
-  // Actualizar slot del usuario en el navbar
-  if (AppState.user) {
-    authSlot.innerHTML = `
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="width:34px;height:34px;border-radius:50%;background:var(--pr);color:var(--on-pr);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">
-          ${AppState.user.iniciales || 'PU'}
+  // Valoración promedio de 1 a 5 por categoría
+  const ratings = CATEGORIAS.map(cat => {
+    const avg = list.length ? list.reduce((s, r) => s + r.moods[cat.key] + 1, 0) / list.length : 0;
+    return { ...cat, avg };
+  }).sort((a, b) => b.avg - a.avg);
+  const colorFor = (v) => v >= 3.7 ? '#6DAF7E' : v >= 3 ? '#D9952B' : '#B3403A';
+
+  // Reportes de las últimas 6 semanas
+  const now = monday();
+  const weeks = [];
+  for (let k = 5; k >= 0; k--) {
+    const start = new Date(now); start.setDate(now.getDate() - 7 * k);
+    const end = new Date(start); end.setDate(start.getDate() + 7);
+    weeks.push({ label: `S${weekOfSemester(start)}`, n: list.filter(r => { const d = new Date(r.createdAt); return d >= start && d < end; }).length, current: k === 0 });
+  }
+  const maxW = Math.max(1, ...weeks.map(w => w.n));
+
+  let titulo = 'Estás al día con tus reportes.';
+  let sub = list.length ? 'No tienes reportes pendientes por responder.' : 'Aún no has recibido reportes este semestre.';
+  if (top) {
+    titulo = `${esc(top.nombre)} concentra tus reportes pendientes.`;
+    sub = `Tiene ${top.c.pend} de ${plural(top.c.total, 'reporte', 'reportes')} sin responder.`;
+  }
+  if (list.length >= 2 && ratings[0].avg !== ratings[2].avg) {
+    sub += ` Tus estudiantes valoran mejor ${ratings[0].nombre === 'Metodología' ? 'la metodología' : `el ${ratings[0].nombre.toLowerCase()}`} y piden revisar ${ratings[2].nombre === 'Metodología' ? 'la metodología' : `el ${ratings[2].nombre.toLowerCase()}`}.`;
+  }
+
+  return shell('doc-stats', `
+    <header>
+      <p class="eyebrow">${weekLabel()} · Métricas consolidadas</p>
+      <h1 class="d h1" style="max-width:28ch">${titulo}</h1>
+      <p class="sub">${sub}</p>
+    </header>
+    <div class="g-hero">
+      ${statusOverview(c, 'reportes recibidos en tus asignaturas este semestre')}
+      ${categoryBlock(list, '¿Sobre qué te reportan?', ['Metodología', 'Contenido', 'Ritmo'])}
+    </div>
+    <div class="g-two">
+      <section class="glass" style="border-radius:30px;padding:30px;display:flex;flex-direction:column;gap:18px">
+        <h2 class="d" style="font-size:22px;font-weight:600">Cómo te valoran tus estudiantes</h2>
+        ${list.length ? `<div style="display:flex;flex-direction:column;gap:14px">${ratings.map(r => `<div style="display:flex;align-items:center;gap:14px">
+          ${face(Math.round(r.avg) - 1, 30)}
+          <div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600"><span>${r.nombre}</span><strong>${r.avg.toFixed(1)} <small style="color:#6B5E60;font-weight:500">de 5</small></strong></div>
+          <div class="stat-track" style="margin-top:6px"><div class="stat-fill" style="width:${(r.avg / 5 * 100).toFixed(0)}%;background:${colorFor(r.avg)}"></div></div></div>
+        </div>`).join('')}</div>` : `<p class="empty">Las valoraciones aparecerán con los primeros reportes.</p>`}
+      </section>
+      <section class="glass" style="border-radius:30px;padding:30px;display:flex;flex-direction:column;gap:18px">
+        <h2 class="d" style="font-size:22px;font-weight:600">Reportes por semana</h2>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;height:150px;padding-top:10px">
+          ${weeks.map(w => `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><strong style="font-size:${w.current ? 14 : 13}px;${w.current ? 'color:#832F2F' : ''}">${w.n}</strong><div style="width:100%;max-width:32px;height:${Math.max(6, Math.round(w.n / maxW * 104))}px;border-radius:8px 8px 4px 4px;${w.current ? 'background:linear-gradient(180deg,#9A3A3A,#832F2F);box-shadow:0 6px 14px -4px rgba(131,47,47,.5)' : 'background:#E7DFDB'}"></div><span style="font-size:12px;${w.current ? 'font-weight:700;color:#832F2F' : 'color:#6B5E60'}">${w.label}</span></div>`).join('')}
         </div>
-        <span style="font-size:13px;font-weight:600;display:none;sm:inline">${AppState.user.primerNombre || 'Usuario'}</span>
-        <button class="btn btn-secondary" id="logoutBtn" style="padding:4px 12px;min-height:32px;font-size:12px">Salir</button>
-      </div>`;
-  } else {
-    authSlot.innerHTML = `
-      <button class="btn btn-primary" data-screen="login" style="padding:6px 16px;min-height:36px;font-size:13px">
-        Iniciar sesión
-      </button>`;
-  }
-
-  // Actualizar clase activa en la barra de pantallas
-  document.querySelectorAll('.screen-tag').forEach(tag => {
-    tag.classList.toggle('active', tag.dataset.screen === AppState.currentScreen);
-  });
-
-  // Renderizar pantalla correspondiente
-  switch (AppState.currentScreen) {
-    case 'landing': root.innerHTML = renderLanding(); break;
-    case 'login': root.innerHTML = renderLogin(); break;
-    case 'est-asig': root.innerHTML = renderEstAsig(); break;
-    case 'est-nuevo': root.innerHTML = renderEstNuevo(); break;
-    case 'est-enviado': root.innerHTML = renderEstEnviado(); break;
-    case 'doc-reportes': root.innerHTML = renderDocReportes(); break;
-    case 'doc-stats': root.innerHTML = renderDocStats(); break;
-    case 'doc-asig': root.innerHTML = renderDocAsig(); break;
-    case 'dir-semanal': root.innerHTML = renderDirSemanal(); break;
-    case 'dir-grupo': root.innerHTML = renderDirGrupo(); break;
-    default: root.innerHTML = renderLanding();
-  }
-
-  window.scrollTo(0, 0);
+      </section>
+    </div>
+    <section class="glass" style="border-radius:30px;padding:28px 32px">
+      <h2 class="d" style="font-size:22px;font-weight:600;margin-bottom:18px">Tus asignaturas, de mayor a menor urgencia</h2>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        ${groups.length ? groups.map((g, i) => urgencyRow(g, i, `${esc(g.grupo)} · ${plural(g.c.total, 'reporte', 'reportes')}`, 'open-subject')).join('') : `<p class="empty">Sin asignaturas a cargo.</p>`}
+      </div>
+    </section>
+  `);
 }
 
 // ===============================================================
-// EVENT HANDLERS & VINCULACIÓN CON BACKEND (NexoAPI)
+// 8. DOCENTE · MIS ASIGNATURAS
 // ===============================================================
+function renderDocAsig() {
+  const groups = subjectGroups(S.reports).sort((a, b) => a.nombre.localeCompare(b.nombre));
+  return shell('doc-asig', `
+    <header>
+      <p class="eyebrow">Semestre ${semestre()} · Asignaciones académicas</p>
+      <h1 class="d h1">Tus asignaturas a cargo</h1>
+      <p class="sub">Abre una asignatura para ver solo sus reportes de barreras académicas.</p>
+    </header>
+    <section class="glass" style="border-radius:30px;padding:32px">
+      ${groups.length ? `<ul class="list">${groups.map((g, i) => `<li class="row lift click" data-act="open-subject" data-id="${esc(g.id)}" style="padding:18px 24px;box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(64,32,32,.06)">
+        ${mk(g.abreviatura, i)}
+        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:18px">${esc(g.nombre)}</div><div style="font-size:14px;color:#6B5E60;margin-top:2px">${esc(g.grupo)} · ${g.c.total ? `${plural(g.c.total, 'reporte', 'reportes')} este semestre` : 'Sin reportes todavía'}</div></div>
+        ${g.c.pend ? `<span class="pill pend" style="font-weight:700">${plural(g.c.pend, 'pendiente', 'pendientes')}</span>` : g.c.total ? `<span class="pill ok" style="font-weight:700">Al día</span>` : `<span class="muted" style="font-size:13px">—</span>`}
+        <span class="muted" style="display:flex">${icon('right', 20, 'stroke-width="2.5"')}</span>
+      </li>`).join('')}</ul>` : `<p class="empty">Aún no tienes asignaturas asignadas.</p>`}
+    </section>
+  `);
+}
 
-function showToast(msg) {
-  const c = document.getElementById('toastContainer');
+// ===============================================================
+// 9. DIRECCIÓN · PANORAMA SEMANAL
+// ===============================================================
+function programRanking() {
+  // Agrupa por nombre de asignatura (sumando sus grupos)
+  const map = new Map();
+  for (const g of subjectGroups(S.reports)) {
+    if (!map.has(g.nombre)) map.set(g.nombre, { nombre: g.nombre, abreviatura: g.abreviatura, groups: [], reports: [] });
+    const e = map.get(g.nombre);
+    e.groups.push(g);
+    e.reports.push(...g.reports);
+  }
+  return [...map.values()].map(e => {
+    const c = counts(e.reports);
+    const worst = [...e.groups].sort((a, b) => b.c.pend - a.c.pend || b.c.total - a.c.total)[0];
+    return { ...e, c, id: worst.id };
+  }).sort((a, b) => (b.c.pend / (b.c.total || 1)) - (a.c.pend / (a.c.total || 1)) || b.c.pend - a.c.pend);
+}
+
+function renderDirSemanal() {
+  const c = counts(S.reports);
+  const ranking = programRanking();
+  const top = ranking.find(e => e.c.pend > 0);
+  return shell('dir-semanal', `
+    <header>
+      <p class="eyebrow">${weekLabel()} · Dirección de Programa</p>
+      <h1 class="d h1" style="max-width:26ch">${top ? `${esc(top.nombre)} necesita atención esta semana.` : 'Todo el programa está al día.'}</h1>
+      <p class="sub">${top ? `Tiene ${top.c.pend} de ${plural(top.c.total, 'reporte', 'reportes')} sin responder, la proporción más alta del programa.` : 'No hay reportes pendientes de respuesta en ninguna asignatura.'}</p>
+    </header>
+    <div class="g-hero">
+      ${statusOverview(c, 'reportes recibidos en todo el programa este semestre')}
+      ${categoryBlock(S.reports, '¿Sobre qué reportan los estudiantes?', ['Metodología de clase', 'Claridad del contenido', 'Ritmo de aprendizaje'])}
+    </div>
+    <section class="glass" style="border-radius:30px;padding:30px 32px">
+      <div class="sec-head" style="margin-bottom:20px"><h2 class="d" style="font-size:22px;font-weight:600">Asignaturas, de mayor a menor urgencia</h2><span style="font-size:13px;color:#6B5E60">El semáforo compara pendientes con el total de cada materia</span></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        ${ranking.length ? ranking.map((e, i) => urgencyRow(e, i, plural(e.groups.length, 'grupo en el semestre', 'grupos en el semestre'), 'open-group')).join('') : `<p class="empty">Aún no hay asignaturas ni reportes en el programa.</p>`}
+      </div>
+    </section>
+  `);
+}
+
+// ===============================================================
+// 10. DIRECCIÓN · DETALLE DE GRUPO
+// ===============================================================
+function renderDirGrupo() {
+  const groups = subjectGroups(S.reports);
+  const g = groups.find(x => x.id === S.dir.subjectId) || groups[0];
+  if (!g) {
+    return shell('dir-grupo', `<header><h1 class="d h1">Grupos y materias</h1><p class="sub">Aún no hay grupos registrados en el programa.</p></header>`);
+  }
+  const siblings = groups.filter(x => x.nombre === g.nombre);
+  const sem = semaforo(g.c);
+  const semText = { alto: 'Atención recomendada', medio: 'Seguimiento sugerido', bajo: 'Grupo al día' }[sem.cls];
+  const reps = [...g.reports].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  return shell('dir-grupo', `
+    <header>
+      <div class="crumbs-nav"><a href="#/dir-semanal">Panorama semanal</a>${icon('right', 14, 'stroke-width="2.5"')}<span>${esc(g.nombre)}</span>${icon('right', 14, 'stroke-width="2.5"')}<span>${esc(g.grupo)}</span></div>
+      <h1 class="d" style="font-size:clamp(30px,3.2vw,44px);line-height:1.08;font-weight:600;margin-top:4px">${esc(g.profesor || 'Docente')} — ${esc(g.grupo)}</h1>
+      <p class="sub">${esc(g.grupo)} de ${esc(g.nombre)}. Estos son los reportes de sus estudiantes, del más reciente al más antiguo.</p>
+    </header>
+    <section class="glass" style="border-radius:24px;padding:24px 30px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+      <div>
+        <span class="sem-badge ${sem.cls}" style="font-size:14px;padding:6px 14px"><i></i>${semText}</span>
+        <div style="margin-top:6px;font-size:15px;color:#6B5E60">${plural(g.c.total, 'reporte total', 'reportes totales')}, ${g.c.pend === 1 ? '1 sigue' : `${g.c.pend} siguen`} sin responder por el docente</div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        ${siblings.length > 1 ? `<select class="custom-select" id="dirGroup" aria-label="Cambiar de grupo">${siblings.map(x => `<option value="${esc(x.id)}" ${x.id === g.id ? 'selected' : ''}>${esc(x.grupo)}</option>`).join('')}</select>` : ''}
+        <button class="btn" data-act="contact" data-id="${esc(g.professorUid || '')}" data-subject="${esc(g.nombre)}" style="font-size:14px">Contactar docente</button>
+        <a class="btn p" href="#/dir-semanal" style="font-size:14px">Ver otros grupos</a>
+      </div>
+    </section>
+    <section class="glass" style="border-radius:30px;padding:32px">
+      <h2 class="d" style="font-size:22px;font-weight:600;margin-bottom:24px">Trazabilidad de reportes del grupo</h2>
+      <div style="display:flex;flex-direction:column;gap:18px">
+        ${reps.length ? reps.map(r => `<div class="lift" style="display:flex;gap:20px;padding:22px 24px;border-radius:20px;background:#fff;box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(64,32,32,.06)">
+          ${dayBadge(r.createdAt)}
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:10px">${face(worstMood(r), 28)}<span class="tag-badge">${esc(r.categoria)}</span></div>
+              ${statusPill(r.estado)}
+            </div>
+            <p class="quote">“${esc(r.detalle)}”</p>
+          </div>
+        </div>`).join('') : `<p class="empty">Este grupo aún no tiene reportes.</p>`}
+      </div>
+    </section>
+  `);
+}
+
+// ===============================================================
+// ROUTER
+// ===============================================================
+const SCREENS = {
+  'landing': renderLanding,
+  'login': renderLogin,
+  'est-asig': renderEstAsig,
+  'est-nuevo': renderEstNuevo,
+  'est-enviado': renderEstEnviado,
+  'doc-reportes': renderDocReportes,
+  'doc-stats': renderDocStats,
+  'doc-asig': renderDocAsig,
+  'dir-semanal': renderDirSemanal,
+  'dir-grupo': renderDirGrupo
+};
+
+function resolveScreen() {
+  let s = (location.hash || '').replace(/^#\/?/, '') || 'landing';
+  if (!SCREENS[s]) s = 'landing';
+  const need = SCREEN_ROLE[s];
+  if (need && !S.user) return S.booting ? 'boot' : 'login';
+  if (need && roleOf(S.user) !== need) return homeOf(S.user);
+  if (s === 'login' && S.user) return homeOf(S.user);
+  return s;
+}
+
+function render() {
+  const s = resolveScreen();
+  const app = document.getElementById('app');
+  if (s === 'boot') {
+    app.innerHTML = `<div class="loader"><div class="orbit"><i style="background:#832F2F"></i></div>Cargando Nexo…</div>`;
+    return;
+  }
+  const target = '#/' + s;
+  if (location.hash && location.hash !== target && s !== 'landing') {
+    history.replaceState(null, '', target);
+  }
+  const changed = S.screen !== s;
+  S.screen = s;
+  app.innerHTML = SCREENS[s]();
+  document.title = 'Nexo · ' + ({ landing: 'Tu voz académica', login: 'Iniciar sesión', 'est-asig': 'Mis asignaturas', 'est-nuevo': 'Nuevo reporte', 'est-enviado': 'Reporte enviado', 'doc-reportes': 'Reportes recibidos', 'doc-stats': 'Estadísticas', 'doc-asig': 'Mis asignaturas', 'dir-semanal': 'Panorama semanal', 'dir-grupo': 'Detalle de grupo' }[s]);
+  if (changed) window.scrollTo(0, 0);
+}
+
+function go(screen) {
+  if (location.hash === '#/' + screen) render();
+  else location.hash = '#/' + screen;
+}
+
+window.addEventListener('hashchange', render);
+
+// ===============================================================
+// DATOS Y SESIÓN
+// ===============================================================
+function toast(msg, bad = false) {
   const el = document.createElement('div');
-  el.className = 'toast-notice';
-  el.innerHTML = `<span>⚡</span> <span>${msg}</span>`;
-  c.appendChild(el);
-  setTimeout(() => el.remove(), 3500);
+  el.className = 'toast' + (bad ? ' bad' : '');
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3800);
 }
 
-// Navegación con delegación de eventos
+async function loadData() {
+  try {
+    const [subjects, reports] = await Promise.all([NexoAPI.subjects(), NexoAPI.reports()]);
+    S.subjects = subjects;
+    S.reports = reports;
+  } catch (e) {
+    console.warn(e);
+    toast('No se pudieron cargar los datos: ' + e.message, true);
+  }
+  if (S.unsubscribe) S.unsubscribe();
+  S.unsubscribe = NexoAPI.subscribeReports((list) => {
+    S.reports = list;
+    // Refresca solo las pantallas que muestran reportes (no interrumpe el asistente)
+    if (['est-asig', 'doc-reportes', 'doc-stats', 'doc-asig', 'dir-semanal', 'dir-grupo'].includes(S.screen)) render();
+  });
+}
+
+async function startSession(user) {
+  S.user = user;
+  await loadData();
+}
+
+async function endSession() {
+  if (S.unsubscribe) S.unsubscribe();
+  S.unsubscribe = null;
+  await NexoAPI.logout();
+  S.user = null;
+  S.subjects = [];
+  S.reports = [];
+  S.wizard = null;
+  S.lastReport = null;
+  S.doc = { estado: 'todos', subject: 'todos', openId: null, menuId: null };
+  S.login = { ...S.login, pass: '', error: '', loading: false };
+}
+
+// ===============================================================
+// EVENTOS
+// ===============================================================
 document.addEventListener('click', async (e) => {
-  // Cambio de pantalla
-  const navBtn = e.target.closest('[data-screen]');
-  if (navBtn) {
-    e.preventDefault();
-    AppState.currentScreen = navBtn.dataset.screen;
-    renderApp();
-    return;
-  }
+  const el = e.target.closest('[data-act]');
 
-  // Cambio de tema
-  const themeBtn = e.target.closest('[data-theme-val]');
-  if (themeBtn) {
-    const val = themeBtn.dataset.themeVal;
-    AppState.theme = val;
-    document.documentElement.setAttribute('data-theme', val);
-    localStorage.setItem('nexo_theme', val);
-    document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.themeVal === val));
-    return;
+  // Cerrar el menú de estado al hacer clic fuera
+  if (S.doc.menuId && !e.target.closest('.status-wrap')) {
+    S.doc.menuId = null;
+    if (!el) { render(); return; }
   }
+  if (!el) return;
+  const act = el.dataset.act;
+  const id = el.dataset.id;
 
-  // Cerrar sesión
-  if (e.target.id === 'logoutBtn') {
-    await NexoAPI.logout();
-    AppState.user = null;
-    AppState.currentScreen = 'landing';
-    showToast('Sesión cerrada correctamente.');
-    renderApp();
-    return;
-  }
+  switch (act) {
+    case 'toggle-dock':
+      S.dockOpen = !S.dockOpen;
+      writePref('nexo_dock', S.dockOpen ? '1' : '0');
+      render();
+      break;
 
-  // Selección de rol en Login
-  const roleBtn = e.target.closest('[data-role]');
-  if (roleBtn) {
-    AppState.selectedRole = roleBtn.dataset.role;
-    renderApp();
-    return;
-  }
+    case 'logout':
+      await endSession();
+      toast('Sesión cerrada.');
+      go('landing');
+      break;
 
-  // Cuentas de demostración en Login
-  const demoBtn = e.target.closest('[data-demo-user]');
-  if (demoBtn) {
-    const u = demoBtn.dataset.demoUser;
-    AppState.selectedRole = u;
-    if (u === 'est') { AppState.loginEmail = 'estudiante@javeriana.edu.co'; }
-    if (u === 'doc') { AppState.loginEmail = 'profesor@javeriana.edu.co'; }
-    if (u === 'dir') { AppState.loginEmail = 'direccion@javeriana.edu.co'; }
-    AppState.loginPass = 'clave123';
-    renderApp();
-    return;
-  }
+    case 'login-role':
+      S.login.role = el.dataset.val;
+      render();
+      break;
 
-  // Selección de materia para nuevo reporte
-  const crearAsigBtn = e.target.closest('[data-action="crear-reporte-asig"]');
-  if (crearAsigBtn) {
-    AppState.newReportSubjectId = crearAsigBtn.dataset.subjId;
-    AppState.currentScreen = 'est-nuevo';
-    renderApp();
-    return;
-  }
-
-  // Selección de mood en nuevo reporte
-  const moodBtn = e.target.closest('[data-mood]');
-  if (moodBtn) {
-    const cat = moodBtn.dataset.mood;
-    const val = Number(moodBtn.dataset.val);
-    AppState.newReportMoods[cat] = val;
-    renderApp();
-    return;
-  }
-
-  // Filtros de estado en panel docente
-  const docFilterBtn = e.target.closest('[data-doc-filter]');
-  if (docFilterBtn) {
-    AppState.docFilterState = docFilterBtn.dataset.docFilter;
-    renderApp();
-    return;
-  }
-
-  // Cambio reactivo de estado en reporte (HU-03)
-  const statusBtn = e.target.closest('[data-action="set-status"]');
-  if (statusBtn) {
-    const repId = statusBtn.dataset.id;
-    const newStatus = statusBtn.dataset.newStatus;
-    try {
-      await NexoAPI.setStatus(repId, newStatus);
-      showToast(`Estado actualizado a: ${EST_LABELS[newStatus] || newStatus}`);
-      // El suscriptor onSnapshot de Firebase actualizará los datos automáticamente
-    } catch (err) {
-      alert('Error actualizando estado: ' + err.message);
+    // ----- Estudiante -----
+    case 'new-report':
+      S.wizard = newWizard();
+      go('est-nuevo');
+      break;
+    case 'report-subject':
+      S.wizard = newWizard(id);
+      go('est-nuevo');
+      break;
+    case 'pick-subject':
+      S.wizard.subjectId = id;
+      render();
+      break;
+    case 'pick-mood':
+      S.wizard.moods[el.dataset.key] = Number(el.dataset.val);
+      render();
+      break;
+    case 'wiz-next':
+      if (S.wizard.step < 5) S.wizard.step++;
+      render();
+      break;
+    case 'wiz-back':
+      if (S.wizard.step > 1) S.wizard.step--;
+      S.wizard.error = '';
+      render();
+      break;
+    case 'wiz-goto':
+      S.wizard.step = Number(el.dataset.step);
+      render();
+      break;
+    case 'wiz-send': {
+      const W = S.wizard;
+      W.sending = true;
+      W.error = '';
+      render();
+      try {
+        const created = await NexoAPI.createReport({
+          subjectId: W.subjectId,
+          moods: W.moods,
+          comentarios: W.comentarios,
+          detalle: W.detalle
+        });
+        S.lastReport = created;
+        if (!S.reports.some(r => r.id === created.id)) S.reports = [created, ...S.reports];
+        S.wizard = null;
+        go('est-enviado');
+      } catch (err) {
+        W.sending = false;
+        W.error = err.message || 'No se pudo enviar el reporte.';
+        render();
+      }
+      break;
     }
-    return;
+
+    // ----- Docente -----
+    case 'doc-tab':
+      S.doc.estado = el.dataset.val;
+      S.doc.openId = null;
+      if (S.screen !== 'doc-reportes') go('doc-reportes'); else render();
+      break;
+    case 'toggle-report':
+      if (e.target.closest('.status-wrap')) return;
+      S.doc.openId = S.doc.openId === id ? null : id;
+      render();
+      break;
+    case 'status-menu':
+      S.doc.menuId = S.doc.menuId === id ? null : id;
+      render();
+      break;
+    case 'set-status': {
+      const rep = S.reports.find(r => r.id === id);
+      const prev = rep?.estado;
+      const next = el.dataset.val;
+      S.doc.menuId = null;
+      if (!rep || prev === next) { render(); break; }
+      rep.estado = next;
+      render();
+      try {
+        await NexoAPI.setStatus(id, next);
+        toast(`Estado actualizado: ${EST_LABELS[next]}`);
+      } catch (err) {
+        rep.estado = prev;
+        render();
+        toast('No se pudo cambiar el estado: ' + err.message, true);
+      }
+      break;
+    }
+    case 'open-subject':
+      S.doc.subject = id;
+      S.doc.estado = 'todos';
+      S.doc.openId = null;
+      go('doc-reportes');
+      break;
+
+    // ----- Dirección -----
+    case 'open-group':
+      S.dir.subjectId = id;
+      go('dir-grupo');
+      break;
+    case 'contact': {
+      const prof = await NexoAPI.profileOf(id);
+      if (prof?.email) {
+        location.href = `mailto:${prof.email}?subject=${encodeURIComponent('Nexo · Reportes de ' + el.dataset.subject)}`;
+      } else {
+        toast('No encontramos el correo del docente.', true);
+      }
+      break;
+    }
   }
 });
 
-// Manejo de input de texto con validación en tiempo real (HU-02)
 document.addEventListener('input', (e) => {
-  if (e.target.id === 'reportDetail') {
-    AppState.newReportDetail = e.target.value;
-    const counter = document.querySelector('.char-counter');
-    const submitBtn = document.querySelector('#newReportForm button[type="submit"]');
-    if (counter && submitBtn) {
-      const len = e.target.value.length;
-      const valid = len >= 20;
-      counter.classList.toggle('valid', valid);
-      counter.innerHTML = `<span>${valid ? '✓ Longitud válida' : 'Mínimo 20 caracteres requeridos (Criterio HU-02)'}</span><span>${len} / 20</span>`;
-      submitBtn.disabled = !valid;
+  const t = e.target;
+  if (t.id === 'loginEmail') S.login.email = t.value;
+  if (t.id === 'loginPass') S.login.pass = t.value;
+  if (!S.wizard) return;
+  if (t.dataset.field === 'coment') S.wizard.comentarios[t.dataset.key] = t.value;
+  if (t.dataset.field === 'detalle') {
+    S.wizard.detalle = t.value;
+    // Actualiza contador y botón sin re-renderizar (conserva el foco)
+    const len = t.value.trim().length;
+    const counter = document.getElementById('wizCounter');
+    if (counter) {
+      counter.classList.toggle('okc', len >= 20);
+      counter.innerHTML = `<span>${len >= 20 ? '✓ Listo para enviar' : 'Escribe al menos 20 caracteres'}</span><span>${len} / 20</span>`;
     }
+    const btn = document.getElementById('wizNext');
+    if (btn) btn.disabled = len < 20 || S.wizard.sending;
   }
-  if (e.target.id === 'inputEmail') AppState.loginEmail = e.target.value;
-  if (e.target.id === 'inputPassword') AppState.loginPass = e.target.value;
 });
 
 document.addEventListener('change', (e) => {
-  if (e.target.id === 'selectSubject') {
-    AppState.newReportSubjectId = e.target.value;
+  if (e.target.id === 'docSubject') {
+    S.doc.subject = e.target.value;
+    S.doc.openId = null;
+    render();
+  }
+  if (e.target.id === 'dirGroup') {
+    S.dir.subjectId = e.target.value;
+    render();
   }
 });
 
-// Envíos de formulario
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && S.doc.menuId) { S.doc.menuId = null; render(); }
+  // Accesibilidad: Enter/Espacio en filas clicables
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.rep-top,[data-act="open-subject"],[data-act="open-group"]')) {
+    e.preventDefault();
+    e.target.click();
+  }
+});
+
 document.addEventListener('submit', async (e) => {
-  // Formulario de login
-  if (e.target.id === 'loginForm') {
-    e.preventDefault();
-    AppState.loginLoading = true;
-    AppState.loginError = '';
-    renderApp();
-
-    try {
-      const user = await NexoAPI.login(AppState.loginEmail, AppState.loginPass, AppState.selectedRole);
-      AppState.user = user;
-      AppState.loginLoading = false;
-      showToast(`¡Bienvenido(a), ${user.nombre}!`);
-
-      // Redirección según rol (HU-01)
-      if (user.rol === 'doc') {
-        AppState.currentScreen = 'doc-reportes';
-      } else if (user.rol === 'dir' || user.rol === 'adm') {
-        AppState.currentScreen = 'dir-semanal';
-      } else {
-        AppState.currentScreen = 'est-asig';
-      }
-    } catch (err) {
-      AppState.loginLoading = false;
-      AppState.loginError = err.message;
-    }
-    renderApp();
-    return;
-  }
-
-  // Formulario de nuevo reporte (HU-02)
-  if (e.target.id === 'newReportForm') {
-    e.preventDefault();
-    try {
-      const nuevo = await NexoAPI.createReport({
-        subjectId: AppState.newReportSubjectId,
-        moods: AppState.newReportMoods,
-        detalle: AppState.newReportDetail
-      });
-      AppState.lastCreatedReport = nuevo;
-      AppState.newReportDetail = '';
-      AppState.currentScreen = 'est-enviado';
-      showToast('Reporte guardado con éxito en Firebase.');
-      renderApp();
-    } catch (err) {
-      alert('Error creando reporte: ' + err.message);
-    }
+  if (e.target.id !== 'loginForm') return;
+  e.preventDefault();
+  const L = S.login;
+  L.loading = true;
+  L.error = '';
+  render();
+  try {
+    const user = await NexoAPI.login(L.email, L.pass, L.role);
+    await startSession(user);
+    L.loading = false;
+    L.pass = '';
+    const nombres = { est: 'Estudiante', doc: 'Docente', dir: 'Dirección' };
+    if (roleOf(user) !== L.role) toast(`Tu cuenta es de ${nombres[roleOf(user)]}. Te llevamos a tu panel.`);
+    else toast(`¡Hola, ${user.primerNombre}!`);
+    go(homeOf(user));
+  } catch (err) {
+    L.loading = false;
+    L.error = err.message;
+    render();
   }
 });
 
-// Inicialización de la aplicación
-async function initApp() {
-  document.documentElement.setAttribute('data-theme', AppState.theme);
-
-  // Actualizar estado de Backend en UI
-  const fbText = document.getElementById('fbStatusText');
-  if (fbText) {
-    const status = await NexoAPI.checkStatus();
-    fbText.textContent = status.java ? 'Java 17 Backend (8080)' : (NexoAPI.isFirebaseActive ? `Firestore: ${NexoAPI.projectId}` : 'Nexo Backend');
-  }
-
-  // Cargar asignaturas y reportes
+// ===============================================================
+// INICIO
+// ===============================================================
+(async function init() {
+  render();
   try {
-    AppState.subjects = await NexoAPI.subjects();
-    AppState.reports = await NexoAPI.reports();
+    const user = await NexoAPI.restoreSession();
+    if (user) await startSession(user);
   } catch (e) {
     console.warn(e);
   }
-
-  // Suscribirse a cambios en tiempo real (HU-03 / HU-04)
-  NexoAPI.subscribeReports((updatedReports) => {
-    AppState.reports = updatedReports;
-    // Si estamos en pantallas docentes que dependen de reportes, refrescamos reactivamente
-    if (['doc-reportes', 'doc-stats', 'dir-semanal'].includes(AppState.currentScreen)) {
-      renderApp();
-    }
-  });
-
-  renderApp();
-}
-
-window.addEventListener('DOMContentLoaded', initApp);
+  S.booting = false;
+  render();
+})();
 </script>
-
 </body>
 </html>
