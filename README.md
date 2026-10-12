@@ -12,7 +12,7 @@
   🔗 <b>URL pública:</b> <a href="https://nexo-7a24e.web.app">https://nexo-7a24e.web.app</a> · 🏷️ <b>Release 1 · tag v0.1</b>
 </p>
 
----
+----
 
 ## ✨ Funcionalidades
 
