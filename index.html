@@ -191,8 +191,9 @@ h1,h2,h3,p{margin:0}
 @keyframes ring2{0%,39.90%{transform:scale(1);opacity:0}40%{transform:scale(1);opacity:.9}55%,100%{transform:scale(1.9);opacity:0}}
 @keyframes hit3{0%,64.90%{background:#832F2F;color:#fff;box-shadow:0 0 0 8px rgba(162,205,171,.12);transform:scale(1)}65%{background:#A2CDAB;color:#2B1E1F;box-shadow:0 0 0 12px rgba(162,205,171,.3),0 0 34px 6px rgba(162,205,171,.75);transform:scale(.85)}68%{transform:scale(1.35) translateY(-6px)}71%{transform:scale(.92)}73.25%{transform:scale(1.12) translateY(-2px)}75.5%{transform:scale(1)}90%{background:#A2CDAB;color:#2B1E1F;box-shadow:0 0 0 12px rgba(162,205,171,.3),0 0 34px 6px rgba(162,205,171,.75);transform:scale(1)}100%{background:#832F2F;color:#fff;box-shadow:0 0 0 8px rgba(162,205,171,.12);transform:scale(1)}}
 @keyframes ring3{0%,64.90%{transform:scale(1);opacity:0}65%{transform:scale(1);opacity:.9}80%,100%{transform:scale(1.9);opacity:0}}
-@media (prefers-reduced-motion:reduce){.reveal{transition:none;opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.landing *{animation-duration:80s!important}}
+/* Con "reducir movimiento" el paso a paso conserva su ritmo; solo se quita el desplazamiento del fade */
+@media (prefers-reduced-motion:reduce){.reveal{transform:none}}
+@media (prefers-reduced-motion:reduce){.landing .blob,.landing .ring,.landing .spin,.landing .float,.landing .glow{animation-duration:80s!important}}
 
 /* ---------- Login ---------- */
 .login{display:flex;flex-wrap:wrap;min-height:100vh;background:#F7F4F2}
@@ -1077,7 +1078,7 @@ let revealObserver = null;
 function setupReveal() {
   if (revealObserver) revealObserver.disconnect();
   const els = document.querySelectorAll('.landing .reveal, .landing .flow-v');
-  if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  if (!('IntersectionObserver' in window)) {
     els.forEach(el => el.classList.add('shown'));
     return;
   }
