@@ -51,8 +51,9 @@ h1,h2,h3,p{margin:0}
 
 /* ---------- Menú lateral (dock) ---------- */
 .app{display:flex;min-height:100vh}
-.dock{position:sticky;top:0;height:100vh;flex:0 0 268px;padding:28px 20px;display:flex;flex-direction:column;gap:28px;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.7));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-right:1px solid rgba(255,255,255,.9);box-shadow:24px 0 60px -34px rgba(64,32,32,.45);transition:flex-basis .35s ease,padding .35s ease,opacity .25s ease}
-.dock.closed{flex-basis:0;padding-left:0;padding-right:0;opacity:0;pointer-events:none;border-right-width:0}
+/* El menú queda fijo a la izquierda mientras se hace scroll */
+.dock{position:fixed;left:0;top:0;bottom:0;z-index:10;width:268px;padding:28px 20px;display:flex;flex-direction:column;gap:28px;overflow-x:hidden;overflow-y:auto;background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.7));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-right:1px solid rgba(255,255,255,.9);box-shadow:24px 0 60px -34px rgba(64,32,32,.45);transition:width .35s ease,padding .35s ease,opacity .25s ease}
+.dock.closed{width:0;padding-left:0;padding-right:0;opacity:0;pointer-events:none;border-right-width:0}
 .dock-inner{position:relative;width:228px;flex:1 0 auto;display:flex;flex-direction:column;gap:24px}
 .nv{display:flex;align-items:center;gap:12px;min-height:48px;padding:0 16px;border-radius:14px;font-weight:600;color:#3D2F31;transition:background .2s;cursor:pointer}
 .nv:hover{background:#F6EFEC}
@@ -63,7 +64,8 @@ h1,h2,h3,p{margin:0}
 .out:hover{background:#832F2F;color:#fff;transform:rotate(-8deg) scale(1.08);box-shadow:0 12px 20px -8px rgba(131,47,47,.8)}
 .avatar{position:relative;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#2B1E1F;background:linear-gradient(145deg,#D5DEE3,#9FB0B8);border:3px solid #fff;box-shadow:0 8px 16px -6px rgba(64,32,32,.45);flex:none}
 .avatar i{position:absolute;right:-2px;bottom:-2px;width:13px;height:13px;border-radius:50%;background:#6DAF7E;border:2px solid #fff}
-.main{position:relative;z-index:2;flex:1;min-width:0;padding:44px 48px;display:flex;flex-direction:column;gap:28px}
+.main{position:relative;z-index:2;flex:1;min-width:0;margin-left:268px;padding:44px 48px;display:flex;flex-direction:column;gap:28px;transition:margin-left .35s ease}
+.app.dock-off .main{margin-left:0}
 
 /* ---------- Banners y listas ---------- */
 .banner{position:relative;overflow:hidden;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;padding:32px 36px;border-radius:30px;color:#fff;background:linear-gradient(135deg,#9A3A3A 0%,#6E2626 60%,#4F1C1C 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 4px rgba(64,32,32,.2),0 30px 60px -24px rgba(110,38,38,.75)}
@@ -208,8 +210,9 @@ h1,h2,h3,p{margin:0}
 @media (max-width:1100px){.g-hero,.g-two{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:900px){
   .app{flex-direction:column}
-  .dock{position:relative;height:auto;flex:none;width:100%;padding:18px 16px;gap:16px;border-right:0;box-shadow:0 18px 40px -30px rgba(64,32,32,.45)}
-  .dock.closed{flex-basis:auto;height:0;padding:0;opacity:0}
+  .dock{position:relative;height:auto;width:100%;padding:18px 16px;gap:16px;border-right:0;box-shadow:0 18px 40px -30px rgba(64,32,32,.45)}
+  .dock.closed{width:100%;height:0;padding:0;opacity:0}
+  .main{margin-left:0}
   .dock-inner{width:100%;gap:14px}
   .dock nav{flex-direction:row!important;flex-wrap:wrap}
   .dock .me-card{margin-top:0}
@@ -421,8 +424,7 @@ function dock(active) {
         <div style="position:relative"><div class="d" style="font-size:20px;font-weight:600">${ring.value} de ${ring.total}</div><div style="font-size:13px;color:#F1D9D9;line-height:1.3">${ring.label}</div></div>
       </div>
       <div class="me-card" style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 12px;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.7));box-shadow:inset 0 1px 0 #fff,0 16px 28px -14px rgba(64,32,32,.4)">
-        <span class="avatar" role="img" aria-label="${esc(u.nombre)}">${esc(u.iniciales)}<i></i></span>
-        <div style="flex:1;min-width:0;line-height:1.2"><div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(u.nombre)}</div><div style="font-size:12px;color:#6B5E60">${{ est: 'Estudiante', doc: 'Docente', dir: 'Dirección' }[roleOf(u)]}</div></div>
+        <span class="avatar" role="img" aria-label="Foto de perfil de ${esc(u.nombre)}" title="${esc(u.nombre)}">${esc(u.iniciales)}<i></i></span>
         <button class="out" data-act="logout" aria-label="Cerrar sesión" title="Cerrar sesión">${icon('logout')}</button>
       </div>
     </div>
@@ -431,7 +433,7 @@ function dock(active) {
 
 function shell(active, content) {
   return `<div class="root">${SCENE_APP}
-    <div class="app">
+    <div class="app ${S.dockOpen ? '' : 'dock-off'}">
       ${dock(active)}
       ${S.dockOpen ? '' : `<button class="round reopen" data-act="toggle-dock" aria-label="Mostrar menú" title="Mostrar menú">${icon('menu', 20)}</button>`}
       <main class="main">${content}</main>
