@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/img/nexo-logo-3d.gif" width="220" alt="Logo de Nexo girando en 3D">
+</p>
+
 # Nexo - Sistema de Feedback y Reporte de Barreras Académicas (PUJ)
 
 ## 📌 Descripción del Proyecto
