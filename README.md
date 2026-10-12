@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/nexo-logo-3d.gif" width="220" alt="Logo de Nexo girando en 3D">
+  <img src="docs/img/nexo-banner-3d.gif" width="100%" alt="Logo 3D giratorio de Nexo">
 </p>
 
 <h1 align="center">📋 Nexo</h1>
