@@ -35,17 +35,19 @@ import {
   serverTimestamp,
   arrayUnion
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import { FIREBASE_CONFIG, API_BASE } from './firebase-config.js';
+import { FIREBASE_CONFIG, API_BASE } from './firebase-config.js?v=20261022';
 
 // Mapeo canónico de roles
 export const ROL_MAP = {
   ESTUDIANTE: 'est',
   DOCENTE: 'doc',
   DIRECCION: 'dir',
+  DOCENTE_DIRECTIVO: 'mix',
   ADMIN: 'adm',
   est: 'ESTUDIANTE',
   doc: 'DOCENTE',
   dir: 'DIRECCION',
+  mix: 'DOCENTE_DIRECTIVO',
   adm: 'ADMIN'
 };
 
@@ -67,11 +69,70 @@ export const EST_LABELS = {
 
 // Escala de valoración de 5 caritas (0 = Muy mal … 4 = Muy bien)
 export const MOOD_LABELS = ['Muy mal', 'Mal', 'Regular', 'Bien', 'Muy bien'];
+
+// ===============================================================
+// FORMULARIO DE EVALUACIÓN (dimensiones inspiradas en el SEEQ)
+// ===============================================================
+// Escala Likert de acuerdo (0 = Totalmente en desacuerdo … 4 = Totalmente de acuerdo).
+// Una respuesta vacía (null) no cuenta en el promedio.
+export const LIKERT_LABELS = ['Totalmente en desacuerdo', 'En desacuerdo', 'Ni de acuerdo ni en desacuerdo', 'De acuerdo', 'Totalmente de acuerdo'];
+
+// Categorías que califican al docente. La valoración de cada una (moods[key]) es el
+// promedio de sus preguntas, en la misma escala 0-4 de las caritas.
 export const CATEGORIAS = [
-  { key: 'metodologia', nombre: 'Metodología' },
-  { key: 'contenido', nombre: 'Contenido' },
-  { key: 'ritmo', nombre: 'Ritmo' }
+  {
+    key: 'claridad', nombre: 'Claridad', titulo: 'Claridad y organización del curso', frase: 'la claridad del curso',
+    help: 'Piensa en los objetivos de la materia y en cómo se ordenaron los temas.',
+    preguntas: [
+      { id: 'p1', n: 1, q: 'Desde el inicio del curso, el docente dejó claro qué debía aprender y lograr.' },
+      { id: 'p2', n: 2, q: 'Los temas se presentaron en un orden que me permitió entender cómo se conectaban entre sí.' }
+    ]
+  },
+  {
+    key: 'explicaciones', nombre: 'Explicaciones', titulo: 'Calidad de las explicaciones', frase: 'las explicaciones',
+    help: 'Piensa en cómo el docente explica en clase y en los ejemplos que usa.',
+    preguntas: [
+      { id: 'p3', n: 3, q: 'Las explicaciones del docente me ayudaron a comprender los contenidos.' },
+      { id: 'p4', n: 4, q: 'El docente usó ejemplos o actividades que facilitaron mi aprendizaje.' }
+    ]
+  },
+  {
+    key: 'evaluacion', nombre: 'Evaluación', titulo: 'Evaluación y retroalimentación', frase: 'la evaluación',
+    help: 'Piensa en los parciales, trabajos y talleres, y en los comentarios que recibiste.',
+    preguntas: [
+      { id: 'p5', n: 5, q: 'Las evaluaciones (parciales, trabajos, talleres) correspondieron con lo trabajado en el curso.' },
+      { id: 'p6', n: 6, q: 'Los criterios de calificación fueron claros antes de cada evaluación.' },
+      { id: 'p7', n: 7, q: 'La retroalimentación que recibí me indicó concretamente cómo mejorar.' }
+    ]
+  },
+  {
+    key: 'acompanamiento', nombre: 'Acompañamiento', titulo: 'Acompañamiento y relación con los estudiantes', frase: 'el acompañamiento',
+    help: 'Piensa en la disposición del docente para ayudarte y en el ambiente de la clase.',
+    preguntas: [
+      { id: 'p8', n: 8, q: 'Cuando tuve dudas o dificultades, pude obtener ayuda del docente.' },
+      { id: 'p9', n: 9, q: 'El docente promovió la participación y las preguntas en clase.' },
+      { id: 'p10', n: 10, q: 'El docente trató a los estudiantes con respeto.' }
+    ]
+  }
 ];
+
+// Datos de contexto: no se promedian con las categorías del docente.
+// Carga y dificultad usan una escala bipolar donde el punto ideal es el centro.
+export const NIVELES = {
+  carga: { n: 11, q: 'La carga de trabajo de esta materia fue:', labels: ['Muy baja', 'Baja', 'Adecuada', 'Alta', 'Muy alta'] },
+  dificultad: { n: 12, q: 'El nivel de dificultad de esta materia fue:', labels: ['Muy bajo', 'Bajo', 'Adecuado', 'Alto', 'Muy alto'] }
+};
+export const CONTEXTO = [
+  { id: 'p13', n: 13, q: 'Siento que aprendí mucho en esta materia.' },
+  { id: 'p14', n: 14, q: 'En general, estoy satisfecho/a con esta materia.' }
+];
+export const HORAS = { n: 15, q: '¿Cuántas horas a la semana dedicaste a esta materia fuera de clase?', labels: ['0–2', '3–5', '6–8', '9 o más'] };
+
+/** Promedio 0-4 de una categoría, sin contar "No aplica". null si no hay respuestas. */
+export function promedioCategoria(respuestas, cat) {
+  const vals = cat.preguntas.map(p => respuestas?.[p.id]).filter(v => Number.isInteger(v) && v >= 0 && v <= 4);
+  return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+}
 
 // Estado del backend en Java
 let isJavaBackendActive = false;
@@ -142,15 +203,14 @@ export function normalizeReport(r) {
     professorUid: r.professorUid || '',
     studentUid: r.studentUid || '',
     studentNombre: r.studentNombre || 'Estudiante',
-    categoria: r.categoria || 'Metodología',
+    categoria: r.categoria || CATEGORIAS[0].nombre,
     titulo: r.titulo || (r.detalle || '').slice(0, 65),
     detalle: r.detalle || '',
-    moods: {
-      metodologia: clampMood(moods.metodologia),
-      contenido: clampMood(moods.contenido),
-      ritmo: clampMood(moods.ritmo)
-    },
+    moods: Object.fromEntries(CATEGORIAS.map(c => [c.key, clampMood(moods[c.key])])),
     comentarios: r.comentarios || {},
+    // Respuestas del formulario por pregunta (p1…p14, carga, dificultad, horas)
+    respuestas: r.respuestas && typeof r.respuestas === 'object' ? r.respuestas : {},
+    mantener: r.mantener || '',
     estado,
     // Seguimiento: cambios de estado con su fecha (más antiguo primero)
     historial: (Array.isArray(r.historial) ? r.historial : [])
@@ -172,7 +232,9 @@ const byDateDesc = (a, b) => new Date(b.createdAt) - new Date(a.createdAt);
 const DEFAULT_USERS = {
   'estudiante@javeriana.edu.co': { uid: 'demo-est-01', email: 'estudiante@javeriana.edu.co', nombre: 'Mateo Silva', rol: 'est' },
   'profesor@javeriana.edu.co': { uid: 'demo-doc-01', email: 'profesor@javeriana.edu.co', nombre: 'María García', rol: 'doc' },
-  'direccion@javeriana.edu.co': { uid: 'demo-dir-01', email: 'direccion@javeriana.edu.co', nombre: 'Ana Torres', rol: 'dir' }
+  'direccion@javeriana.edu.co': { uid: 'demo-dir-01', email: 'direccion@javeriana.edu.co', nombre: 'Ana Torres', rol: 'dir' },
+  // Docente que además es jefe de sección o director de carrera
+  'jefe@javeriana.edu.co': { uid: 'doc-torres', email: 'jefe@javeriana.edu.co', nombre: 'Julián Torres', rol: 'mix', aCargo: ['demo-doc-01'] }
 };
 
 const DEFAULT_SUBJECTS = [
@@ -184,12 +246,14 @@ const DEFAULT_SUBJECTS = [
 
 const daysAgo = (n) => new Date(Date.now() - 86400000 * n).toISOString();
 const DEFAULT_REPORTS = [
-  { id: 'demo-1', studentUid: 'demo-est-01', studentNombre: 'Mateo Silva', subjectId: 'estructuras-g1', subjectNombre: 'Estructuras de Datos', grupo: 'Grupo 1', professorUid: 'demo-doc-01', categoria: 'Ritmo', titulo: 'El ritmo de la clase es muy rápido', detalle: 'El ritmo de la clase es muy rápido, no alcanzo a tomar apuntes y los temas de árboles y grafos se acumulan antes del parcial.', moods: { metodologia: 1, contenido: 2, ritmo: 0 }, comentarios: {}, estado: 'pend', createdAt: daysAgo(2) },
-  { id: 'demo-2', studentUid: 'demo-est-02', studentNombre: 'Laura Díaz', subjectId: 'bases-g1', subjectNombre: 'Bases de Datos I', grupo: 'Grupo 1', professorUid: 'demo-doc-01', categoria: 'Contenido', titulo: 'Los ejemplos de normalización no corresponden con el taller', detalle: 'Los ejemplos de normalización vistos en clase no corresponden con los ejercicios propuestos para el taller.', moods: { metodologia: 3, contenido: 1, ritmo: 2 }, comentarios: {}, estado: 'rev', createdAt: daysAgo(6) },
-  { id: 'demo-3', studentUid: 'demo-est-02', studentNombre: 'Laura Díaz', subjectId: 'calculo-g1', subjectNombre: 'Cálculo Diferencial', grupo: 'Grupo 1', professorUid: 'doc-ruiz', categoria: 'Metodología', titulo: 'Falta retroalimentación detallada en las tareas', detalle: 'Falta retroalimentación detallada en las tareas entregadas, solo recibimos la nota.', moods: { metodologia: 0, contenido: 2, ritmo: 1 }, comentarios: {}, estado: 'ok', createdAt: daysAgo(12) }
+  { id: 'demo-1', studentUid: 'demo-est-01', studentNombre: 'Mateo Silva', subjectId: 'estructuras-g1', subjectNombre: 'Estructuras de Datos', grupo: 'Grupo 1', professorUid: 'demo-doc-01', categoria: 'Explicaciones', titulo: 'El ritmo de la clase es muy rápido', detalle: 'El ritmo de la clase es muy rápido, no alcanzo a tomar apuntes y los temas de árboles y grafos se acumulan antes del parcial.', moods: { claridad: 2, explicaciones: 1, evaluacion: 2, acompanamiento: 3 }, respuestas: { p1: 2, p2: 2, p3: 1, p4: 1, p5: 2, p6: 2, p7: 2, p8: 3, p9: 3, p10: 4, carga: 4, dificultad: 3, p13: 2, p14: 1, horas: 2 }, mantener: 'Los talleres en grupo.', comentarios: {}, estado: 'pend', createdAt: daysAgo(2) },
+  { id: 'demo-2', studentUid: 'demo-est-02', studentNombre: 'Laura Díaz', subjectId: 'bases-g1', subjectNombre: 'Bases de Datos I', grupo: 'Grupo 1', professorUid: 'demo-doc-01', categoria: 'Evaluación', titulo: 'Los ejemplos de normalización no corresponden con el taller', detalle: 'Los ejemplos de normalización vistos en clase no corresponden con los ejercicios propuestos para el taller.', moods: { claridad: 3, explicaciones: 3, evaluacion: 1, acompanamiento: 3 }, respuestas: { p1: 3, p2: 3, p3: 3, p4: 3, p5: 1, p6: 1, p7: 2, p8: 3, p9: null, p10: 4, carga: 2, dificultad: 3, p13: 3, p14: 3, horas: 1 }, mantener: '', comentarios: {}, estado: 'rev', createdAt: daysAgo(6) },
+  { id: 'demo-4', studentUid: 'demo-est-01', studentNombre: 'Mateo Silva', subjectId: 'poo-g2', subjectNombre: 'Programación Orientada a Objetos', grupo: 'Grupo 2', professorUid: 'doc-torres', categoria: 'Claridad', titulo: 'No queda claro qué se evalúa en el proyecto final', detalle: 'No queda claro qué se evalúa en el proyecto final ni cómo se conecta con los talleres de herencia.', moods: { claridad: 1, explicaciones: 3, evaluacion: 2, acompanamiento: 3 }, respuestas: { p1: 1, p2: 1, p3: 3, p4: 3, p5: 2, p6: 1, p7: 3, p8: 3, p9: 4, p10: 4, carga: 3, dificultad: 2, p13: 3, p14: 2, horas: 2 }, mantener: 'Las asesorías antes de las entregas.', comentarios: {}, estado: 'pend', createdAt: daysAgo(3) },
+  { id: 'demo-3', studentUid: 'demo-est-02', studentNombre: 'Laura Díaz', subjectId: 'calculo-g1', subjectNombre: 'Cálculo Diferencial', grupo: 'Grupo 1', professorUid: 'doc-ruiz', categoria: 'Evaluación', titulo: 'Falta retroalimentación detallada en las tareas', detalle: 'Falta retroalimentación detallada en las tareas entregadas, solo recibimos la nota.', moods: { claridad: 2, explicaciones: 2, evaluacion: 0, acompanamiento: 1 }, respuestas: { p1: 2, p2: 2, p3: 2, p4: 2, p5: 1, p6: 0, p7: 0, p8: 1, p9: 1, p10: 3, carga: 3, dificultad: 2, p13: 2, p14: 1, horas: 1 }, mantener: '', comentarios: {}, estado: 'ok', createdAt: daysAgo(12) }
 ];
 
-const STORAGE_KEY = 'nexo_local_db_v2';
+// v4: reportes con las categorías del formulario de evaluación docente y perfil docente directivo
+const STORAGE_KEY = 'nexo_local_db_v4';
 function loadLocalDb() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -277,7 +341,9 @@ function formatProfile(uid, data) {
     nombre,
     primerNombre: primer,
     iniciales: ini,
-    rol: ROL_MAP[data.rol] && data.rol.length > 3 ? ROL_MAP[data.rol] : (data.rol || 'est')
+    rol: ROL_MAP[data.rol] && data.rol.length > 3 ? ROL_MAP[data.rol] : (data.rol || 'est'),
+    // Docente directivo: uids de los docentes de su sección (vacío = todo el programa)
+    aCargo: Array.isArray(data.aCargo) ? data.aCargo : []
   };
 }
 
@@ -454,8 +520,8 @@ export const NexoAPI = {
 
   // -------------------------------------------------------------
   // HU-02: Creación de reportes de dificultades académicas
-  // payload: { subjectId, moods: {metodologia, contenido, ritmo} (0-4),
-  //            comentarios: {metodologia, contenido, ritmo}, detalle }
+  // payload: { subjectId, respuestas: {p1…p14 (0-4 o null = No aplica),
+  //            carga, dificultad (0-4), horas (0-3)}, mantener, detalle }
   // -------------------------------------------------------------
   async createReport(payload) {
     const me = currentProfile;
@@ -466,16 +532,17 @@ export const NexoAPI = {
       throw new Error('La descripción debe tener al menos 20 caracteres.');
     }
 
-    const moods = {
-      metodologia: clampMood(payload.moods?.metodologia),
-      contenido: clampMood(payload.moods?.contenido),
-      ritmo: clampMood(payload.moods?.ritmo)
-    };
+    // Solo se guardan las preguntas conocidas, con valores dentro de su escala
+    const valid = (v, max) => (Number.isInteger(v) && v >= 0 && v <= max ? v : null);
+    const respuestas = {};
+    for (const p of [...CATEGORIAS.flatMap(c => c.preguntas), ...CONTEXTO]) respuestas[p.id] = valid(payload.respuestas?.[p.id], 4);
+    for (const k of Object.keys(NIVELES)) respuestas[k] = valid(payload.respuestas?.[k], 4);
+    respuestas.horas = valid(payload.respuestas?.horas, HORAS.labels.length - 1);
+
+    // Valoración por categoría: promedio de sus preguntas (neutro si todo fue "No aplica")
+    const moods = Object.fromEntries(CATEGORIAS.map(c => [c.key, clampMood(promedioCategoria(respuestas, c) ?? 2)]));
+    const mantener = (payload.mantener || '').trim();
     const comentarios = {};
-    for (const { key } of CATEGORIAS) {
-      const c = (payload.comentarios?.[key] || '').trim();
-      if (c) comentarios[key] = c;
-    }
 
     await javaReady;
 
@@ -483,7 +550,7 @@ export const NexoAPI = {
     if (isJavaBackendActive) {
       const created = await javaFetch('/reports', {
         method: 'POST',
-        body: JSON.stringify({ subjectId: payload.subjectId, moods, comentarios, detalle })
+        body: JSON.stringify({ subjectId: payload.subjectId, moods, comentarios, respuestas, mantener, detalle })
       });
       return normalizeReport(created);
     }
@@ -492,8 +559,10 @@ export const NexoAPI = {
     const subj = (await this.subjects()).find(s => s.id === payload.subjectId);
     if (!subj) throw new Error('Selecciona una asignatura válida.');
 
+    // Categoría con la peor valoración (con el promedio sin redondear)
+    const score = (c) => promedioCategoria(respuestas, c) ?? 2;
     let categoria = CATEGORIAS[0];
-    for (const c of CATEGORIAS) if (moods[c.key] < moods[categoria.key]) categoria = c;
+    for (const c of CATEGORIAS) if (score(c) < score(categoria)) categoria = c;
     const limpio = detalle.replace(/\s+/g, ' ');
     const titulo = limpio.length <= 65 ? limpio : limpio.slice(0, 65).replace(/\s\S*$/, '') + '…';
 
@@ -508,7 +577,9 @@ export const NexoAPI = {
       titulo,
       detalle,
       moods,
-      comentarios
+      comentarios,
+      respuestas,
+      mantener
     };
 
     // 3. Cloud Firestore

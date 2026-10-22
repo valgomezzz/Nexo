@@ -32,13 +32,20 @@ service cloud.firestore {
     }
 
     function isDocente() {
-      return isAuthenticated() && (userRole() == 'DOCENTE' || userRole() == 'doc');
+      return isAuthenticated() && (
+        userRole() == 'DOCENTE' ||
+        userRole() == 'doc' ||
+        userRole() == 'DOCENTE_DIRECTIVO' ||
+        userRole() == 'mix'
+      );
     }
 
     function isDireccionOrAdmin() {
       return isAuthenticated() && (
         userRole() == 'DIRECCION' || 
         userRole() == 'dir' || 
+        userRole() == 'DOCENTE_DIRECTIVO' || 
+        userRole() == 'mix' || 
         userRole() == 'ADMIN' || 
         userRole() == 'adm'
       );
