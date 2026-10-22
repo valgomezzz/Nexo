@@ -159,6 +159,12 @@ h1,h2,h3,p{margin:0}
 .mood{display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 6px;border-radius:20px;cursor:pointer;font-weight:600;font-size:14px;color:#132135;transition:all .25s cubic-bezier(.3,1.5,.5,1);border:1.5px solid #DCE5F2;background:#fff;box-shadow:inset 0 1px 0 #fff,0 8px 16px -10px rgba(19,33,53,.3)}
 .mood.on{border:2px solid #355E96;background:#E7EEF8;transform:translateY(-8px) scale(1.04);box-shadow:inset 0 1px 0 #fff,0 22px 30px -14px rgba(53,94,150,.55)}
 .mood{text-align:center;line-height:1.25}
+.mood.solo{padding:16px 4px}
+.mood.solo svg{width:clamp(30px,8vw,44px);height:clamp(30px,8vw,44px)}
+.moods.solos{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:clamp(6px,2vw,12px)}
+.escala{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:#5B6B82}
+.escala span{display:inline-flex;align-items:center;gap:6px}
+.escala .linea{flex:1;height:2px;background:linear-gradient(90deg,#B3403A,#C98418,#5B6B82,#355E96,#4B9862);border-radius:2px;opacity:.5}
 .q-item{display:flex;flex-direction:column;gap:16px}
 .q-item+.q-item{padding-top:24px;border-top:1.5px dashed #DCE5F2}
 .q-text{font-weight:700;font-size:18px;line-height:1.4;color:#132135}
@@ -298,7 +304,7 @@ h1,h2,h3,p{margin:0}
 <div id="toasts" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { NexoAPI, EST_LABELS, MOOD_LABELS, CATEGORIAS, LIKERT_LABELS, NIVELES, CONTEXTO, HORAS, promedioCategoria } from './nexo-api.js?v=2026-10-22d';
+import { NexoAPI, EST_LABELS, MOOD_LABELS, CATEGORIAS, LIKERT_LABELS, CONTEXTO, HORAS, promedioCategoria } from './nexo-api.js?v=2026-10-22e';
 
 // ===============================================================
 // ESTADO DE LA APLICACIÓN
@@ -684,8 +690,6 @@ const WIZ_STEPS = [
   { name: 'Tus comentarios' }
 ];
 
-// Las caritas de carga y dificultad reflejan la distancia al punto ideal (el centro)
-const NIVEL_FACES = [1, 2, 4, 2, 1];
 
 function newWizard(subjectId = null) {
   return {
@@ -703,23 +707,18 @@ function respuestasApi(W) {
   return { ...W.respuestas };
 }
 
+// Solo caritas, en el mismo orden para todas las preguntas; el significado va en la leyenda
 function likertItem(p, sel) {
   return `<div class="q-item">
     <p class="q-text" id="q-${p.id}"><span class="n">${p.n}.</span>${esc(p.q)}</p>
-    <div role="radiogroup" aria-labelledby="q-${p.id}" class="moods">
-      ${LIKERT_LABELS.map((label, i) => `<button type="button" role="radio" aria-checked="${sel === i}" class="mood ${sel === i ? 'on' : ''}" data-act="pick-answer" data-key="${p.id}" data-val="${i}">${face(i, 40, '')}${label}</button>`).join('')}
+    <div role="radiogroup" aria-labelledby="q-${p.id}" class="moods solos">
+      ${LIKERT_LABELS.map((label, i) => `<button type="button" role="radio" aria-checked="${sel === i}" aria-label="${label}" title="${label}" class="mood solo ${sel === i ? 'on' : ''}" data-act="pick-answer" data-key="${p.id}" data-val="${i}">${face(i, 44, '')}</button>`).join('')}
     </div>
   </div>`;
 }
 
-function nivelItem(key, sel) {
-  const nv = NIVELES[key];
-  return `<div class="q-item">
-    <p class="q-text" id="q-${key}"><span class="n">${nv.n}.</span>${esc(nv.q)}</p>
-    <div role="radiogroup" aria-labelledby="q-${key}" class="moods">
-      ${nv.labels.map((label, i) => `<button type="button" role="radio" aria-checked="${sel === i}" class="mood ${sel === i ? 'on' : ''}" data-act="pick-answer" data-key="${key}" data-val="${i}">${face(NIVEL_FACES[i], 40, '')}${label}</button>`).join('')}
-    </div>
-  </div>`;
+function escalaLeyenda() {
+  return `<div class="escala" aria-hidden="true"><span>${face(0, 22, '')}${LIKERT_LABELS[0]}</span><span class="linea"></span><span>${LIKERT_LABELS[4]}${face(4, 22, '')}</span></div>`;
 }
 
 function horasItem(sel) {
@@ -756,15 +755,16 @@ function renderEstNuevo() {
       <div><p class="eyebrow">Categoría ${CATEGORIAS.indexOf(cat) + 1} de ${CATEGORIAS.length}</p>
       <h1 class="d" style="font-size:clamp(28px,3vw,38px);line-height:1.1;font-weight:600;margin-top:8px">${cat.titulo}</h1>
       <p style="margin:12px 0 0;color:#5B6B82;font-size:17px;line-height:1.5">${cat.help} ¿Qué tan de acuerdo estás con cada afirmación?</p></div>
+      ${escalaLeyenda()}
       ${cat.preguntas.map(p => likertItem(p, W.respuestas[p.id])).join('')}`;
   } else if (st.materia) {
-    const keys = [...Object.keys(NIVELES), ...CONTEXTO.map(p => p.id), 'horas'];
+    const keys = [...CONTEXTO.map(p => p.id), 'horas'];
     canNext = keys.every(k => W.respuestas[k] !== undefined);
     body = `
       <div><h1 class="d" style="font-size:clamp(28px,3vw,38px);line-height:1.1;font-weight:600">Sobre la materia</h1>
       <p style="margin:12px 0 0;color:#5B6B82;font-size:17px;line-height:1.5">Estas preguntas dan contexto sobre el curso.</p></div>
       <p class="ctx-note">Estas respuestas no se promedian en la calificación del docente.</p>
-      ${Object.keys(NIVELES).map(k => nivelItem(k, W.respuestas[k])).join('')}
+      ${escalaLeyenda()}
       ${CONTEXTO.map(p => likertItem(p, W.respuestas[p.id])).join('')}
       ${horasItem(W.respuestas.horas)}`;
   } else {
@@ -851,7 +851,6 @@ function respuestasDetalle(r) {
     <h3>Respuestas por pregunta</h3>
     <ul class="ans-list">
       ${CATEGORIAS.flatMap(c => c.preguntas).map(p => fila(p.n, p.q, likert(R[p.id]))).join('')}
-      ${Object.entries(NIVELES).map(([k, nv]) => fila(nv.n, nv.q, nv.labels[R[k]])).join('')}
       ${CONTEXTO.map(p => fila(p.n, p.q, likert(R[p.id]))).join('')}
       ${fila(HORAS.n, HORAS.q, HORAS.labels[R.horas] && `${HORAS.labels[R.horas]} h`)}
     </ul>

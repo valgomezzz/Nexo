@@ -117,12 +117,10 @@ export const CATEGORIAS = [
 ];
 
 // Datos de contexto: no se promedian con las categorías del docente.
-// Carga y dificultad usan una escala bipolar donde el punto ideal es el centro.
-export const NIVELES = {
-  carga: { n: 11, q: 'La carga de trabajo de esta materia fue:', labels: ['Muy baja', 'Baja', 'Adecuada', 'Alta', 'Muy alta'] },
-  dificultad: { n: 12, q: 'El nivel de dificultad de esta materia fue:', labels: ['Muy bajo', 'Bajo', 'Adecuado', 'Alto', 'Muy alto'] }
-};
+// Usan la misma escala de acuerdo que las demás preguntas.
 export const CONTEXTO = [
+  { id: 'carga', n: 11, q: 'La carga de trabajo fue adecuada para lo que se esperaba que aprendiera.' },
+  { id: 'dificultad', n: 12, q: 'El nivel de dificultad fue adecuado para lo que se esperaba que aprendiera.' },
   { id: 'p13', n: 13, q: 'Siento que aprendí mucho en esta materia.' },
   { id: 'p14', n: 14, q: 'En general, estoy satisfecho/a con esta materia.' }
 ];
@@ -536,7 +534,6 @@ export const NexoAPI = {
     const valid = (v, max) => (Number.isInteger(v) && v >= 0 && v <= max ? v : null);
     const respuestas = {};
     for (const p of [...CATEGORIAS.flatMap(c => c.preguntas), ...CONTEXTO]) respuestas[p.id] = valid(payload.respuestas?.[p.id], 4);
-    for (const k of Object.keys(NIVELES)) respuestas[k] = valid(payload.respuestas?.[k], 4);
     respuestas.horas = valid(payload.respuestas?.horas, HORAS.labels.length - 1);
 
     // Valoración por categoría: promedio de sus preguntas (neutro si todo fue "No aplica")
