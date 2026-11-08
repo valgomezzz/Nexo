@@ -76,64 +76,182 @@ export const MOOD_LABELS = ['Muy mal', 'Mal', 'Regular', 'Bien', 'Muy bien'];
 // ===============================================================
 // FORMULARIO DE EVALUACIÓN (dimensiones inspiradas en el SEEQ)
 // ===============================================================
-// Escala Likert de acuerdo (0 = Totalmente en desacuerdo … 4 = Totalmente de acuerdo).
-// Una respuesta vacía (null) no cuenta en el promedio.
+// Cada pregunta tiene un tipo de respuesta:
+//   likert → 0-4 (Totalmente en desacuerdo … Totalmente de acuerdo), se responde con caritas.
+//            Solo para percepciones, donde importa el grado.
+//   sino   → true / false. Para hechos que ocurrieron o no.
+//   opcion → índice de "opciones". Para respuestas categóricas (carga, horas, …).
+// "puntaje" lleva cada respuesta a la escala 0-4 para calcular la valoración de la
+// categoría (null = no cuenta). "alerta" marca la respuesta que dirección debe revisar.
+export const FORM_VERSION = 2;
 export const LIKERT_LABELS = ['Totalmente en desacuerdo', 'En desacuerdo', 'Ni de acuerdo ni en desacuerdo', 'De acuerdo', 'Totalmente de acuerdo'];
+export const SI_NO = { true: 'Sí', false: 'No' };
 
-// Categorías que califican al docente. La valoración de cada una (moods[key]) es el
-// promedio de sus preguntas, en la misma escala 0-4 de las caritas.
 export const CATEGORIAS = [
   {
     key: 'claridad', nombre: 'Claridad', titulo: 'Claridad y organización del curso', frase: 'la claridad del curso',
     help: 'Piensa en los objetivos de la materia y en cómo se ordenaron los temas.',
     preguntas: [
-      { id: 'p1', n: 1, q: 'Desde el inicio del curso, el docente dejó claro qué debía aprender y lograr.' },
-      { id: 'p2', n: 2, q: 'Los temas se presentaron en un orden que me permitió entender cómo se conectaban entre sí.' }
+      { id: 'p1', tipo: 'sino', corto: 'Presentó objetivos y forma de evaluar', q: '¿Al inicio del curso, el docente presentó los objetivos de la materia y cómo se iba a evaluar?' },
+      { id: 'p2', tipo: 'likert', corto: 'Orden de los temas', q: 'Los temas se presentaron en un orden que me permitió entender cómo se conectaban entre sí.' }
     ]
   },
   {
     key: 'explicaciones', nombre: 'Explicaciones', titulo: 'Calidad de las explicaciones', frase: 'las explicaciones',
     help: 'Piensa en cómo el docente explica en clase y en los ejemplos que usa.',
     preguntas: [
-      { id: 'p3', n: 3, q: 'Las explicaciones del docente me ayudaron a comprender los contenidos.' },
-      { id: 'p4', n: 4, q: 'El docente usó ejemplos o actividades que facilitaron mi aprendizaje.' }
+      { id: 'p3', tipo: 'likert', corto: 'Explicaciones comprensibles', q: 'Las explicaciones del docente me ayudaron a comprender los contenidos.' },
+      { id: 'p4', tipo: 'likert', corto: 'Ejemplos y actividades útiles', q: 'El docente usó ejemplos o actividades que facilitaron mi aprendizaje.' }
     ]
   },
   {
     key: 'evaluacion', nombre: 'Evaluación', titulo: 'Evaluación y retroalimentación', frase: 'la evaluación',
     help: 'Piensa en los parciales, trabajos y talleres, y en los comentarios que recibiste.',
     preguntas: [
-      { id: 'p5', n: 5, q: 'Las evaluaciones (parciales, trabajos, talleres) correspondieron con lo trabajado en el curso.' },
-      { id: 'p6', n: 6, q: 'Los criterios de calificación fueron claros antes de cada evaluación.' },
-      { id: 'p7', n: 7, q: 'La retroalimentación que recibí me indicó concretamente cómo mejorar.' }
+      { id: 'p5', tipo: 'likert', corto: 'Evaluaciones acordes al curso', q: 'Las evaluaciones (parciales, trabajos, talleres) correspondieron con lo trabajado en el curso.' },
+      { id: 'p6', tipo: 'sino', corto: 'Criterios claros antes de evaluar', q: '¿Conociste los criterios de calificación antes de cada evaluación?' },
+      { id: 'p7', tipo: 'sino', corto: 'Retroalimentación más allá de la nota', q: '¿Recibiste retroalimentación, además de la nota, que te indicara cómo mejorar?' }
     ]
   },
   {
     key: 'acompanamiento', nombre: 'Acompañamiento', titulo: 'Acompañamiento y relación con los estudiantes', frase: 'el acompañamiento',
     help: 'Piensa en la disposición del docente para ayudarte y en el ambiente de la clase.',
     preguntas: [
-      { id: 'p8', n: 8, q: 'Cuando tuve dudas o dificultades, pude obtener ayuda del docente.' },
-      { id: 'p9', n: 9, q: 'El docente promovió la participación y las preguntas en clase.' },
-      { id: 'p10', n: 10, q: 'El docente trató a los estudiantes con respeto.' }
+      { id: 'p8', tipo: 'opcion', corto: 'Obtuvo ayuda con sus dudas', q: 'Cuando tuviste dudas, ¿pudiste obtener ayuda del docente?',
+        opciones: ['Sí, siempre', 'A veces', 'No', 'No tuve dudas'], puntaje: [4, 2, 0, null], colores: ['#355E96', '#E6B979', '#B3403A', '#C5D3E8'] },
+      { id: 'p9', tipo: 'likert', corto: 'Promueve la participación', q: 'El docente promovió la participación y las preguntas en clase.' },
+      { id: 'p10', tipo: 'sino', corto: 'Trato respetuoso', q: '¿El docente trató a los estudiantes con respeto?', alerta: false }
     ]
   }
 ];
 
-// Datos de contexto: no se promedian con las categorías del docente.
-// Usan la misma escala de acuerdo que las demás preguntas.
+// Datos de contexto: no se promedian en la valoración del docente.
 export const CONTEXTO = [
-  { id: 'carga', n: 11, q: 'La carga de trabajo fue adecuada para lo que se esperaba que aprendiera.' },
-  { id: 'dificultad', n: 12, q: 'El nivel de dificultad fue adecuado para lo que se esperaba que aprendiera.' },
-  { id: 'p13', n: 13, q: 'Siento que aprendí mucho en esta materia.' },
-  { id: 'p14', n: 14, q: 'En general, estoy satisfecho/a con esta materia.' }
+  { id: 'carga', tipo: 'opcion', corto: 'Carga de trabajo', q: '¿Cómo fue la carga de trabajo de esta materia?',
+    opciones: ['Baja', 'Adecuada', 'Alta', 'Excesiva'], colores: ['#9DB6DA', '#355E96', '#E6B979', '#B3403A'] },
+  { id: 'dificultad', tipo: 'opcion', corto: 'Nivel de dificultad', q: '¿Cómo fue el nivel de dificultad?',
+    opciones: ['Fácil', 'Adecuado', 'Difícil', 'Muy difícil'], colores: ['#9DB6DA', '#355E96', '#E6B979', '#B3403A'] },
+  { id: 'horas', tipo: 'opcion', corto: 'Horas semanales fuera de clase', q: '¿Cuántas horas a la semana dedicaste a esta materia fuera de clase?',
+    opciones: ['0–2 h', '3–5 h', '6–8 h', '9 h o más'], colores: ['#DCE5F2', '#9DB6DA', '#5E7FAF', '#2C4F80'] },
+  { id: 'p13', tipo: 'likert', corto: 'Siente que aprendió', q: 'Siento que aprendí mucho en esta materia.' },
+  { id: 'p14', tipo: 'likert', corto: 'Satisfacción general', q: 'En general, estoy satisfecho/a con esta materia.' },
+  { id: 'recomienda', tipo: 'sino', corto: 'Recomendaría la materia', q: '¿Le recomendarías esta materia, con este docente, a otro estudiante?' }
 ];
-export const HORAS = { n: 15, q: '¿Cuántas horas a la semana dedicaste a esta materia fuera de clase?', labels: ['0–2', '3–5', '6–8', '9 o más'] };
 
-/** Promedio 0-4 de una categoría, sin contar "No aplica". null si no hay respuestas. */
+// Numeración consecutiva de todas las preguntas cerradas
+export const PREGUNTAS = [...CATEGORIAS.flatMap(c => c.preguntas), ...CONTEXTO];
+PREGUNTAS.forEach((p, i) => { p.n = i + 1; });
+export const PREGUNTA = Object.fromEntries(PREGUNTAS.map(p => [p.id, p]));
+
+/** Texto legible de una respuesta. */
+export function textoRespuesta(p, v) {
+  if (v === null || v === undefined) return '—';
+  if (p.tipo === 'likert') return LIKERT_LABELS[v] ?? '—';
+  if (p.tipo === 'sino') return SI_NO[v] ?? '—';
+  return p.opciones[v] ?? '—';
+}
+
+/** Respuesta llevada a la escala 0-4 (null = no cuenta). */
+export function puntaje(p, v) {
+  if (p.tipo === 'likert') return Number.isInteger(v) && v >= 0 && v <= 4 ? v : null;
+  if (p.tipo === 'sino') return v === true ? 4 : v === false ? 0 : null;
+  return Number.isInteger(v) ? (p.puntaje?.[v] ?? null) : null;
+}
+
+/** true si la respuesta es la marcada como alerta en la pregunta. */
+export const esAlerta = (p, v) => p.alerta !== undefined && v === p.alerta;
+
+/** Preguntas con respuesta de alerta en un reporte. */
+export const alertasDe = (r) => PREGUNTAS.filter(p => esAlerta(p, r.respuestas?.[p.id]));
+
+/** Promedio 0-4 de una categoría. null si no hay respuestas que cuenten. */
 export function promedioCategoria(respuestas, cat) {
-  const vals = cat.preguntas.map(p => respuestas?.[p.id]).filter(v => Number.isInteger(v) && v >= 0 && v <= 4);
+  const vals = cat.preguntas.map(p => puntaje(p, respuestas?.[p.id])).filter(v => v !== null);
   return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
 }
+
+/** % de respuestas favorables (puntaje ≥ 3) de una categoría en una lista de reportes. */
+export function favorableCategoria(reports, cat) {
+  const vals = reports.flatMap(r => cat.preguntas.map(p => puntaje(p, r.respuestas?.[p.id]))).filter(v => v !== null);
+  return vals.length ? { pct: Math.round(vals.filter(v => v >= 3).length * 100 / vals.length), n: vals.length } : { pct: null, n: 0 };
+}
+
+/**
+ * Resumen de una pregunta sobre una lista de reportes:
+ *   conteos por respuesta (en el orden de la escala), total respondido y titular.
+ */
+export function resumenPregunta(p, reports) {
+  const vals = reports.map(r => r.respuestas?.[p.id]).filter(v => v !== null && v !== undefined);
+  let labels, keys, colores;
+  if (p.tipo === 'likert') {
+    labels = LIKERT_LABELS; keys = [0, 1, 2, 3, 4];
+    colores = ['#B3403A', '#E09A62', '#C5D3E8', '#7FA0CF', '#355E96'];
+  } else if (p.tipo === 'sino') {
+    labels = ['Sí', 'No']; keys = [true, false];
+    colores = ['#355E96', '#B3403A'];
+  } else {
+    labels = p.opciones; keys = p.opciones.map((_, i) => i);
+    colores = p.colores || ['#355E96', '#7FA0CF', '#E6B979', '#B3403A', '#C5D3E8'];
+  }
+  const n = vals.length;
+  const partes = keys.map((k, i) => {
+    const c = vals.filter(v => v === k).length;
+    return { label: labels[i], n: c, pct: n ? Math.round(c * 100 / n) : 0, color: colores[i], alerta: esAlerta(p, k) };
+  });
+  let titular = null;
+  if (n) {
+    if (p.tipo === 'likert') {
+      const pct = Math.round(vals.filter(v => v >= 3).length * 100 / n);
+      titular = { valor: `${pct} %`, texto: 'de acuerdo', pct };
+    } else if (p.tipo === 'sino') {
+      titular = { valor: `${partes[0].pct} %`, texto: 'dijo que sí', pct: partes[0].pct };
+    } else {
+      const top = [...partes].sort((a, b) => b.n - a.n)[0];
+      titular = { valor: `${top.pct} %`, texto: top.label.toLowerCase(), pct: null };
+    }
+  }
+  return { n, partes, titular, alertas: partes.filter(x => x.alerta).reduce((a, x) => a + x.n, 0) };
+}
+
+/**
+ * Reportes hechos con el formulario anterior (todo en escala de acuerdo 0-4):
+ * se convierten a los tipos actuales para poder resumirlos juntos.
+ */
+function migrarRespuestas(R) {
+  if (!R || R.p1 === undefined) return R || {};
+  const out = { ...R };
+  const sino = (v) => (Number.isInteger(v) ? (v >= 3 ? true : v <= 1 ? false : null) : null);
+  for (const id of ['p1', 'p6', 'p7', 'p10']) out[id] = sino(R[id]);
+  out.p8 = Number.isInteger(R.p8) ? (R.p8 >= 3 ? 0 : R.p8 === 2 ? 1 : 2) : null;
+  // "La carga / dificultad fue adecuada": de acuerdo → Adecuada, en desacuerdo → Alta / Difícil
+  out.carga = Number.isInteger(R.carga) ? (R.carga >= 3 ? 1 : R.carga <= 1 ? 2 : null) : null;
+  out.dificultad = Number.isInteger(R.dificultad) ? (R.dificultad >= 3 ? 1 : R.dificultad <= 1 ? 2 : null) : null;
+  out.recomienda = null;
+  return out;
+}
+
+// ---------------------------------------------------------------
+// Temas de los comentarios (por palabras clave), para identificarlos y filtrarlos
+// ---------------------------------------------------------------
+export const TEMAS = [
+  { key: 'ritmo', nombre: 'Ritmo de la clase', palabras: ['ritmo', 'rapido', 'muy rapido', 'lento', 'velocidad', 'no alcanzo', 'acelerad', 'apurad'] },
+  { key: 'explicaciones', nombre: 'Explicaciones', palabras: ['explica', 'ejemplo', 'entiend', 'entend', 'confus', 'claro', 'claridad', 'comprend'] },
+  { key: 'evaluacion', nombre: 'Evaluaciones', palabras: ['parcial', 'examen', 'quiz', 'evalua', 'calific', 'nota', 'rubrica', 'criterio'] },
+  { key: 'retro', nombre: 'Retroalimentación', palabras: ['retroaliment', 'feedback', 'correcc', 'corrig', 'devuelv', 'solo la nota'] },
+  { key: 'carga', nombre: 'Carga de trabajo', palabras: ['carga', 'tarea', 'taller', 'extens', 'mucho trabajo', 'demasiad', 'entrega', 'proyecto'] },
+  { key: 'material', nombre: 'Material y recursos', palabras: ['material', 'diapositiva', 'slides', 'presentacion', 'guia', 'lectura', 'libro', 'recurso', 'video', 'apuntes'] },
+  { key: 'acompanamiento', nombre: 'Asesorías y apoyo', palabras: ['asesor', 'tutor', 'monitor', 'atencion', 'dudas', 'ayuda', 'disponib', 'respond', 'correo'] },
+  { key: 'trato', nombre: 'Trato y ambiente', palabras: ['respeto', 'irrespet', 'trato', 'grosero', 'ambiente', 'humill', 'grit', 'amable', 'paciencia'] },
+  { key: 'organizacion', nombre: 'Organización', palabras: ['organiz', 'cronograma', 'programa', 'orden', 'planea', 'horario', 'puntual', 'cancel'] },
+  { key: 'practica', nombre: 'Práctica y laboratorios', palabras: ['practic', 'laboratorio', 'ejercicio', 'codigo', 'caso real', 'casos reales', 'grupo'] }
+];
+const sinTildes = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+/** Claves de los temas que menciona un comentario (vacío si ninguno). */
+export function temasDe(texto) {
+  const t = sinTildes(texto);
+  return TEMAS.filter(tm => tm.palabras.some(w => t.includes(w))).map(tm => tm.key);
+}
+export { sinTildes };
 
 // Estado del backend en Java
 let isJavaBackendActive = false;
@@ -209,8 +327,9 @@ export function normalizeReport(r) {
     detalle: r.detalle || '',
     moods: Object.fromEntries(CATEGORIAS.map(c => [c.key, clampMood(moods[c.key])])),
     comentarios: r.comentarios || {},
-    // Respuestas del formulario por pregunta (p1…p14, carga, dificultad, horas)
-    respuestas: r.respuestas && typeof r.respuestas === 'object' ? r.respuestas : {},
+    // Respuestas del formulario por pregunta (ver PREGUNTAS); las del formulario anterior se migran
+    respuestas: r.respuestas && typeof r.respuestas === 'object' ? (r.formVersion === FORM_VERSION ? r.respuestas : migrarRespuestas(r.respuestas)) : {},
+    formVersion: r.formVersion || 1,
     mantener: r.mantener || '',
     estado,
     // Seguimiento: cambios de estado con su fecha (más antiguo primero)
@@ -732,8 +851,8 @@ export const NexoAPI = {
 
   // -------------------------------------------------------------
   // HU-02: Creación de reportes de dificultades académicas
-  // payload: { subjectId, respuestas: {p1…p14 (0-4 o null = No aplica),
-  //            carga, dificultad (0-4), horas (0-3)}, mantener, detalle }
+  // payload: { subjectId, respuestas: { [id de PREGUNTAS]: 0-4 | true/false | índice },
+  //            mantener, detalle }
   // -------------------------------------------------------------
   async createReport(payload) {
     const me = currentProfile;
@@ -745,10 +864,13 @@ export const NexoAPI = {
     }
 
     // Solo se guardan las preguntas conocidas, con valores dentro de su escala
-    const valid = (v, max) => (Number.isInteger(v) && v >= 0 && v <= max ? v : null);
+    const valid = (p, v) => {
+      if (p.tipo === 'sino') return typeof v === 'boolean' ? v : null;
+      const max = p.tipo === 'likert' ? 4 : p.opciones.length - 1;
+      return Number.isInteger(v) && v >= 0 && v <= max ? v : null;
+    };
     const respuestas = {};
-    for (const p of [...CATEGORIAS.flatMap(c => c.preguntas), ...CONTEXTO]) respuestas[p.id] = valid(payload.respuestas?.[p.id], 4);
-    respuestas.horas = valid(payload.respuestas?.horas, HORAS.labels.length - 1);
+    for (const p of PREGUNTAS) respuestas[p.id] = valid(p, payload.respuestas?.[p.id]);
 
     // Valoración por categoría: promedio de sus preguntas (neutro si todo fue "No aplica")
     const moods = Object.fromEntries(CATEGORIAS.map(c => [c.key, clampMood(promedioCategoria(respuestas, c) ?? 2)]));
@@ -761,7 +883,7 @@ export const NexoAPI = {
     if (isJavaBackendActive) {
       const created = await javaFetch('/reports', {
         method: 'POST',
-        body: JSON.stringify({ subjectId: payload.subjectId, moods, comentarios, respuestas, mantener, detalle })
+        body: JSON.stringify({ subjectId: payload.subjectId, moods, comentarios, respuestas, formVersion: FORM_VERSION, mantener, detalle })
       });
       return normalizeReport(created);
     }
@@ -790,6 +912,7 @@ export const NexoAPI = {
       moods,
       comentarios,
       respuestas,
+      formVersion: FORM_VERSION,
       mantener
     };
 
