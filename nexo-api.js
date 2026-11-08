@@ -361,14 +361,47 @@ async function loadFirebaseProfile(user, fallbackEmail) {
 
 function translateAuthError(err) {
   const code = err.code || '';
-  if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found') || code.includes('email-already-in-use')) {
-    return 'Correo institucional o contraseña incorrectos.';
+  if (code.includes('email-already-in-use')) return 'Ya existe una cuenta con este correo. Inicia sesión.';
+  if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) {
+    return 'Correo institucional o contraseña incorrectos. Si aún no tienes cuenta, regístrate.';
   }
   if (code.includes('weak-password')) return 'La contraseña debe tener al menos 6 caracteres.';
   if (code.includes('too-many-requests')) return 'Demasiados intentos. Espera un momento e inténtalo de nuevo.';
   if (code.includes('network')) return 'Sin conexión con Firebase. Revisa tu internet.';
   return err.message || 'No fue posible iniciar sesión.';
 }
+
+const INSTITUTIONAL = /^[^@\s]+@javeriana\.edu\.co$/;
+
+// Llamada al backend Java para enviar / confirmar el código de verificación del correo.
+// Usa el ID token de la cuenta recién creada (aún sin verificar).
+async function verificationFetch(path, body) {
+  if (!auth?.currentUser) throw new Error('Tu sesión expiró. Inicia sesión de nuevo.');
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${await auth.currentUser.getIdToken()}`
+      },
+      body: JSON.stringify(body || {})
+    });
+  } catch (e) {
+    throw new Error('El servicio de verificación no está disponible en este momento. Inténtalo más tarde.');
+  }
+  const data = await res.json().catch(() => null);
+  if (!data) throw new Error('El servicio de verificación no está disponible en este momento. Inténtalo más tarde.');
+  if (!res.ok) {
+    const err = new Error(data.error || `Error ${res.status} verificando el correo.`);
+    const wait = /(\d+)\s*s\b/.exec(data.error || '');
+    if (res.status === 429 && wait) err.retryIn = Number(wait[1]);
+    throw err;
+  }
+  return data;
+}
+
+const pendingOf = (user) => ({ pendingVerification: true, email: user.email });
 
 // ===============================================================
 // API PÚBLICA DE NEXO
@@ -398,6 +431,8 @@ export const NexoAPI = {
       const off = onAuthStateChanged(auth, u => { off(); resolve(u); });
     });
     if (!user) return null;
+    // Cuenta creada pero sin verificar: la interfaz muestra la pantalla del código
+    if (!user.emailVerified) return pendingOf(user);
     try {
       currentProfile = await loadFirebaseProfile(user);
       return currentProfile;
@@ -410,29 +445,23 @@ export const NexoAPI = {
   async login(email, password, requestedRole = 'est') {
     const cleanEmail = (email || '').trim().toLowerCase();
 
-    if (!cleanEmail.endsWith('@javeriana.edu.co')) {
+    if (!INSTITUTIONAL.test(cleanEmail)) {
       throw new Error('Solo se permiten cuentas con correo institucional (@javeriana.edu.co).');
     }
     if (!password || password.length < 4) {
       throw new Error('Ingresa una contraseña válida.');
     }
 
-    // 1. Firebase Authentication (también da el token para el backend Java)
+    // 1. Firebase Authentication (también da el token para el backend Java).
+    //    Las cuentas nuevas se crean en register(); aquí solo se inicia sesión.
     if (this.isFirebaseActive) {
       let credential;
       try {
         credential = await signInWithEmailAndPassword(auth, cleanEmail, password);
       } catch (signInErr) {
-        if (signInErr.code !== 'auth/user-not-found' && signInErr.code !== 'auth/invalid-credential') {
-          throw new Error(translateAuthError(signInErr));
-        }
-        // Cuenta nueva: se registra como estudiante
-        try {
-          credential = await createUserWithEmailAndPassword(auth, cleanEmail, password);
-        } catch (createErr) {
-          throw new Error(translateAuthError(createErr));
-        }
+        throw new Error(translateAuthError(signInErr));
       }
+      if (!credential.user.emailVerified) return pendingOf(credential.user);
       currentProfile = await loadFirebaseProfile(credential.user, cleanEmail);
       return currentProfile;
     }
@@ -458,6 +487,68 @@ export const NexoAPI = {
       rol: requestedRole
     };
     currentProfile = formatProfile(base.uid, { ...base, rol: DEFAULT_USERS[cleanEmail] ? base.rol : requestedRole });
+    return currentProfile;
+  },
+
+  /**
+   * Registro de estudiantes: crea la cuenta en Firebase Authentication y envía el código
+   * de verificación al correo institucional. Devuelve { pendingVerification, email, cooldown }.
+   * Los roles de docente / dirección se asignan después con AsignarRol (backend).
+   */
+  async register(nombre, email, password) {
+    const cleanEmail = (email || '').trim().toLowerCase();
+    const cleanName = (nombre || '').trim().replace(/\s+/g, ' ');
+    if (cleanName.length < 3) throw new Error('Escribe tu nombre completo.');
+    if (!INSTITUTIONAL.test(cleanEmail)) {
+      throw new Error('Solo puedes registrarte con tu correo institucional (@javeriana.edu.co).');
+    }
+    if (!password || password.length < 6) throw new Error('La contraseña debe tener al menos 6 caracteres.');
+    if (!this.isFirebaseActive) throw new Error('El registro requiere conexión con Firebase.');
+
+    let user;
+    try {
+      user = (await createUserWithEmailAndPassword(auth, cleanEmail, password)).user;
+    } catch (err) {
+      if (!String(err.code).includes('email-already-in-use')) throw new Error(translateAuthError(err));
+      // Si la cuenta ya existía sin verificar y la contraseña coincide, se retoma la verificación
+      try {
+        user = (await signInWithEmailAndPassword(auth, cleanEmail, password)).user;
+      } catch (e) {
+        throw new Error(translateAuthError(err));
+      }
+      if (user.emailVerified) {
+        await signOut(auth).catch(() => {});
+        throw new Error(translateAuthError(err));
+      }
+    }
+
+    const pending = { ...pendingOf(user), cooldown: 0, sendError: null };
+    try {
+      const r = await verificationFetch('/auth/verification/send', { nombre: cleanName });
+      pending.cooldown = r.cooldown || 60;
+    } catch (e) {
+      // La cuenta ya existe: el usuario puede reintentar el envío desde la pantalla del código
+      pending.sendError = e.message;
+      pending.cooldown = e.retryIn || 0;
+    }
+    return pending;
+  },
+
+  /** (Re)envía el código de verificación. Devuelve { cooldown } en segundos. */
+  async sendVerificationCode() {
+    const r = await verificationFetch('/auth/verification/send', {});
+    return { cooldown: r.cooldown || 60, verified: Boolean(r.verified) };
+  },
+
+  /** Confirma el código; si es correcto, deja la sesión iniciada y devuelve el perfil. */
+  async confirmVerificationCode(code) {
+    const clean = String(code || '').replace(/\D/g, '');
+    if (clean.length !== 6) throw new Error('Escribe los 6 dígitos del código.');
+    await verificationFetch('/auth/verification/confirm', { code: clean });
+    const user = auth.currentUser;
+    await user.reload();
+    await user.getIdToken(true); // el token nuevo ya incluye email_verified = true
+    currentProfile = await loadFirebaseProfile(user);
     return currentProfile;
   },
 

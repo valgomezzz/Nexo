@@ -268,6 +268,12 @@ h1,h2,h3,p{margin:0}
 .go{min-height:54px;border:0;border-radius:999px;background:#355E96;color:#fff;font:inherit;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 14px 28px -12px rgba(53,94,150,.7);transition:transform .2s}
 .go:hover{transform:translateY(-2px);background:#132135}
 .go:disabled{opacity:.6;cursor:wait;transform:none}
+.alt{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;color:#5B6B82;font-size:15px}
+.alt a,.linkbtn{color:#355E96;font-weight:700;background:none;border:0;padding:0;font:inherit;cursor:pointer}
+.linkbtn:disabled{color:#8A99AF;cursor:default;font-weight:600}
+.hint{color:#5B6B82;font-size:14px;line-height:1.45}
+.code-in input{text-align:center;font-size:30px;font-weight:700;letter-spacing:12px;font-variant-numeric:tabular-nums}
+.info{color:#2F6B47;font-weight:600;font-size:14px}
 .rise{animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
 @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 
@@ -304,7 +310,7 @@ h1,h2,h3,p{margin:0}
 <div id="toasts" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { NexoAPI, EST_LABELS, MOOD_LABELS, CATEGORIAS, LIKERT_LABELS, CONTEXTO, HORAS, promedioCategoria } from './nexo-api.js?v=2026-10-22e';
+import { NexoAPI, EST_LABELS, MOOD_LABELS, CATEGORIAS, LIKERT_LABELS, CONTEXTO, HORAS, promedioCategoria } from './nexo-api.js?v=2026-11-07a';
 
 // ===============================================================
 // ESTADO DE LA APLICACIÓN
@@ -318,6 +324,9 @@ const S = {
   unsubscribe: null,
   dockOpen: readPref('nexo_dock', '1') === '1',
   login: { role: 'est', email: '', pass: '', error: '', loading: false },
+  register: { nombre: '', email: '', pass: '', pass2: '', error: '', loading: false },
+  // Cuenta creada pero sin verificar (pantalla del código)
+  verify: { email: null, code: '', error: '', info: '', loading: false, sending: false, until: 0 },
   wizard: null,
   lastReport: null,
   doc: { estado: 'todos', subject: 'todos', menuId: null },
@@ -588,9 +597,8 @@ function renderLanding() {
 // ===============================================================
 // 2. INICIAR SESIÓN
 // ===============================================================
-function renderLogin() {
-  const L = S.login;
-  const roleBtn = (r, label) => `<button type="button" class="role ${L.role === r ? 'on' : ''}" data-act="login-role" data-val="${r}" aria-pressed="${L.role === r}">${label}</button>`;
+// Marco común de iniciar sesión, registro y verificación (panel azul + tarjeta)
+function authShell(form) {
   return `
   <div class="login">
     <section class="side">
@@ -613,7 +621,20 @@ function renderLogin() {
       <div class="orbit" style="width:520px;height:520px;left:calc(50% - 260px);top:calc(50% - 260px);border:1px dashed rgba(53,94,150,.28);animation-duration:48s"><i style="background:#355E96"></i></div>
       <div class="orbit" style="width:360px;height:360px;left:calc(50% - 180px);top:calc(50% - 180px);border:1px solid rgba(53,94,150,.22);animation-duration:30s;animation-direction:reverse"><i style="background:#7FA0CF"></i></div>
       <div class="pulse" style="width:360px;height:360px;left:calc(50% - 180px);top:calc(50% - 180px);border-color:rgba(53,94,150,.35)"></div>
-      <form id="loginForm" class="rise" novalidate style="position:relative;width:100%;max-width:440px;display:flex;flex-direction:column;gap:20px;padding:36px 34px;border-radius:28px;background:#fff;border:1px solid #DCE5F2;box-shadow:0 2px 4px rgba(19,33,53,.08),0 30px 60px -24px rgba(19,33,53,.35)">
+      ${form}
+    </section>
+  </div>`;
+}
+
+const AUTH_CARD = 'class="rise" novalidate style="position:relative;width:100%;max-width:440px;display:flex;flex-direction:column;gap:20px;padding:36px 34px;border-radius:28px;background:#fff;border:1px solid #DCE5F2;box-shadow:0 2px 4px rgba(19,33,53,.08),0 30px 60px -24px rgba(19,33,53,.35)"';
+const field = (label, ic, input) => `<label style="display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:15px">${label}
+          <span class="in"><span style="color:#5B6B82;display:flex">${icon(ic)}</span>${input}</span></label>`;
+
+function renderLogin() {
+  const L = S.login;
+  const roleBtn = (r, label) => `<button type="button" class="role ${L.role === r ? 'on' : ''}" data-act="login-role" data-val="${r}" aria-pressed="${L.role === r}">${label}</button>`;
+  return authShell(`
+      <form id="loginForm" ${AUTH_CARD}>
         <a href="#/landing" style="color:#355E96;font-weight:600;font-size:15px">← Volver al inicio</a>
         <h2 class="d" style="font-size:40px;line-height:1.05;font-weight:600">Iniciar sesión</h2>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" role="group" aria-label="Tipo de cuenta">
@@ -625,9 +646,71 @@ function renderLogin() {
           <span class="in"><span style="color:#5B6B82;display:flex">${icon('lock')}</span><input id="loginPass" type="password" autocomplete="current-password" placeholder="Tu contraseña" value="${esc(L.pass)}" required></span></label>
         ${L.error ? `<p class="err" role="alert">${esc(L.error)}</p>` : ''}
         <button class="go" type="submit" ${L.loading ? 'disabled' : ''}>${L.loading ? 'Ingresando…' : 'Ingresar'}</button>
-      </form>
-    </section>
-  </div>`;
+        <p class="alt">¿No tienes cuenta? <a href="#/registro">Regístrate</a></p>
+      </form>`);
+}
+
+// ===============================================================
+// 2b. REGISTRO (solo estudiantes, correo @javeriana.edu.co)
+// ===============================================================
+function renderRegistro() {
+  const R = S.register;
+  return authShell(`
+      <form id="registerForm" ${AUTH_CARD}>
+        <a href="#/login" style="color:#355E96;font-weight:600;font-size:15px">← Volver a iniciar sesión</a>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <h2 class="d" style="font-size:40px;line-height:1.05;font-weight:600">Crear cuenta</h2>
+          <p class="hint">Regístrate como estudiante con tu correo institucional. Te enviaremos un código para verificarlo.</p>
+        </div>
+        ${field('Nombre completo', 'users', `<input id="regNombre" type="text" autocomplete="name" placeholder="Nombre y apellido" maxlength="80" value="${esc(R.nombre)}" required>`)}
+        ${field('Correo institucional', 'mail', `<input id="regEmail" type="email" autocomplete="email" placeholder="usuario@javeriana.edu.co" value="${esc(R.email)}" required>`)}
+        ${field('Contraseña', 'lock', `<input id="regPass" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres" value="${esc(R.pass)}" required>`)}
+        ${field('Confirmar contraseña', 'lock', `<input id="regPass2" type="password" autocomplete="new-password" placeholder="Repite la contraseña" value="${esc(R.pass2)}" required>`)}
+        ${R.error ? `<p class="err" role="alert">${esc(R.error)}</p>` : ''}
+        <button class="go" type="submit" ${R.loading ? 'disabled' : ''}>${R.loading ? 'Creando cuenta…' : 'Crear cuenta'}</button>
+        <p class="hint" style="text-align:center">¿Eres docente? Regístrate igual y la dirección del programa asignará tu rol.</p>
+        <p class="alt">¿Ya tienes cuenta? <a href="#/login">Inicia sesión</a></p>
+      </form>`);
+}
+
+// ===============================================================
+// 2c. VERIFICACIÓN DEL CORREO (código de 6 dígitos)
+// ===============================================================
+const resendLeft = () => Math.max(0, Math.ceil((S.verify.until - Date.now()) / 1000));
+const resendLabel = () => (S.verify.sending ? 'Enviando…' : resendLeft() ? `Reenviar código (${resendLeft()} s)` : 'Reenviar código');
+
+function renderVerificar() {
+  const V = S.verify;
+  return authShell(`
+      <form id="verifyForm" ${AUTH_CARD}>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <h2 class="d" style="font-size:40px;line-height:1.05;font-weight:600">Verifica tu correo</h2>
+          <p class="hint">Enviamos un código de 6 dígitos a <b style="color:#132135">${esc(V.email || '')}</b>. Revisa también la carpeta de spam. El código vence en 10 minutos.</p>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:15px">Código de verificación
+          <span class="in code-in"><input id="verifyCode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="••••••" value="${esc(V.code)}" required></span></label>
+        ${V.error ? `<p class="err" role="alert">${esc(V.error)}</p>` : ''}
+        ${V.info ? `<p class="info" role="status">${esc(V.info)}</p>` : ''}
+        <button class="go" type="submit" ${V.loading ? 'disabled' : ''}>${V.loading ? 'Verificando…' : 'Verificar'}</button>
+        <p class="alt">¿No te llegó? <button type="button" id="resendBtn" class="linkbtn" data-act="resend-code" ${V.sending || resendLeft() ? 'disabled' : ''}>${resendLabel()}</button></p>
+        <p class="alt"><button type="button" class="linkbtn" data-act="verify-cancel">Usar otra cuenta</button></p>
+      </form>`);
+}
+
+// Cuenta regresiva del botón "Reenviar código" sin re-renderizar (conserva el foco)
+setInterval(() => {
+  const b = document.getElementById('resendBtn');
+  if (!b || S.verify.sending) return;
+  b.textContent = resendLabel();
+  b.disabled = resendLeft() > 0;
+}, 1000);
+
+function startVerification(pending) {
+  S.verify = {
+    email: pending.email, code: '', loading: false, sending: false,
+    error: pending.sendError || '', info: pending.sendError ? '' : (pending.info || ''),
+    until: Date.now() + (pending.cooldown || 0) * 1000
+  };
 }
 
 // ===============================================================
@@ -1260,6 +1343,8 @@ function renderDirGrupo() {
 const SCREENS = {
   'landing': renderLanding,
   'login': renderLogin,
+  'registro': renderRegistro,
+  'verificar': renderVerificar,
   'est-asig': renderEstAsig,
   'est-nuevo': renderEstNuevo,
   'est-enviado': renderEstEnviado,
@@ -1277,7 +1362,8 @@ function resolveScreen() {
   const need = SCREEN_ROLE[s];
   if (need && !S.user) return S.booting ? 'boot' : 'login';
   if (need && !canSee(need, roleOf(S.user))) return homeOf(S.user);
-  if (s === 'login' && S.user) return homeOf(S.user);
+  if (S.user && (s === 'login' || s === 'registro' || s === 'verificar')) return homeOf(S.user);
+  if (s === 'verificar' && !S.verify.email) return S.booting ? 'boot' : 'login';
   return s;
 }
 
@@ -1298,7 +1384,7 @@ function render() {
   const modal = S.viewId && S.user ? reportModal() : '';
   app.innerHTML = SCREENS[s]() + modal;
   document.body.style.overflow = modal ? 'hidden' : '';
-  document.title = 'Nexo · ' + ({ landing: 'Tu voz académica', login: 'Iniciar sesión', 'est-asig': 'Mis asignaturas', 'est-nuevo': 'Nuevo reporte', 'est-enviado': 'Reporte enviado', 'doc-reportes': 'Reportes recibidos', 'doc-stats': 'Estadísticas', 'doc-asig': 'Mis asignaturas', 'dir-semanal': 'Panorama semanal', 'dir-grupo': 'Detalle de grupo', 'dir-clases': 'Clases a cargo' }[s]);
+  document.title = 'Nexo · ' + ({ landing: 'Tu voz académica', login: 'Iniciar sesión', registro: 'Crear cuenta', verificar: 'Verifica tu correo', 'est-asig': 'Mis asignaturas', 'est-nuevo': 'Nuevo reporte', 'est-enviado': 'Reporte enviado', 'doc-reportes': 'Reportes recibidos', 'doc-stats': 'Estadísticas', 'doc-asig': 'Mis asignaturas', 'dir-semanal': 'Panorama semanal', 'dir-grupo': 'Detalle de grupo', 'dir-clases': 'Clases a cargo' }[s]);
   if (changed) window.scrollTo(0, 0);
   if (s === 'landing') setupReveal();
 }
@@ -1375,6 +1461,8 @@ async function endSession() {
   S.doc = { estado: 'todos', subject: 'todos', menuId: null };
   S.viewId = null;
   S.login = { ...S.login, pass: '', error: '', loading: false };
+  S.register = { nombre: '', email: '', pass: '', pass2: '', error: '', loading: false };
+  S.verify = { email: null, code: '', error: '', info: '', loading: false, sending: false, until: 0 };
 }
 
 // ===============================================================
@@ -1412,6 +1500,31 @@ document.addEventListener('click', async (e) => {
     case 'login-role':
       S.login.role = el.dataset.val;
       render();
+      break;
+
+    case 'resend-code': {
+      const V = S.verify;
+      if (V.sending || resendLeft()) break;
+      V.sending = true;
+      V.error = '';
+      V.info = '';
+      render();
+      try {
+        const r = await NexoAPI.sendVerificationCode();
+        V.until = Date.now() + r.cooldown * 1000;
+        V.info = 'Te enviamos un código nuevo.';
+      } catch (err) {
+        V.error = err.message;
+        if (err.retryIn) V.until = Date.now() + err.retryIn * 1000;
+      }
+      V.sending = false;
+      render();
+      break;
+    }
+
+    case 'verify-cancel':
+      await endSession();
+      go('login');
       break;
 
     // ----- Estudiante -----
@@ -1542,6 +1655,14 @@ document.addEventListener('input', (e) => {
   const t = e.target;
   if (t.id === 'loginEmail') S.login.email = t.value;
   if (t.id === 'loginPass') S.login.pass = t.value;
+  if (t.id === 'regNombre') S.register.nombre = t.value;
+  if (t.id === 'regEmail') S.register.email = t.value;
+  if (t.id === 'regPass') S.register.pass = t.value;
+  if (t.id === 'regPass2') S.register.pass2 = t.value;
+  if (t.id === 'verifyCode') {
+    t.value = t.value.replace(/\D/g, '').slice(0, 6);
+    S.verify.code = t.value;
+  }
   if (!S.wizard) return;
   if (t.dataset.field === 'mantener') S.wizard.mantener = t.value;
   if (t.dataset.field === 'detalle') {
@@ -1579,7 +1700,54 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+async function enterApp(user, greeting) {
+  await startSession(user);
+  S.verify = { email: null, code: '', error: '', info: '', loading: false, sending: false, until: 0 };
+  toast(greeting || `¡Hola, ${user.primerNombre}!`);
+  go(homeOf(user));
+}
+
 document.addEventListener('submit', async (e) => {
+  if (e.target.id === 'registerForm') {
+    e.preventDefault();
+    const R = S.register;
+    R.error = '';
+    if (R.pass !== R.pass2) { R.error = 'Las contraseñas no coinciden.'; render(); return; }
+    R.loading = true;
+    render();
+    try {
+      const pending = await NexoAPI.register(R.nombre, R.email, R.pass);
+      S.register = { nombre: '', email: '', pass: '', pass2: '', error: '', loading: false };
+      startVerification(pending);
+      go('verificar');
+    } catch (err) {
+      R.loading = false;
+      R.error = err.message;
+      render();
+    }
+    return;
+  }
+
+  if (e.target.id === 'verifyForm') {
+    e.preventDefault();
+    const V = S.verify;
+    V.loading = true;
+    V.error = '';
+    V.info = '';
+    render();
+    try {
+      const user = await NexoAPI.confirmVerificationCode(V.code);
+      await enterApp(user, `¡Correo verificado! Bienvenido, ${user.primerNombre}.`);
+    } catch (err) {
+      V.loading = false;
+      V.error = err.message;
+      V.code = '';
+      render();
+      document.getElementById('verifyCode')?.focus();
+    }
+    return;
+  }
+
   if (e.target.id !== 'loginForm') return;
   e.preventDefault();
   const L = S.login;
@@ -1588,6 +1756,22 @@ document.addEventListener('submit', async (e) => {
   render();
   try {
     const user = await NexoAPI.login(L.email, L.pass, L.role);
+    if (user.pendingVerification) {
+      // Cuenta sin verificar: se envía un código y se muestra la pantalla para escribirlo
+      L.loading = false;
+      L.pass = '';
+      const pending = { email: user.email, cooldown: 0 };
+      try {
+        pending.cooldown = (await NexoAPI.sendVerificationCode()).cooldown;
+        pending.info = 'Tu correo aún no está verificado. Te enviamos un código.';
+      } catch (err) {
+        if (err.retryIn) { pending.cooldown = err.retryIn; pending.info = 'Tu correo aún no está verificado. Usa el último código que te enviamos.'; }
+        else pending.sendError = err.message;
+      }
+      startVerification(pending);
+      go('verificar');
+      return;
+    }
     await startSession(user);
     L.loading = false;
     L.pass = '';
@@ -1609,7 +1793,10 @@ document.addEventListener('submit', async (e) => {
   render();
   try {
     const user = await NexoAPI.restoreSession();
-    if (user) await startSession(user);
+    if (user?.pendingVerification) {
+      startVerification({ email: user.email, info: 'Escribe el código que te enviamos o pide uno nuevo.' });
+      if (['login', 'registro'].includes((location.hash || '').replace(/^#\/?/, ''))) go('verificar');
+    } else if (user) await startSession(user);
   } catch (e) {
     console.warn(e);
   }

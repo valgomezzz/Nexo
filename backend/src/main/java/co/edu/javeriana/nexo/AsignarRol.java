@@ -33,6 +33,10 @@ public class AsignarRol {
     Rol rol = Rol.valueOf(args[1].trim().toUpperCase());
 
     UserRecord user = FirebaseAuth.getInstance().getUserByEmail(email);
+    // Asignar el rol equivale a respaldar la cuenta: queda con el correo verificado
+    if (!user.isEmailVerified()) {
+      FirebaseAuth.getInstance().updateUser(new UserRecord.UpdateRequest(user.getUid()).setEmailVerified(true));
+    }
     Firebase.await(Firebase.db().collection("users").document(user.getUid())
         .set(Map.of("email", email, "rol", rol.name()), SetOptions.merge()));
 

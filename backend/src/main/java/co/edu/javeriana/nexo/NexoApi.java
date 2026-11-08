@@ -8,6 +8,7 @@ import co.edu.javeriana.nexo.service.AuthService;
 import co.edu.javeriana.nexo.service.ReportService;
 import co.edu.javeriana.nexo.service.StatsService;
 import co.edu.javeriana.nexo.service.SubjectService;
+import co.edu.javeriana.nexo.service.VerificationService;
 import co.edu.javeriana.nexo.support.ApiException;
 import co.edu.javeriana.nexo.support.Firebase;
 import com.google.cloud.functions.HttpFunction;
@@ -37,6 +38,7 @@ public class NexoApi implements HttpFunction {
   private final SubjectService subjects = new SubjectService();
   private final ReportService reports = new ReportService(subjects);
   private final StatsService stats = new StatsService(reports, subjects);
+  private final VerificationService verification = new VerificationService();
 
   @Override
   public void service(HttpRequest req, HttpResponse res) throws IOException {
@@ -90,6 +92,16 @@ public class NexoApi implements HttpFunction {
       Map<String, Object> resp = new LinkedHashMap<>(u.toJson());
       resp.put("token", u.uid()); // Token de sesión
       return resp;
+    }
+
+    // 3. Registro: verificación del correo institucional con código (no exige correo verificado)
+    if (path.equals("/auth/verification/send") && "POST".equalsIgnoreCase(method)) {
+      String nombre = body.has("nombre") && !body.get("nombre").isJsonNull() ? body.get("nombre").getAsString() : null;
+      return verification.enviar(authHeader, nombre);
+    }
+    if (path.equals("/auth/verification/confirm") && "POST".equalsIgnoreCase(method)) {
+      String code = body.has("code") && !body.get("code").isJsonNull() ? body.get("code").getAsString() : "";
+      return verification.confirmar(authHeader, code);
     }
 
     // Rutas protegidas
