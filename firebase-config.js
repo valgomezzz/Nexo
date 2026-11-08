@@ -31,18 +31,8 @@ export const API_BASE = (typeof location !== 'undefined' && (location.hostname =
  * se muestra en pantalla (modo prueba).
  */
 export const EMAILJS = {
-  serviceId: '',   // Email Services → Service ID (p. ej. "service_abc123")
-  templateId: '',  // Email Templates → Template ID (p. ej. "template_xyz789")
-  publicKey: ''    // Account → General → Public Key
+  serviceId: 'service_rrr4zoe',     // Email Services → Service ID
+  templateId: 'template_oxp8v1c',  // Email Templates → Template ID
+  publicKey: 'dPVlJmD6bJG-hI-Tr'   // Account → General → Public Key
 };
 
-/**
- * Inicio de sesión con Microsoft (cuentas @javeriana.edu.co).
- * Requiere activar el proveedor "Microsoft" en Firebase Authentication con el
- * ID y el secreto de una app registrada en Microsoft Entra (Azure).
- * tenant: dominio o ID del directorio de la universidad; limita la ventana a sus cuentas.
- */
-export const MICROSOFT = {
-  enabled: true,
-  tenant: 'javeriana.edu.co'
-};

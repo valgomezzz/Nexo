@@ -18,10 +18,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
-  signOut,
-  OAuthProvider,
-  signInWithPopup,
-  getAdditionalUserInfo
+  signOut
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   getFirestore,
@@ -38,7 +35,7 @@ import {
   serverTimestamp,
   arrayUnion
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import { FIREBASE_CONFIG, API_BASE, EMAILJS, MICROSOFT } from './firebase-config.js?v=20261108';
+import { FIREBASE_CONFIG, API_BASE, EMAILJS } from './firebase-config.js?v=20261108d';
 
 // Mapeo canónico de roles
 export const ROL_MAP = {
@@ -621,17 +618,6 @@ function translateAuthError(err) {
   return err.message || 'No fue posible iniciar sesión.';
 }
 
-function translateMicrosoftError(err) {
-  const code = err.code || '';
-  if (code.includes('popup-closed-by-user') || code.includes('cancelled-popup-request')) return 'Cerraste la ventana de Microsoft antes de terminar.';
-  if (code.includes('popup-blocked')) return 'El navegador bloqueó la ventana de Microsoft. Permite ventanas emergentes para este sitio e inténtalo de nuevo.';
-  if (code.includes('account-exists-with-different-credential')) return 'Este correo ya tiene una cuenta con contraseña. Inicia sesión con tu contraseña.';
-  if (code.includes('operation-not-allowed')) return 'El inicio con Microsoft no está activado en Firebase (Authentication → Proveedores).';
-  if (code.includes('unauthorized-domain')) return 'Este sitio no está autorizado en Firebase (Authentication → Configuración → Dominios autorizados).';
-  if (code.includes('network')) return 'Sin conexión. Revisa tu internet.';
-  return 'No fue posible iniciar sesión con Microsoft. ' + (err.message || '');
-}
-
 const INSTITUTIONAL = /^[^@\s]+@javeriana\.edu\.co$/;
 
 // ---------------------------------------------------------------
@@ -871,53 +857,6 @@ export const NexoAPI = {
     const data = { email, nombre, rol: 'ESTUDIANTE', verificado: true, createdAt: serverTimestamp() };
     await setDoc(doc(db, 'users', user.uid), data);
     clearCode(user.uid);
-    currentProfile = formatProfile(user.uid, data);
-    return currentProfile;
-  },
-
-  /** true si el botón "Continuar con Microsoft" debe mostrarse. */
-  get microsoftEnabled() {
-    return Boolean(this.isFirebaseActive && MICROSOFT?.enabled);
-  },
-
-  /**
-   * Inicio de sesión con la cuenta institucional de Microsoft (ventana emergente).
-   * Microsoft ya comprueba que el correo es de la persona, así que no se pide código:
-   * si es la primera vez, se crea el perfil de estudiante directamente.
-   */
-  async loginMicrosoft() {
-    if (!this.microsoftEnabled) throw new Error('El inicio con Microsoft no está disponible.');
-    const provider = new OAuthProvider('microsoft.com');
-    // "tenant" limita la ventana a las cuentas de la universidad
-    provider.setCustomParameters({ prompt: 'select_account', tenant: MICROSOFT.tenant || 'organizations' });
-
-    let cred;
-    try {
-      cred = await signInWithPopup(auth, provider);
-    } catch (err) {
-      throw new Error(translateMicrosoftError(err));
-    }
-
-    const info = getAdditionalUserInfo(cred);
-    const user = cred.user;
-    const email = (user.email || info?.profile?.mail || info?.profile?.userPrincipalName || '').toLowerCase();
-    if (!INSTITUTIONAL.test(email)) {
-      // Cuenta ajena a la universidad: se borra si se acaba de crear y se cierra la sesión
-      if (info?.isNewUser) await user.delete().catch(() => {});
-      await signOut(auth).catch(() => {});
-      throw new Error('Usa tu cuenta institucional @javeriana.edu.co.');
-    }
-
-    const ref = doc(db, 'users', user.uid);
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-      currentProfile = formatProfile(user.uid, snap.data());
-      return currentProfile;
-    }
-    const nombre = (user.displayName || info?.profile?.displayName || '').trim()
-      || email.split('@')[0].split('.').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
-    const data = { email, nombre, rol: 'ESTUDIANTE', verificado: true, metodo: 'microsoft', createdAt: serverTimestamp() };
-    await setDoc(ref, data);
     currentProfile = formatProfile(user.uid, data);
     return currentProfile;
   },

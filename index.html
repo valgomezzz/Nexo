@@ -333,11 +333,6 @@ button.kpi{cursor:pointer;transition:transform .2s}button.kpi:hover{transform:tr
 .ans-h{margin:14px 0 6px;font-size:13px;font-weight:700;color:#355E96;text-transform:uppercase;letter-spacing:.06em}
 .demo-note{padding:12px 16px;border-radius:14px;background:#FDF2E2;color:#85500C;font-size:14px;line-height:1.45;font-weight:600}
 @media (max-width:760px){.q-row{grid-template-columns:minmax(0,1fr);gap:10px}.q-row .qv{text-align:left;display:flex;align-items:baseline;gap:8px}.q-card{padding:22px 18px}}
-.ms-btn{display:flex;align-items:center;justify-content:center;gap:12px;min-height:52px;border-radius:999px;border:1.5px solid #C5D3E8;background:#fff;color:#132135;font:inherit;font-weight:700;font-size:16px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
-.ms-btn:hover{border-color:#355E96;box-shadow:0 8px 18px -10px rgba(19,33,53,.35)}
-.ms-btn:disabled{opacity:.6;cursor:wait}
-.or{display:flex;align-items:center;gap:12px;color:#8A99AF;font-size:13px;font-weight:600}
-.or::before,.or::after{content:'';flex:1;height:1px;background:#DCE5F2}
 .rise{animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
 @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 
@@ -374,7 +369,7 @@ button.kpi{cursor:pointer;transition:transform .2s}button.kpi:hover{transform:tr
 <div id="toasts" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { NexoAPI, EST_LABELS, MOOD_LABELS, CATEGORIAS, LIKERT_LABELS, CONTEXTO, PREGUNTAS, promedioCategoria, puntaje, textoRespuesta, esAlerta, alertasDe, resumenPregunta, favorableCategoria, TEMAS, temasDe, sinTildes, DEMO_MODE } from './nexo-api.js?v=2026-11-08b';
+import { NexoAPI, EST_LABELS, MOOD_LABELS, CATEGORIAS, LIKERT_LABELS, CONTEXTO, PREGUNTAS, promedioCategoria, puntaje, textoRespuesta, esAlerta, alertasDe, resumenPregunta, favorableCategoria, TEMAS, temasDe, sinTildes, DEMO_MODE } from './nexo-api.js?v=2026-11-08e';
 
 // ===============================================================
 // ESTADO DE LA APLICACIÓN
@@ -699,15 +694,6 @@ const AUTH_CARD = 'class="rise" novalidate style="position:relative;width:100%;m
 const field = (label, ic, input) => `<label style="display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:15px">${label}
           <span class="in"><span style="color:#5B6B82;display:flex">${icon(ic)}</span>${input}</span></label>`;
 
-// Botón "Continuar con Microsoft": abre la ventana de inicio de sesión de la cuenta institucional
-let msLoading = false;
-function msButton(label = 'Continuar con Microsoft') {
-  if (!NexoAPI.microsoftEnabled) return '';
-  const logo = '<svg width="20" height="20" viewBox="0 0 21 21" aria-hidden="true"><rect x="1" y="1" width="9" height="9" fill="#F25022"/><rect x="11" y="1" width="9" height="9" fill="#7FBA00"/><rect x="1" y="11" width="9" height="9" fill="#00A4EF"/><rect x="11" y="11" width="9" height="9" fill="#FFB900"/></svg>';
-  return `<div class="or">o</div>
-        <button type="button" class="ms-btn" data-act="ms-login" ${msLoading ? 'disabled' : ''}>${logo}${msLoading ? 'Abriendo Microsoft…' : label}</button>`;
-}
-
 function renderLogin() {
   const L = S.login;
   const roleBtn = (r, label) => `<button type="button" class="role ${L.role === r ? 'on' : ''}" data-act="login-role" data-val="${r}" aria-pressed="${L.role === r}">${label}</button>`;
@@ -725,7 +711,6 @@ function renderLogin() {
           <span class="in"><span style="color:#5B6B82;display:flex">${icon('lock')}</span><input id="loginPass" type="password" autocomplete="current-password" placeholder="Tu contraseña" value="${esc(L.pass)}" required></span></label>
         ${L.error ? `<p class="err" role="alert">${esc(L.error)}</p>` : ''}
         <button class="go" type="submit" ${L.loading ? 'disabled' : ''}>${L.loading ? 'Ingresando…' : 'Ingresar'}</button>
-        ${msButton()}
         <p class="alt">¿No tienes cuenta? <a href="#/registro">Regístrate</a></p>
       </form>`);
 }
@@ -749,7 +734,6 @@ function renderRegistro() {
         ${R.error ? `<p class="err" role="alert">${esc(R.error)}</p>` : ''}
         <button class="go" type="submit" ${R.loading ? 'disabled' : ''}>${R.loading ? 'Creando cuenta…' : 'Crear cuenta'}</button>
         <p class="hint" style="text-align:center">¿Eres docente? Regístrate igual y la dirección del programa asignará tu rol.</p>
-        ${msButton('Registrarme con Microsoft')}
         <p class="alt">¿Ya tienes cuenta? <a href="#/login">Inicia sesión</a></p>
       </form>`);
 }
@@ -1806,24 +1790,6 @@ document.addEventListener('click', async (e) => {
     case 'scroll-how':
       document.getElementById('como-funciona')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       break;
-
-    case 'ms-login': {
-      if (msLoading) break;
-      msLoading = true;
-      S.login.error = '';
-      S.register.error = '';
-      render();
-      try {
-        const user = await NexoAPI.loginMicrosoft();
-        msLoading = false;
-        await enterApp(user);
-      } catch (err) {
-        msLoading = false;
-        if (S.screen === 'registro') S.register.error = err.message; else S.login.error = err.message;
-        render();
-      }
-      break;
-    }
 
     case 'login-role':
       S.login.role = el.dataset.val;
