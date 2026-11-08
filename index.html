@@ -331,6 +331,7 @@ button.kpi{cursor:pointer;transition:transform .2s}button.kpi:hover{transform:tr
 .ans-list li.al{background:#FCEBEB;border-color:#F3C9C6}
 .ans-list li.al b{color:#B3403A}
 .ans-h{margin:14px 0 6px;font-size:13px;font-weight:700;color:#355E96;text-transform:uppercase;letter-spacing:.06em}
+.demo-note{padding:12px 16px;border-radius:14px;background:#FDF2E2;color:#85500C;font-size:14px;line-height:1.45;font-weight:600}
 @media (max-width:760px){.q-row{grid-template-columns:minmax(0,1fr);gap:10px}.q-row .qv{text-align:left;display:flex;align-items:baseline;gap:8px}.q-card{padding:22px 18px}}
 .ms-btn{display:flex;align-items:center;justify-content:center;gap:12px;min-height:52px;border-radius:999px;border:1.5px solid #C5D3E8;background:#fff;color:#132135;font:inherit;font-weight:700;font-size:16px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
 .ms-btn:hover{border-color:#355E96;box-shadow:0 8px 18px -10px rgba(19,33,53,.35)}
@@ -373,7 +374,7 @@ button.kpi{cursor:pointer;transition:transform .2s}button.kpi:hover{transform:tr
 <div id="toasts" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { NexoAPI, EST_LABELS, MOOD_LABELS, CATEGORIAS, LIKERT_LABELS, CONTEXTO, PREGUNTAS, promedioCategoria, puntaje, textoRespuesta, esAlerta, alertasDe, resumenPregunta, favorableCategoria, TEMAS, temasDe, sinTildes } from './nexo-api.js?v=2026-11-08b';
+import { NexoAPI, EST_LABELS, MOOD_LABELS, CATEGORIAS, LIKERT_LABELS, CONTEXTO, PREGUNTAS, promedioCategoria, puntaje, textoRespuesta, esAlerta, alertasDe, resumenPregunta, favorableCategoria, TEMAS, temasDe, sinTildes, DEMO_MODE } from './nexo-api.js?v=2026-11-08b';
 
 // ===============================================================
 // ESTADO DE LA APLICACIÓN
@@ -714,6 +715,7 @@ function renderLogin() {
       <form id="loginForm" ${AUTH_CARD}>
         <a href="#/landing" style="color:#355E96;font-weight:600;font-size:15px">← Volver al inicio</a>
         <h2 class="d" style="font-size:40px;line-height:1.05;font-weight:600">Iniciar sesión</h2>
+        ${DEMO_MODE ? `<p class="demo-note">Modo simulación con datos de prueba. Entra con profesor@, direccion@, jefe@ o estudiante@javeriana.edu.co y cualquier contraseña.</p>` : ''}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" role="group" aria-label="Tipo de cuenta">
           ${roleBtn('est', 'Estudiante')}${roleBtn('doc', 'Docente')}${roleBtn('dir', 'Dirección')}${roleBtn('mix', 'Docente directivo')}
         </div>

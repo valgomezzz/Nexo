@@ -256,8 +256,13 @@ export { sinTildes };
 // Estado del backend en Java
 let isJavaBackendActive = false;
 
+// Modo simulación: con ?demo en la URL se usan datos locales generados (cientos de
+// encuestas) en lugar de Firebase, para revisar las estadísticas con volumen real.
+export const DEMO_MODE = typeof location !== 'undefined' && new URLSearchParams(location.search).has('demo');
+
 // Detección de Firebase SDK
 const isFirebaseConfigured = Boolean(
+  !DEMO_MODE &&
   FIREBASE_CONFIG?.apiKey &&
   !FIREBASE_CONFIG.apiKey.startsWith('TU_') &&
   FIREBASE_CONFIG.projectId
@@ -357,29 +362,151 @@ const DEFAULT_USERS = {
   'jefe@javeriana.edu.co': { uid: 'doc-torres', email: 'jefe@javeriana.edu.co', nombre: 'Julián Torres', rol: 'mix', aCargo: ['demo-doc-01'] }
 };
 
-const DEFAULT_SUBJECTS = [
-  { id: 'calculo-g1', nombre: 'Cálculo Diferencial', abreviatura: 'CD', grupo: 'Grupo 1', professorNombre: 'Andrea Ruiz', professorUid: 'doc-ruiz', studentUids: ['demo-est-01'] },
-  { id: 'estructuras-g1', nombre: 'Estructuras de Datos', abreviatura: 'ED', grupo: 'Grupo 1', professorNombre: 'María García', professorUid: 'demo-doc-01', studentUids: ['demo-est-01'] },
-  { id: 'bases-g1', nombre: 'Bases de Datos I', abreviatura: 'BD', grupo: 'Grupo 1', professorNombre: 'María García', professorUid: 'demo-doc-01', studentUids: ['demo-est-01'] },
-  { id: 'poo-g2', nombre: 'Programación Orientada a Objetos', abreviatura: 'PO', grupo: 'Grupo 2', professorNombre: 'Julián Torres', professorUid: 'doc-torres', studentUids: ['demo-est-01'] }
+// Docentes y grupos de la simulación. "q" es la calidad base del grupo (0-1) y
+// "sesgo" baja o sube categorías puntuales, para que los grupos se diferencien.
+const SIM_GRUPOS = [
+  { id: 'estructuras-g1', nombre: 'Estructuras de Datos', abreviatura: 'ED', grupo: 'Grupo 1', prof: ['demo-doc-01', 'María García'], q: 0.55, sesgo: { explicaciones: -0.2 }, dif: 0.75 },
+  { id: 'estructuras-g2', nombre: 'Estructuras de Datos', abreviatura: 'ED', grupo: 'Grupo 2', prof: ['doc-vargas', 'Diego Vargas'], q: 0.8, sesgo: {}, dif: 0.7 },
+  { id: 'bases-g1', nombre: 'Bases de Datos I', abreviatura: 'BD', grupo: 'Grupo 1', prof: ['demo-doc-01', 'María García'], q: 0.72, sesgo: { evaluacion: -0.25 }, dif: 0.5 },
+  { id: 'software-g1', nombre: 'Ingeniería de Software', abreviatura: 'IS', grupo: 'Grupo 1', prof: ['demo-doc-01', 'María García'], q: 0.85, sesgo: {}, dif: 0.4 },
+  { id: 'poo-g1', nombre: 'Programación Orientada a Objetos', abreviatura: 'PO', grupo: 'Grupo 1', prof: ['doc-perez', 'Camilo Pérez'], q: 0.7, sesgo: { acompanamiento: 0.1 }, dif: 0.55 },
+  { id: 'poo-g2', nombre: 'Programación Orientada a Objetos', abreviatura: 'PO', grupo: 'Grupo 2', prof: ['doc-torres', 'Julián Torres'], q: 0.6, sesgo: { claridad: -0.25 }, dif: 0.55 },
+  { id: 'calculo-g1', nombre: 'Cálculo Diferencial', abreviatura: 'CD', grupo: 'Grupo 1', prof: ['doc-ruiz', 'Andrea Ruiz'], q: 0.38, sesgo: { evaluacion: -0.2, acompanamiento: -0.15 }, dif: 0.85, irrespeto: 0.12 },
+  { id: 'calculo-g2', nombre: 'Cálculo Diferencial', abreviatura: 'CD', grupo: 'Grupo 2', prof: ['doc-mora', 'Lucía Mora'], q: 0.86, sesgo: {}, dif: 0.7 },
+  { id: 'algebra-g1', nombre: 'Álgebra Lineal', abreviatura: 'AL', grupo: 'Grupo 1', prof: ['doc-mora', 'Lucía Mora'], q: 0.74, sesgo: { evaluacion: -0.1 }, dif: 0.6 },
+  { id: 'redes-g1', nombre: 'Redes de Computadores', abreviatura: 'RC', grupo: 'Grupo 1', prof: ['doc-vargas', 'Diego Vargas'], q: 0.66, sesgo: { explicaciones: -0.1 }, dif: 0.6 },
+  { id: 'fisica-g1', nombre: 'Física Mecánica', abreviatura: 'FM', grupo: 'Grupo 1', prof: ['doc-ruiz', 'Andrea Ruiz'], q: 0.48, sesgo: { claridad: -0.1 }, dif: 0.8, irrespeto: 0.05 },
+  { id: 'so-g1', nombre: 'Sistemas Operativos', abreviatura: 'SO', grupo: 'Grupo 1', prof: ['doc-perez', 'Camilo Pérez'], q: 0.52, sesgo: { acompanamiento: -0.2 }, dif: 0.7 }
 ];
+const DEMO_EST_SUBJECTS = ['estructuras-g1', 'bases-g1', 'poo-g2', 'calculo-g1'];
 
-const daysAgo = (n) => new Date(Date.now() - 86400000 * n).toISOString();
-const DEFAULT_REPORTS = [
-  { id: 'demo-1', studentUid: 'demo-est-01', studentNombre: 'Mateo Silva', subjectId: 'estructuras-g1', subjectNombre: 'Estructuras de Datos', grupo: 'Grupo 1', professorUid: 'demo-doc-01', categoria: 'Explicaciones', titulo: 'El ritmo de la clase es muy rápido', detalle: 'El ritmo de la clase es muy rápido, no alcanzo a tomar apuntes y los temas de árboles y grafos se acumulan antes del parcial.', moods: { claridad: 2, explicaciones: 1, evaluacion: 2, acompanamiento: 3 }, respuestas: { p1: 2, p2: 2, p3: 1, p4: 1, p5: 2, p6: 2, p7: 2, p8: 3, p9: 3, p10: 4, carga: 4, dificultad: 3, p13: 2, p14: 1, horas: 2 }, mantener: 'Los talleres en grupo.', comentarios: {}, estado: 'pend', createdAt: daysAgo(2) },
-  { id: 'demo-2', studentUid: 'demo-est-02', studentNombre: 'Laura Díaz', subjectId: 'bases-g1', subjectNombre: 'Bases de Datos I', grupo: 'Grupo 1', professorUid: 'demo-doc-01', categoria: 'Evaluación', titulo: 'Los ejemplos de normalización no corresponden con el taller', detalle: 'Los ejemplos de normalización vistos en clase no corresponden con los ejercicios propuestos para el taller.', moods: { claridad: 3, explicaciones: 3, evaluacion: 1, acompanamiento: 3 }, respuestas: { p1: 3, p2: 3, p3: 3, p4: 3, p5: 1, p6: 1, p7: 2, p8: 3, p9: null, p10: 4, carga: 2, dificultad: 3, p13: 3, p14: 3, horas: 1 }, mantener: '', comentarios: {}, estado: 'rev', createdAt: daysAgo(6) },
-  { id: 'demo-4', studentUid: 'demo-est-01', studentNombre: 'Mateo Silva', subjectId: 'poo-g2', subjectNombre: 'Programación Orientada a Objetos', grupo: 'Grupo 2', professorUid: 'doc-torres', categoria: 'Claridad', titulo: 'No queda claro qué se evalúa en el proyecto final', detalle: 'No queda claro qué se evalúa en el proyecto final ni cómo se conecta con los talleres de herencia.', moods: { claridad: 1, explicaciones: 3, evaluacion: 2, acompanamiento: 3 }, respuestas: { p1: 1, p2: 1, p3: 3, p4: 3, p5: 2, p6: 1, p7: 3, p8: 3, p9: 4, p10: 4, carga: 3, dificultad: 2, p13: 3, p14: 2, horas: 2 }, mantener: 'Las asesorías antes de las entregas.', comentarios: {}, estado: 'pend', createdAt: daysAgo(3) },
-  { id: 'demo-3', studentUid: 'demo-est-02', studentNombre: 'Laura Díaz', subjectId: 'calculo-g1', subjectNombre: 'Cálculo Diferencial', grupo: 'Grupo 1', professorUid: 'doc-ruiz', categoria: 'Evaluación', titulo: 'Falta retroalimentación detallada en las tareas', detalle: 'Falta retroalimentación detallada en las tareas entregadas, solo recibimos la nota.', moods: { claridad: 2, explicaciones: 2, evaluacion: 0, acompanamiento: 1 }, respuestas: { p1: 2, p2: 2, p3: 2, p4: 2, p5: 1, p6: 0, p7: 0, p8: 1, p9: 1, p10: 3, carga: 3, dificultad: 2, p13: 2, p14: 1, horas: 1 }, mantener: '', comentarios: {}, estado: 'ok', createdAt: daysAgo(12) }
+const DEFAULT_SUBJECTS = SIM_GRUPOS.map(g => ({
+  id: g.id, nombre: g.nombre, abreviatura: g.abreviatura, grupo: g.grupo,
+  professorNombre: g.prof[1], professorUid: g.prof[0],
+  studentUids: DEMO_EST_SUBJECTS.includes(g.id) ? ['demo-est-01'] : []
+}));
+
+const SIM_MEJORAR = {
+  claridad: [
+    'No queda claro qué se evalúa en el proyecto final ni cómo se conecta con los talleres.',
+    'Sería útil un cronograma con las fechas de entregas desde el inicio del semestre.',
+    'Los temas saltan de un lado a otro y cuesta ver cómo se relacionan entre sí.',
+    'El programa del curso cambió varias veces y no sabemos qué entra en el parcial.'
+  ],
+  explicaciones: [
+    'El ritmo de la clase es muy rápido, no alcanzo a tomar apuntes y los temas se acumulan.',
+    'Las explicaciones son muy teóricas; más ejemplos resueltos paso a paso ayudarían mucho.',
+    'Las diapositivas tienen demasiado texto y en clase solo se leen, faltan ejemplos prácticos.',
+    'Cuando alguien pregunta, la explicación se repite igual y sigue siendo confusa.',
+    'Sería bueno usar casos reales o ejercicios en código para entender mejor los conceptos.'
+  ],
+  evaluacion: [
+    'Falta retroalimentación detallada en las tareas entregadas, solo recibimos la nota.',
+    'El parcial incluyó temas que no se vieron en clase ni en los talleres.',
+    'Los criterios de calificación de los proyectos no se conocen antes de la entrega.',
+    'Las notas de los talleres se demoran semanas y no sabemos en qué fallamos antes del examen.',
+    'Una rúbrica publicada antes de cada entrega haría la evaluación más justa.'
+  ],
+  acompanamiento: [
+    'Es difícil conseguir asesoría; el docente no responde los correos con las dudas.',
+    'Hacen falta horarios de atención o un monitor para resolver dudas fuera de clase.',
+    'En clase casi no hay espacio para preguntas y el ambiente intimida un poco.',
+    'Algunos comentarios del docente hacia los estudiantes se sienten irrespetuosos.',
+    'Cuando pedimos ayuda nos remiten al libro sin explicarnos la duda.'
+  ],
+  general: [
+    'La carga de talleres es demasiada para el tiempo de la semana junto con las otras materias.',
+    'Las clases se cancelan seguido y luego se acumulan los temas antes del parcial.',
+    'El material de apoyo debería subirse antes de la clase y no después.',
+    'Más laboratorios y práctica guiada ayudarían a aterrizar la teoría.'
+  ]
+};
+const SIM_MANTENER = [
+  'Los talleres en grupo.', 'Las asesorías antes de las entregas.', 'Los ejemplos con casos reales.',
+  'La disposición del docente para resolver dudas.', 'Los quices cortos al final de cada tema.',
+  'El material organizado en la plataforma.', 'La paciencia para explicar varias veces.',
+  'Los laboratorios prácticos con código.', 'La puntualidad y el orden de las clases.',
+  'Que publique las notas rápido con comentarios.'
 ];
+const SIM_NOMBRES = ['Mateo Silva', 'Laura Díaz', 'Santiago Rojas', 'Valentina Gómez', 'Samuel Castro', 'Isabella Moreno', 'Sebastián Ríos', 'Mariana López', 'Nicolás Herrera', 'Gabriela Vargas', 'Tomás Mejía', 'Sofía Ramírez', 'Juan Pablo Ortiz', 'Daniela Suárez', 'Andrés Cárdenas', 'Paula Jiménez', 'Felipe Navarro', 'Camila Restrepo', 'David Peña', 'Lucía Acosta'];
 
-// v4: reportes con las categorías del formulario de evaluación docente y perfil docente directivo
-const STORAGE_KEY = 'nexo_local_db_v4';
+// Generador pseudoaleatorio con semilla: la simulación es igual en cada carga
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function simularReportes() {
+  const rnd = mulberry32(20261107);
+  const pick = (arr) => arr[Math.floor(rnd() * arr.length)];
+  const clamp01 = (x) => Math.min(0.98, Math.max(0.02, x));
+  const pesos = (ws) => { const t = ws.reduce((a, b) => a + b, 0); let r = rnd() * t; for (let i = 0; i < ws.length; i++) { r -= ws[i]; if (r <= 0) return i; } return ws.length - 1; };
+  const reports = [];
+  let id = 0;
+  for (const g of SIM_GRUPOS) {
+    const total = 22 + Math.floor(rnd() * 18);
+    for (let k = 0; k < total; k++) {
+      const alumno = rnd() * 0.3 - 0.15;
+      const x = (cat) => clamp01(g.q + (g.sesgo[cat] || 0) + alumno + (rnd() * 0.3 - 0.15));
+      const likert = (v) => Math.max(0, Math.min(4, Math.round(v * 4)));
+      const R = {};
+      const vc = Object.fromEntries(CATEGORIAS.map(c => [c.key, x(c.key)]));
+      R.p1 = rnd() < vc.claridad + 0.1;
+      R.p2 = likert(vc.claridad);
+      R.p3 = likert(vc.explicaciones);
+      R.p4 = likert(x('explicaciones'));
+      R.p5 = likert(vc.evaluacion);
+      R.p6 = rnd() < vc.evaluacion;
+      R.p7 = rnd() < vc.evaluacion - 0.1;
+      R.p8 = rnd() < 0.18 ? 3 : vc.acompanamiento > 0.62 ? 0 : vc.acompanamiento > 0.38 ? 1 : 2;
+      R.p9 = likert(vc.acompanamiento);
+      R.p10 = !(rnd() < 0.015 + (g.irrespeto || 0));
+      R.carga = pesos(g.dif > 0.7 ? [0.5, 3, 4, 2.5] : g.dif > 0.5 ? [1, 5, 3, 1] : [2, 6, 1.5, 0.3]);
+      R.dificultad = pesos(g.dif > 0.7 ? [0.3, 2.5, 4, 3] : g.dif > 0.5 ? [1, 5, 3, 0.8] : [3, 5, 1, 0.2]);
+      R.horas = pesos(g.dif > 0.7 ? [1, 3, 4, 2.5] : [3, 4, 2, 0.6]);
+      const general = (vc.claridad + vc.explicaciones + vc.evaluacion + vc.acompanamiento) / 4;
+      R.p13 = likert(clamp01(general + 0.05 + (rnd() * 0.2 - 0.1)));
+      R.p14 = likert(general);
+      R.recomienda = rnd() < general + 0.05;
+
+      const moods = Object.fromEntries(CATEGORIAS.map(c => [c.key, clampMood(promedioCategoria(R, c) ?? 2)]));
+      let peor = CATEGORIAS[0];
+      for (const c of CATEGORIAS) if ((promedioCategoria(R, c) ?? 2) < (promedioCategoria(R, peor) ?? 2)) peor = c;
+      let detalle = rnd() < 0.2 ? pick(SIM_MEJORAR.general) : pick(SIM_MEJORAR[peor.key]);
+      if (R.p10 === false) detalle = SIM_MEJORAR.acompanamiento[3];
+      const titulo = detalle.length <= 65 ? detalle : detalle.slice(0, 65).replace(/\s\S*$/, '') + '…';
+
+      const dias = Math.floor(rnd() * 70);
+      const createdAt = new Date(Date.now() - 86400000 * dias - Math.floor(rnd() * 36000000)).toISOString();
+      const estado = ['pend', 'rev', 'ok'][pesos(dias > 21 ? [1, 2, 7] : dias > 7 ? [3, 3.5, 3.5] : [6, 3, 1])];
+      const propio = DEMO_EST_SUBJECTS.includes(g.id) && k === 0;
+      reports.push({
+        id: `sim-${++id}`,
+        studentUid: propio ? 'demo-est-01' : `sim-est-${Math.floor(rnd() * 400)}`,
+        studentNombre: propio ? 'Mateo Silva' : pick(SIM_NOMBRES),
+        subjectId: g.id, subjectNombre: g.nombre, grupo: g.grupo, professorUid: g.prof[0],
+        categoria: peor.nombre, titulo, detalle, moods, comentarios: {},
+        respuestas: R, formVersion: FORM_VERSION,
+        mantener: rnd() < 0.55 ? pick(SIM_MANTENER) : '',
+        estado, createdAt
+      });
+    }
+  }
+  return reports.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+// v5: formulario con tipos de respuesta (sí/no, opciones, escala) y simulación grande
+const STORAGE_KEY = 'nexo_local_db_v5';
 function loadLocalDb() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch (e) {}
-  return { subjects: DEFAULT_SUBJECTS, reports: DEFAULT_REPORTS };
+  return { subjects: DEFAULT_SUBJECTS, reports: simularReportes() };
 }
 function saveLocalDb(data) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
@@ -392,6 +519,7 @@ let currentProfile = null;
 // BACKEND JAVA
 // ===============================================================
 async function checkJavaBackend() {
+  if (DEMO_MODE) return (isJavaBackendActive = false);
   try {
     const ctrl = new AbortController();
     const timeout = setTimeout(() => ctrl.abort(), 1200);
