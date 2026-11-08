@@ -23,3 +23,26 @@ export const API_BASE = (typeof location !== 'undefined' && (location.hostname =
   ? 'http://localhost:8080/api'
   : '/api';
 
+
+/**
+ * EmailJS: envía el correo con el código de verificación del registro.
+ * Crea una cuenta gratis en https://www.emailjs.com, conecta un servicio de correo
+ * y una plantilla, y pega aquí los tres valores. Mientras estén vacíos, el código
+ * se muestra en pantalla (modo prueba).
+ */
+export const EMAILJS = {
+  serviceId: '',   // Email Services → Service ID (p. ej. "service_abc123")
+  templateId: '',  // Email Templates → Template ID (p. ej. "template_xyz789")
+  publicKey: ''    // Account → General → Public Key
+};
+
+/**
+ * Inicio de sesión con Microsoft (cuentas @javeriana.edu.co).
+ * Requiere activar el proveedor "Microsoft" en Firebase Authentication con el
+ * ID y el secreto de una app registrada en Microsoft Entra (Azure).
+ * tenant: dominio o ID del directorio de la universidad; limita la ventana a sus cuentas.
+ */
+export const MICROSOFT = {
+  enabled: true,
+  tenant: 'javeriana.edu.co'
+};

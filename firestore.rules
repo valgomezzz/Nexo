@@ -6,10 +6,8 @@ service cloud.firestore {
     // ===============================================================
     // FUNCIONES AUXILIARES DE AUTENTICACIÓN, ROLES E INTEGRIDAD (HU-01 a HU-05)
     // ===============================================================
-    // Sesión válida solo si el correo fue verificado con el código enviado al registrarse
-    // (el backend marca emailVerified con el Admin SDK al confirmar el código).
     function isAuthenticated() {
-      return request.auth != null && request.auth.token.email_verified == true;
+      return request.auth != null;
     }
 
     function isOwner(userId) {
@@ -132,14 +130,6 @@ service cloud.firestore {
       // PROHIBICIÓN DE BORRADO (Criterio HU-05):
       // Los reportes no se pueden eliminar físicamente para preservar auditoría y trazabilidad
       allow delete: if false;
-    }
-
-    // ===============================================================
-    // CÓDIGOS DE VERIFICACIÓN DEL REGISTRO
-    // Solo los lee y escribe el backend (Admin SDK); ningún cliente tiene acceso.
-    // ===============================================================
-    match /emailCodes/{uid} {
-      allow read, write: if false;
     }
   }
 }

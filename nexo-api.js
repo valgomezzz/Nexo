@@ -18,7 +18,10 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
-  signOut
+  signOut,
+  OAuthProvider,
+  signInWithPopup,
+  getAdditionalUserInfo
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   getFirestore,
@@ -35,7 +38,7 @@ import {
   serverTimestamp,
   arrayUnion
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import { FIREBASE_CONFIG, API_BASE } from './firebase-config.js?v=20261022';
+import { FIREBASE_CONFIG, API_BASE, EMAILJS, MICROSOFT } from './firebase-config.js?v=20261108';
 
 // Mapeo canónico de roles
 export const ROL_MAP = {
@@ -371,34 +374,91 @@ function translateAuthError(err) {
   return err.message || 'No fue posible iniciar sesión.';
 }
 
+function translateMicrosoftError(err) {
+  const code = err.code || '';
+  if (code.includes('popup-closed-by-user') || code.includes('cancelled-popup-request')) return 'Cerraste la ventana de Microsoft antes de terminar.';
+  if (code.includes('popup-blocked')) return 'El navegador bloqueó la ventana de Microsoft. Permite ventanas emergentes para este sitio e inténtalo de nuevo.';
+  if (code.includes('account-exists-with-different-credential')) return 'Este correo ya tiene una cuenta con contraseña. Inicia sesión con tu contraseña.';
+  if (code.includes('operation-not-allowed')) return 'El inicio con Microsoft no está activado en Firebase (Authentication → Proveedores).';
+  if (code.includes('unauthorized-domain')) return 'Este sitio no está autorizado en Firebase (Authentication → Configuración → Dominios autorizados).';
+  if (code.includes('network')) return 'Sin conexión. Revisa tu internet.';
+  return 'No fue posible iniciar sesión con Microsoft. ' + (err.message || '');
+}
+
 const INSTITUTIONAL = /^[^@\s]+@javeriana\.edu\.co$/;
 
-// Llamada al backend Java para enviar / confirmar el código de verificación del correo.
-// Usa el ID token de la cuenta recién creada (aún sin verificar).
-async function verificationFetch(path, body) {
-  if (!auth?.currentUser) throw new Error('Tu sesión expiró. Inicia sesión de nuevo.');
-  let res;
-  try {
-    res = await fetch(`${API_BASE}${path}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${await auth.currentUser.getIdToken()}`
-      },
-      body: JSON.stringify(body || {})
-    });
-  } catch (e) {
-    throw new Error('El servicio de verificación no está disponible en este momento. Inténtalo más tarde.');
+// ---------------------------------------------------------------
+// Verificación del correo con código de 6 dígitos (todo en el navegador).
+// El código se genera aquí y se envía con EmailJS (configurado en firebase-config.js).
+// La cuenta queda verificada cuando existe su perfil en users/{uid}: el perfil solo se
+// crea al escribir el código correcto.
+// ---------------------------------------------------------------
+const CODE_TTL_MS = 10 * 60_000;
+const RESEND_MS = 60_000;
+const MAX_TRIES = 5;
+const codeKey = (uid) => 'nexo_code_' + uid;
+const emailjsReady = Boolean(EMAILJS?.serviceId && EMAILJS?.templateId && EMAILJS?.publicKey);
+
+function readCode(uid) {
+  try { return JSON.parse(localStorage.getItem(codeKey(uid))) || {}; } catch (e) { return {}; }
+}
+function writeCode(uid, data) {
+  try { localStorage.setItem(codeKey(uid), JSON.stringify(data)); } catch (e) {}
+}
+function clearCode(uid) {
+  try { localStorage.removeItem(codeKey(uid)); } catch (e) {}
+}
+
+async function sendCodeEmail(email, nombre, code) {
+  const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      service_id: EMAILJS.serviceId,
+      template_id: EMAILJS.templateId,
+      user_id: EMAILJS.publicKey,
+      template_params: { to_email: email, to_name: nombre || email, code, minutes: CODE_TTL_MS / 60_000 }
+    })
+  }).catch(() => null);
+  if (!res || !res.ok) {
+    const detail = res ? await res.text().catch(() => '') : 'sin conexión';
+    console.warn('[Nexo] EmailJS:', detail);
+    throw new Error('No fue posible enviar el correo con el código. Inténtalo de nuevo.');
   }
-  const data = await res.json().catch(() => null);
-  if (!data) throw new Error('El servicio de verificación no está disponible en este momento. Inténtalo más tarde.');
-  if (!res.ok) {
-    const err = new Error(data.error || `Error ${res.status} verificando el correo.`);
-    const wait = /(\d+)\s*s\b/.exec(data.error || '');
-    if (res.status === 429 && wait) err.retryIn = Number(wait[1]);
+}
+
+/** Genera un código nuevo y lo envía. Devuelve { cooldown, notice }. */
+async function issueCode(user, nombre) {
+  const prev = readCode(user.uid);
+  const wait = Math.ceil(((prev.sentAt || 0) + RESEND_MS - Date.now()) / 1000);
+  if (wait > 0) {
+    const err = new Error(`Espera ${wait} s antes de pedir otro código.`);
+    err.retryIn = wait;
     throw err;
   }
-  return data;
+  const code = String(Math.floor(Math.random() * 1_000_000)).padStart(6, '0');
+  const data = { code, nombre: nombre || prev.nombre || null, expiresAt: Date.now() + CODE_TTL_MS, sentAt: Date.now(), tries: 0 };
+  writeCode(user.uid, data);
+
+  if (!emailjsReady) {
+    // Modo prueba: sin EmailJS configurado el código se muestra en pantalla
+    console.info(`[Nexo] Código de verificación para ${user.email}: ${code}`);
+    return { cooldown: RESEND_MS / 1000, notice: `Modo prueba (EmailJS sin configurar): tu código es ${code}` };
+  }
+  try {
+    await sendCodeEmail(user.email, data.nombre, code);
+  } catch (e) {
+    writeCode(user.uid, { ...data, sentAt: 0 }); // permite reintentar de inmediato
+    throw e;
+  }
+  return { cooldown: RESEND_MS / 1000, notice: '' };
+}
+
+// Cuenta verificada = tiene perfil. Los perfiles anteriores a esta función no tienen
+// el campo "verificado" y se consideran verificados.
+async function isVerified(user) {
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  return snap.exists() && snap.data().verificado !== false;
 }
 
 const pendingOf = (user) => ({ pendingVerification: true, email: user.email });
@@ -432,8 +492,8 @@ export const NexoAPI = {
     });
     if (!user) return null;
     // Cuenta creada pero sin verificar: la interfaz muestra la pantalla del código
-    if (!user.emailVerified) return pendingOf(user);
     try {
+      if (!(await isVerified(user))) return pendingOf(user);
       currentProfile = await loadFirebaseProfile(user);
       return currentProfile;
     } catch (e) {
@@ -461,7 +521,7 @@ export const NexoAPI = {
       } catch (signInErr) {
         throw new Error(translateAuthError(signInErr));
       }
-      if (!credential.user.emailVerified) return pendingOf(credential.user);
+      if (!(await isVerified(credential.user))) return pendingOf(credential.user);
       currentProfile = await loadFirebaseProfile(credential.user, cleanEmail);
       return currentProfile;
     }
@@ -516,16 +576,17 @@ export const NexoAPI = {
       } catch (e) {
         throw new Error(translateAuthError(err));
       }
-      if (user.emailVerified) {
+      if (await isVerified(user)) {
         await signOut(auth).catch(() => {});
         throw new Error(translateAuthError(err));
       }
     }
 
-    const pending = { ...pendingOf(user), cooldown: 0, sendError: null };
+    const pending = { ...pendingOf(user), cooldown: 0, sendError: null, info: '' };
     try {
-      const r = await verificationFetch('/auth/verification/send', { nombre: cleanName });
-      pending.cooldown = r.cooldown || 60;
+      const r = await issueCode(user, cleanName);
+      pending.cooldown = r.cooldown;
+      pending.info = r.notice;
     } catch (e) {
       // La cuenta ya existe: el usuario puede reintentar el envío desde la pantalla del código
       pending.sendError = e.message;
@@ -536,19 +597,81 @@ export const NexoAPI = {
 
   /** (Re)envía el código de verificación. Devuelve { cooldown } en segundos. */
   async sendVerificationCode() {
-    const r = await verificationFetch('/auth/verification/send', {});
-    return { cooldown: r.cooldown || 60, verified: Boolean(r.verified) };
+    if (!auth?.currentUser) throw new Error('Tu sesión expiró. Inicia sesión de nuevo.');
+    return issueCode(auth.currentUser);
   },
 
   /** Confirma el código; si es correcto, deja la sesión iniciada y devuelve el perfil. */
   async confirmVerificationCode(code) {
     const clean = String(code || '').replace(/\D/g, '');
     if (clean.length !== 6) throw new Error('Escribe los 6 dígitos del código.');
-    await verificationFetch('/auth/verification/confirm', { code: clean });
-    const user = auth.currentUser;
-    await user.reload();
-    await user.getIdToken(true); // el token nuevo ya incluye email_verified = true
-    currentProfile = await loadFirebaseProfile(user);
+    const user = auth?.currentUser;
+    if (!user) throw new Error('Tu sesión expiró. Inicia sesión de nuevo.');
+
+    const saved = readCode(user.uid);
+    if (!saved.code) throw new Error('No hay un código activo. Pide uno nuevo.');
+    if (Date.now() > saved.expiresAt) throw new Error('El código venció. Pide uno nuevo.');
+    if (saved.tries >= MAX_TRIES) throw new Error('Demasiados intentos fallidos. Pide un código nuevo.');
+    if (clean !== saved.code) {
+      writeCode(user.uid, { ...saved, tries: saved.tries + 1 });
+      const left = MAX_TRIES - saved.tries - 1;
+      throw new Error(left > 0 ? `Código incorrecto. Te quedan ${left} intento${left === 1 ? '' : 's'}.` : 'Código incorrecto. Pide un código nuevo.');
+    }
+
+    // Código correcto: se crea el perfil de estudiante (eso marca la cuenta como verificada)
+    const email = user.email.toLowerCase();
+    const nombre = saved.nombre || email.split('@')[0].split('.').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+    const data = { email, nombre, rol: 'ESTUDIANTE', verificado: true, createdAt: serverTimestamp() };
+    await setDoc(doc(db, 'users', user.uid), data);
+    clearCode(user.uid);
+    currentProfile = formatProfile(user.uid, data);
+    return currentProfile;
+  },
+
+  /** true si el botón "Continuar con Microsoft" debe mostrarse. */
+  get microsoftEnabled() {
+    return Boolean(this.isFirebaseActive && MICROSOFT?.enabled);
+  },
+
+  /**
+   * Inicio de sesión con la cuenta institucional de Microsoft (ventana emergente).
+   * Microsoft ya comprueba que el correo es de la persona, así que no se pide código:
+   * si es la primera vez, se crea el perfil de estudiante directamente.
+   */
+  async loginMicrosoft() {
+    if (!this.microsoftEnabled) throw new Error('El inicio con Microsoft no está disponible.');
+    const provider = new OAuthProvider('microsoft.com');
+    // "tenant" limita la ventana a las cuentas de la universidad
+    provider.setCustomParameters({ prompt: 'select_account', tenant: MICROSOFT.tenant || 'organizations' });
+
+    let cred;
+    try {
+      cred = await signInWithPopup(auth, provider);
+    } catch (err) {
+      throw new Error(translateMicrosoftError(err));
+    }
+
+    const info = getAdditionalUserInfo(cred);
+    const user = cred.user;
+    const email = (user.email || info?.profile?.mail || info?.profile?.userPrincipalName || '').toLowerCase();
+    if (!INSTITUTIONAL.test(email)) {
+      // Cuenta ajena a la universidad: se borra si se acaba de crear y se cierra la sesión
+      if (info?.isNewUser) await user.delete().catch(() => {});
+      await signOut(auth).catch(() => {});
+      throw new Error('Usa tu cuenta institucional @javeriana.edu.co.');
+    }
+
+    const ref = doc(db, 'users', user.uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      currentProfile = formatProfile(user.uid, snap.data());
+      return currentProfile;
+    }
+    const nombre = (user.displayName || info?.profile?.displayName || '').trim()
+      || email.split('@')[0].split('.').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+    const data = { email, nombre, rol: 'ESTUDIANTE', verificado: true, metodo: 'microsoft', createdAt: serverTimestamp() };
+    await setDoc(ref, data);
+    currentProfile = formatProfile(user.uid, data);
     return currentProfile;
   },
 

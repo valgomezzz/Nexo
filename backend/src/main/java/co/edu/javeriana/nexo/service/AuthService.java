@@ -61,9 +61,6 @@ public class AuthService {
         if (!dominioPermitido(token.getEmail())) {
           throw new ApiException(403, "Solo se permiten correos institucionales (@javeriana.edu.co)");
         }
-        if (!token.isEmailVerified()) {
-          throw new ApiException(403, "Verifica tu correo institucional con el código que te enviamos.");
-        }
         DocumentSnapshot perfil = Firebase.await(
             Firebase.db().collection("users").document(token.getUid()).get());
         if (perfil.exists()) {
