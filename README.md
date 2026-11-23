@@ -225,12 +225,31 @@ Nexo/
 └── docs/img/                Recursos gráficos
 ```
 
-## Historial de versiones
+## Releases y tags
 
-| Versión | Contenido |
+| Tag | Release | Fecha | Contenido |
+|---|---|---|---|
+| — | Release 1 | 11 oct 2026 | Primera versión pública: 10 pantallas, backend Java con Firebase Admin SDK, Firestore en tiempo real, reglas de seguridad y despliegue en Hosting |
+| [`v0.2`](https://github.com/valgomezzz/Nexo/releases/tag/v0.2) | [Release 2](https://github.com/valgomezzz/Nexo/releases/tag/v0.2) | 25 oct 2026 | Formulario de evaluación por categorías con escala de caritas y rol de docente directivo |
+| [`v1.0-rc`](https://github.com/valgomezzz/Nexo/releases/tag/v1.0-rc) | [Nexo v1.0-rc](https://github.com/valgomezzz/Nexo/releases/tag/v1.0-rc) *(pre-release)* | 16 nov 2026 | Registro con verificación por EmailJS, encuestas con tipos de respuesta, pantalla de encuestas y comentarios y modo simulación. Documenta los errores conocidos E-01 a E-09 |
+| [`v1.0`](https://github.com/valgomezzz/Nexo/tree/v1.0) | v1.0 | 22 nov 2026 | Ajustes post-validación: respuesta del docente, Mi perfil, mejoras publicadas, historial del estudiante y evolución por categoría |
+
+### Qué cambió de v1.0-rc a v1.0
+
+| Commit | Cambio |
 |---|---|
-| v0.1 | MVP: registro, reportes, panel docente, métricas, panel de dirección y despliegue en Firebase |
-| v1.0 | Ajustes post-validación: respuesta del docente, perfil, mejoras publicadas, historial del estudiante y evolución por categoría |
+| `2278049` | Asignaturas por defecto para estudiantes nuevos. Corrige **E-01**: el estudiante recién registrado ya no queda sin asignaturas |
+| `191aaff` | Respuesta del docente a los reportes |
+| `dcceb75` | Pantalla Mi perfil y elección de asignaturas |
+| `26809de` | Mejoras publicadas por el docente |
+| `c961865` | Historial semanal del estudiante |
+| `9d815dc` | Evolución por categoría en estadísticas del docente |
+| `0920ad6` | Hosting deja de publicar carpetas ocultas (`.git`) |
+| `5bbeb62` | README final de la v1.0. Corrige **E-09**: el README ya no describe el Release 1 |
+
+Los errores E-02 a E-08 siguen abiertos y están descritos en el [release v1.0-rc](https://github.com/valgomezzz/Nexo/releases/tag/v1.0-rc).
+
+Todas las versiones: [Releases](https://github.com/valgomezzz/Nexo/releases) · [Tags](https://github.com/valgomezzz/Nexo/tags)
 
 ---
 
