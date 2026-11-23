@@ -75,7 +75,12 @@ h1,h2,h3,p{margin:0}
 .row.click{cursor:pointer}
 .sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:18px}
 .empty{padding:36px 20px;text-align:center;color:#5B6B82;font-size:16px}
+/* Perfil: asignaturas seleccionables */
+.pick-row{width:100%;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.pick-row.on{box-shadow:inset 0 0 0 2px #355E96,0 16px 28px -16px rgba(19,33,53,.28)}
+.pick-row:disabled{cursor:default}
 .ok-badge{background:#E1F1E5;color:#2A6A3D}
+a.avatar{text-decoration:none}
 
 /* ---------- Docente / Dirección ---------- */
 .date-badge{display:flex;flex-direction:column;align-items:center;justify-content:center;width:58px;height:58px;border-radius:18px;background:linear-gradient(145deg,#fff,#E7EEF8);border:1.5px solid #DCE5F2;box-shadow:inset 0 1px 0 #fff,0 6px 14px -6px rgba(53,94,150,.25);color:#355E96;flex:none}
@@ -395,7 +400,10 @@ const S = {
   // Pantalla de encuestas: pestaña y filtros
   res: { tab: 'preguntas', subject: 'todos', docente: 'todos', tipo: 'todos', tema: null, q: '', alertas: false, limit: 30 },
   // Respuesta del docente que se está escribiendo en la ventana de detalle
-  reply: { id: null, text: '', sending: false }
+  reply: { id: null, text: '', sending: false },
+  // Perfil: catálogo de asignaturas y selección del estudiante (null = sin cambios)
+  catalog: null,
+  perfil: { sel: null, saving: false }
 };
 
 function readPref(k, def) { try { return localStorage.getItem(k) ?? def; } catch (e) { return def; } }
@@ -405,11 +413,12 @@ const SCREEN_ROLE = {
   'est-asig': 'est', 'est-nuevo': 'est', 'est-enviado': 'est',
   'doc-reportes': 'doc', 'doc-stats': 'doc', 'doc-asig': 'doc',
   'dir-semanal': 'dir', 'dir-grupo': 'dir', 'dir-clases': 'dir',
-  'doc-encuesta': 'doc', 'dir-encuesta': 'dir'
+  'doc-encuesta': 'doc', 'dir-encuesta': 'dir',
+  'perfil': 'any'
 };
 const roleOf = (u) => (u?.rol === 'adm' ? 'dir' : u?.rol);
 const homeOf = (u) => ({ est: 'est-asig', doc: 'doc-reportes', dir: 'dir-semanal', mix: 'doc-reportes' }[roleOf(u)] || 'landing');
-const canSee = (need, rol) => need === rol || (rol === 'mix' && (need === 'doc' || need === 'dir'));
+const canSee = (need, rol) => need === 'any' || need === rol || (rol === 'mix' && (need === 'doc' || need === 'dir'));
 
 // El docente directivo recibe los datos de todo el programa; sus vistas de docente
 // se limitan a sus propias asignaturas.
@@ -497,6 +506,7 @@ const ICON = {
   chat: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
   send: '<path d="m22 2-7 20-4-9-9-4z"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>',
   alert: '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>'
 };
 const icon = (name, size = 20, extra = '') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${ICON[name]}</svg>`;
@@ -541,10 +551,10 @@ const SCENE_CENTER = `<div class="scene">
 </div>`;
 
 const NAVS = {
-  est: [['est-asig', 'Mis asignaturas', 'book'], ['est-nuevo', 'Nuevo reporte', 'pen']],
-  doc: [['doc-reportes', 'Reportes recibidos', 'inbox'], ['doc-stats', 'Estadísticas', 'chart'], ['doc-encuesta', 'Encuestas y comentarios', 'chat'], ['doc-asig', 'Mis asignaturas', 'book']],
-  dir: [['dir-semanal', 'Panorama semanal', 'grid'], ['dir-encuesta', 'Encuestas y comentarios', 'chat'], ['dir-grupo', 'Grupos y materias', 'users']],
-  mix: [['doc-reportes', 'Reportes', 'inbox'], ['doc-asig', 'Mis asignaturas', 'book'], ['doc-stats', 'Estadísticas como docente', 'chart'], ['dir-semanal', 'Estadísticas como directivo', 'grid'], ['dir-encuesta', 'Encuestas y comentarios', 'chat'], ['dir-clases', 'Clases a cargo', 'users']]
+  est: [['est-asig', 'Mis asignaturas', 'book'], ['est-nuevo', 'Nuevo reporte', 'pen'], ['perfil', 'Mi perfil', 'user']],
+  doc: [['doc-reportes', 'Reportes recibidos', 'inbox'], ['doc-stats', 'Estadísticas', 'chart'], ['doc-encuesta', 'Encuestas y comentarios', 'chat'], ['doc-asig', 'Mis asignaturas', 'book'], ['perfil', 'Mi perfil', 'user']],
+  dir: [['dir-semanal', 'Panorama semanal', 'grid'], ['dir-encuesta', 'Encuestas y comentarios', 'chat'], ['dir-grupo', 'Grupos y materias', 'users'], ['perfil', 'Mi perfil', 'user']],
+  mix: [['doc-reportes', 'Reportes', 'inbox'], ['doc-asig', 'Mis asignaturas', 'book'], ['doc-stats', 'Estadísticas como docente', 'chart'], ['dir-semanal', 'Estadísticas como directivo', 'grid'], ['dir-encuesta', 'Encuestas y comentarios', 'chat'], ['dir-clases', 'Clases a cargo', 'users'], ['perfil', 'Mi perfil', 'user']]
 };
 
 function ringData() {
@@ -583,7 +593,7 @@ function dock(active) {
         <div style="position:relative"><div class="d" style="font-size:20px;font-weight:600">${ring.value} de ${ring.total}</div><div style="font-size:13px;color:#CEDBEE;line-height:1.3">${ring.label}</div></div>
       </div>
       <div class="me-card" style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 12px;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.7));box-shadow:inset 0 1px 0 #fff,0 16px 28px -14px rgba(19,33,53,.4)">
-        <span class="avatar" role="img" aria-label="Foto de perfil de ${esc(u.nombre)}" title="${esc(u.nombre)}">${esc(u.iniciales)}<i></i></span>
+        <a class="avatar" href="#/perfil" aria-label="Mi perfil (${esc(u.nombre)})" title="Mi perfil">${esc(u.iniciales)}<i></i></a>
         <button class="out" data-act="logout" aria-label="Cerrar sesión" title="Cerrar sesión">${icon('logout')}</button>
       </div>
     </div>
@@ -822,7 +832,7 @@ function renderEstAsig() {
     </section>
     <section class="glass" style="border-radius:30px;padding:28px 28px 32px">
       <div class="sec-head"><h2 class="d" style="font-size:24px;font-weight:600">Tus asignaturas</h2><span style="font-size:14px;color:#5B6B82">${plural(S.subjects.length, 'asignatura', 'asignaturas')} este semestre</span></div>
-      ${rows ? `<ul class="list">${rows}</ul>` : `<p class="empty">Cuando te inscriban en asignaturas aparecerán aquí.</p>`}
+      ${rows ? `<ul class="list">${rows}</ul>` : `<p class="empty">Aún no tienes asignaturas. Elígelas en <a href="#/perfil">Mi perfil</a>.</p>`}
     </section>
     ${mine ? `<section class="glass" style="border-radius:30px;padding:28px 28px 32px">
       <div class="sec-head"><h2 class="d" style="font-size:24px;font-weight:600">Tus reportes recientes</h2><span style="font-size:14px;color:#5B6B82">Así va el seguimiento de tu docente</span></div>
@@ -1334,6 +1344,76 @@ function renderDocAsig() {
 }
 
 // ===============================================================
+// MI PERFIL (todos los roles; el estudiante elige sus asignaturas)
+// ===============================================================
+async function loadCatalog() {
+  if (S.catalogLoading) return;
+  S.catalogLoading = true;
+  try { S.catalog = await NexoAPI.catalog(); } catch (e) { S.catalog = []; }
+  S.catalogLoading = false;
+  if (S.screen === 'perfil') render();
+}
+
+function renderPerfil() {
+  const u = S.user;
+  const rol = roleOf(u);
+  const ROL_NOMBRE = { est: 'Estudiante', doc: 'Docente', dir: 'Dirección de programa', mix: 'Docente directivo' };
+  const dato = (label, value) => `<div><div style="font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5B6B82">${label}</div><div style="font-size:17px;font-weight:600;margin-top:4px;overflow-wrap:anywhere">${value}</div></div>`;
+  const resumen = rol === 'est'
+    ? [dato('Reportes enviados', S.reports.length), dato('Con respuesta del docente', S.reports.filter(r => r.respuesta).length)]
+    : rol === 'dir'
+      ? [dato('Reportes en el programa', S.reports.length), dato('Asignaturas', S.subjects.length)]
+      : [dato('Asignaturas a cargo', docSubjects().length), dato('Reportes recibidos', docReports().length)];
+
+  let asig = '';
+  if (rol === 'est') {
+    if (!S.catalog) {
+      loadCatalog();
+      asig = `<p class="empty">Cargando asignaturas…</p>`;
+    } else {
+      const P = S.perfil;
+      const fijas = new Set(S.catalog.filter(s => s.studentUids.includes(u.uid)).map(s => s.id));
+      const guardadas = new Set(u.subjectIds || []);
+      const sel = P.sel || guardadas;
+      const total = new Set([...fijas, ...sel]).size;
+      const cambio = P.sel && (P.sel.size !== guardadas.size || [...P.sel].some(id => !guardadas.has(id)));
+      asig = `<ul class="list">${S.catalog.map((s, i) => {
+        const fija = fijas.has(s.id);
+        const on = fija || sel.has(s.id);
+        return `<li><button type="button" class="row lift pick-row ${on ? 'on' : ''}" data-act="toggle-subject" data-id="${esc(s.id)}" aria-pressed="${on}" ${fija ? 'disabled' : ''}>
+          ${mk(s.abreviatura, i)}
+          <div style="flex:1 1 220px;min-width:0"><div style="font-weight:700;font-size:16px">${esc(s.nombre)}</div><div style="font-size:14px;color:#5B6B82;margin-top:2px">${esc(s.profesor)}, ${esc(s.grupo)}</div></div>
+          ${fija ? `<span class="pill rev">Inscrita por la universidad</span>` : on ? `<span class="pill ok">${icon('check', 14)}Inscrita</span>` : `<span class="pill" style="background:#F4F7FC;color:#5B6B82">Agregar</span>`}
+        </button></li>`;
+      }).join('')}</ul>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="font-size:14px;color:#5B6B82">${plural(total, 'asignatura seleccionada', 'asignaturas seleccionadas')}${total ? '' : ' · elige al menos una'}</span>
+        <div style="display:flex;gap:10px">${cambio ? `<button class="btn" data-act="reset-subjects">Descartar</button>` : ''}<button class="btn p" data-act="save-subjects" ${!cambio || !total || P.saving ? 'disabled' : ''}>${P.saving ? 'Guardando…' : 'Guardar asignaturas'}</button></div>
+      </div>`;
+    }
+  }
+
+  return shell('perfil', `
+    <header>
+      <p class="eyebrow">Semestre ${semestre()} · Mi perfil</p>
+      <h1 class="d h1">${esc(u.nombre)}</h1>
+    </header>
+    <section class="glass" style="border-radius:30px;padding:32px;display:flex;flex-wrap:wrap;gap:28px;align-items:center">
+      <span class="avatar" style="width:84px;height:84px;font-size:28px" aria-hidden="true">${esc(u.iniciales)}<i></i></span>
+      <div style="flex:1 1 420px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:20px">
+        ${dato('Correo institucional', esc(u.email || '—'))}
+        ${dato('Rol', ROL_NOMBRE[rol] || 'Usuario')}
+        ${resumen.join('')}
+      </div>
+    </section>
+    ${rol === 'est' ? `<section class="glass" style="border-radius:30px;padding:28px 28px 32px;display:flex;flex-direction:column;gap:18px">
+      <div class="sec-head"><h2 class="d" style="font-size:24px;font-weight:600">Mis asignaturas</h2><span style="font-size:14px;color:#5B6B82">Elige las asignaturas que cursas este semestre para poder reportarlas</span></div>
+      ${asig}
+    </section>` : ''}
+  `);
+}
+
+// ===============================================================
 // 9. DIRECCIÓN · PANORAMA SEMANAL
 // ===============================================================
 function programRanking() {
@@ -1676,7 +1756,8 @@ const SCREENS = {
   'dir-grupo': renderDirGrupo,
   'dir-clases': renderDirClases,
   'doc-encuesta': () => renderEncuesta('doc'),
-  'dir-encuesta': () => renderEncuesta('dir')
+  'dir-encuesta': () => renderEncuesta('dir'),
+  'perfil': renderPerfil
 };
 
 function resolveScreen() {
@@ -1707,7 +1788,7 @@ function render() {
   const modal = S.viewId && S.user ? reportModal() : '';
   app.innerHTML = SCREENS[s]() + modal;
   document.body.style.overflow = modal ? 'hidden' : '';
-  document.title = 'Nexo · ' + ({ landing: 'Tu voz académica', login: 'Iniciar sesión', registro: 'Crear cuenta', verificar: 'Verifica tu correo', 'est-asig': 'Mis asignaturas', 'est-nuevo': 'Nuevo reporte', 'est-enviado': 'Reporte enviado', 'doc-reportes': 'Reportes recibidos', 'doc-stats': 'Estadísticas', 'doc-asig': 'Mis asignaturas', 'dir-semanal': 'Panorama semanal', 'dir-grupo': 'Detalle de grupo', 'dir-clases': 'Clases a cargo', 'doc-encuesta': 'Encuestas y comentarios', 'dir-encuesta': 'Encuestas y comentarios' }[s]);
+  document.title = 'Nexo · ' + ({ landing: 'Tu voz académica', login: 'Iniciar sesión', registro: 'Crear cuenta', verificar: 'Verifica tu correo', 'est-asig': 'Mis asignaturas', 'est-nuevo': 'Nuevo reporte', 'est-enviado': 'Reporte enviado', 'doc-reportes': 'Reportes recibidos', 'doc-stats': 'Estadísticas', 'doc-asig': 'Mis asignaturas', 'dir-semanal': 'Panorama semanal', 'dir-grupo': 'Detalle de grupo', 'dir-clases': 'Clases a cargo', 'doc-encuesta': 'Encuestas y comentarios', 'dir-encuesta': 'Encuestas y comentarios', perfil: 'Mi perfil' }[s]);
   if (changed) window.scrollTo(0, 0);
   if (s === 'landing') setupReveal();
 }
@@ -1765,7 +1846,7 @@ async function loadData() {
     // Refresca solo las pantallas que muestran reportes (no interrumpe el asistente)
     // ni borra lo que se está escribiendo en una respuesta o una mejora
     if (document.activeElement?.matches('textarea')) return;
-    if (['est-asig', 'doc-reportes', 'doc-stats', 'doc-asig', 'dir-semanal', 'dir-grupo', 'dir-clases'].includes(S.screen)) render();
+    if (['est-asig', 'perfil', 'doc-reportes', 'doc-stats', 'doc-asig', 'dir-semanal', 'dir-grupo', 'dir-clases'].includes(S.screen)) render();
   });
 }
 
@@ -1786,6 +1867,8 @@ async function endSession() {
   S.doc = { estado: 'todos', subject: 'todos', menuId: null };
   S.viewId = null;
   S.reply = { id: null, text: '', sending: false };
+  S.catalog = null;
+  S.perfil = { sel: null, saving: false };
   S.login = { ...S.login, pass: '', error: '', loading: false };
   S.register = { nombre: '', email: '', pass: '', pass2: '', error: '', loading: false };
   S.verify = { email: null, code: '', error: '', info: '', loading: false, sending: false, until: 0 };
@@ -2002,6 +2085,36 @@ document.addEventListener('click', async (e) => {
       S.doc.estado = 'todos';
       go('doc-reportes');
       break;
+
+    // ----- Perfil -----
+    case 'toggle-subject': {
+      const P = S.perfil;
+      if (!P.sel) P.sel = new Set(S.user.subjectIds || []);
+      if (P.sel.has(id)) P.sel.delete(id); else P.sel.add(id);
+      render();
+      break;
+    }
+    case 'reset-subjects':
+      S.perfil.sel = null;
+      render();
+      break;
+    case 'save-subjects': {
+      const P = S.perfil;
+      if (!P.sel || P.saving) break;
+      P.saving = true;
+      render();
+      try {
+        S.user.subjectIds = await NexoAPI.saveMySubjects([...P.sel]);
+        S.subjects = await NexoAPI.subjects();
+        S.perfil = { sel: null, saving: false };
+        toast('Tus asignaturas quedaron guardadas.');
+      } catch (err) {
+        P.saving = false;
+        toast('No se pudieron guardar: ' + err.message, true);
+      }
+      render();
+      break;
+    }
 
     // ----- Dirección -----
     case 'open-group':

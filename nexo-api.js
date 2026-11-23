@@ -803,7 +803,8 @@ export const NexoAPI = {
       nombre: cleanEmail.split('@')[0].split('.').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' '),
       rol: requestedRole
     };
-    currentProfile = formatProfile(base.uid, { ...base, rol: DEFAULT_USERS[cleanEmail] ? base.rol : requestedRole });
+    const elegidas = localDb.perfiles?.[base.uid] || (DEFAULT_USERS[cleanEmail] ? [] : NEW_STUDENT_SUBJECTS);
+    currentProfile = formatProfile(base.uid, { ...base, subjectIds: elegidas, rol: DEFAULT_USERS[cleanEmail] ? base.rol : requestedRole });
     return currentProfile;
   },
 
@@ -1090,6 +1091,40 @@ export const NexoAPI = {
       saveLocalDb(localDb);
     }
     return { texto: clean, nombre: me.nombre, fecha: respuesta.fecha };
+  },
+
+  // -------------------------------------------------------------
+  // Perfil: catálogo de asignaturas y elección del estudiante
+  // -------------------------------------------------------------
+  async catalog() {
+    const list = [];
+    if (useFirestore()) {
+      try {
+        const snap = await getDocs(collection(db, 'subjects'));
+        snap.forEach(d => list.push(normalizeSubject({ id: d.id, ...d.data() })));
+      } catch (e) {
+        console.warn('[Nexo] Catálogo de asignaturas:', e.message);
+      }
+    } else {
+      list.push(...localDb.subjects.map(normalizeSubject));
+    }
+    for (const s of DEFAULT_SUBJECTS) if (!list.some(x => x.id === s.id)) list.push(normalizeSubject(s));
+    return list.sort((a, b) => a.nombre.localeCompare(b.nombre) || a.grupo.localeCompare(b.grupo));
+  },
+
+  /** Guarda en el perfil las asignaturas que eligió el estudiante. */
+  async saveMySubjects(ids) {
+    const me = currentProfile;
+    if (!me) throw new Error('Tu sesión expiró. Inicia sesión de nuevo.');
+    const clean = [...new Set((ids || []).filter(x => typeof x === 'string' && x))];
+    if (useFirestore()) {
+      await updateDoc(doc(db, 'users', me.uid), { subjectIds: clean });
+    } else {
+      localDb.perfiles = { ...(localDb.perfiles || {}), [me.uid]: clean };
+      saveLocalDb(localDb);
+    }
+    me.subjectIds = clean;
+    return clean;
   },
 
   async setStatus(reportId, newStatus) {
