@@ -1,0 +1,11 @@
+{
+  "desde": "2026-10-11",
+  "corte": "2026-11-15",
+  "visitas": null,
+  "visitasDesde": null,
+  "registros": 11,
+  "activados": 11,
+  "reportes": null,
+  "respondidos": null,
+  "nota": "Registros y activaciones según Firebase Authentication y Cloud Firestore. Las visitas a la landing se miden con Google Analytics desde la v1.0."
+}

@@ -9,3 +9,9 @@ serviceAccountKey.json
 
 # Caché de Firebase
 .firebase/
+
+# Dependencias de los scripts
+node_modules/
+
+# Cuentas excluidas del conteo de conversión (correos del equipo y de prueba)
+scripts/cuentas-excluidas.txt

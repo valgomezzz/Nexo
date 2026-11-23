@@ -166,6 +166,23 @@ firebase deploy --only hosting,firestore:rules
 - `firestore:rules` publica `firestore.rules`. Hay que incluirlo siempre que cambien las reglas.
 - Después de desplegar, conviene una recarga forzada (Cmd/Ctrl + Shift + R) para descartar la versión en caché.
 
+### Conversión acumulada de la landing
+
+La sección **Nexo en números** de la landing lee `conversion.json` (raíz del sitio). Para actualizarlo antes de una entrega:
+
+```bash
+cd scripts
+npm install
+node conversion.mjs --dry-run                      # revisar los números sin escribir
+node conversion.mjs --visitas 230 --visitas-desde 2026-11-23
+cd .. && firebase deploy --only hosting
+```
+
+- **Registros, activados, reportes y respondidos** se cuentan en Firestore (`users` y `reports`). Usa `backend/serviceAccountKey.json` o `GOOGLE_APPLICATION_CREDENTIALS`.
+- **Visitas** vienen de Google Analytics (evento `landing_view`) y se pasan con `--visitas`. Si quedan en `null`, la landing muestra "En medición".
+- Las cuentas del equipo y de prueba se excluyen escribiéndolas en `scripts/cuentas-excluidas.txt` (ver `cuentas-excluidas.ejemplo.txt`; el archivo no se sube).
+- Eventos de Analytics: `landing_view`, `cta_click`, `sign_up`, `first_report` y `report_sent`. En modo `?demo` no se registra nada.
+
 ## Modelo de datos
 
 Colecciones en Cloud Firestore:

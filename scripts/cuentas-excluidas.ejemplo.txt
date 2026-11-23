@@ -1,0 +1,4 @@
+# Cuentas que no son uso real (integrantes del equipo y cuentas de prueba).
+# Copia este archivo como cuentas-excluidas.txt (no se sube al repo) y escribe
+# un correo o un uid por línea. Las líneas que empiezan con # se ignoran.
+estudiante@javeriana.edu.co

@@ -16,6 +16,7 @@
       "seed-data.js",
       "backend/**",
       "docs/**",
+      "scripts/**",
       "**/serviceAccountKey*.json"
     ],
     "cleanUrls": true,

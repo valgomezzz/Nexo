@@ -1,0 +1,12 @@
+{
+  "name": "nexo-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Scripts de mantenimiento de Nexo (no se publican en Hosting)",
+  "scripts": {
+    "conversion": "node conversion.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}

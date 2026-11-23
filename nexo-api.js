@@ -35,6 +35,7 @@ import {
   serverTimestamp,
   arrayUnion
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getAnalytics, isSupported as analyticsSupported, logEvent } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js';
 import { FIREBASE_CONFIG, API_BASE, EMAILJS } from './firebase-config.js?v=20261108d';
 
 // Mapeo canónico de roles
@@ -276,6 +277,33 @@ if (isFirebaseConfigured) {
     db = getFirestore(app);
   } catch (err) {
     console.warn('[Nexo] Error inicializando Firebase SDK:', err);
+  }
+}
+
+// ===============================================================
+// ANALÍTICA (Google Analytics vía Firebase; measurementId en firebase-config.js)
+// Embudo: landing_view → cta_click → sign_up → first_report / report_sent.
+// En modo simulación (?demo) no se registra nada.
+// ===============================================================
+let analytics = null;
+const analyticsQueue = [];
+if (app && FIREBASE_CONFIG.measurementId) {
+  analyticsSupported()
+    .then(ok => {
+      if (!ok) return;
+      analytics = getAnalytics(app);
+      analyticsQueue.splice(0).forEach(([n, p]) => logEvent(analytics, n, p));
+    })
+    .catch(err => console.warn('[Nexo] Analytics no disponible:', err));
+}
+
+export function track(name, params = {}) {
+  if (!app) return;
+  try {
+    if (analytics) logEvent(analytics, name, params);
+    else if (analyticsQueue.length < 50) analyticsQueue.push([name, params]);
+  } catch (err) {
+    console.warn('[Nexo] No se pudo registrar el evento', name, err);
   }
 }
 
