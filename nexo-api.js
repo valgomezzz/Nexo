@@ -383,6 +383,24 @@ const DEFAULT_SUBJECTS = SIM_GRUPOS.map(g => ({
   studentUids: DEMO_EST_SUBJECTS.includes(g.id) ? ['demo-est-01'] : []
 }));
 
+// Asignaturas que recibe por defecto todo estudiante nuevo al registrarse.
+// Se guardan en su perfil (users/{uid}.subjectIds) porque las reglas no le
+// permiten escribir en /subjects para agregarse a studentUids.
+const NEW_STUDENT_SUBJECTS = ['estructuras-g1', 'bases-g1', 'software-g1'];
+
+// Asignaturas de un estudiante: las de studentUids más las de su perfil. Si una
+// asignatura del perfil no existe en la fuente de datos, se usa la predeterminada.
+function studentSubjects(list, me) {
+  const ids = me.subjectIds || [];
+  const out = list.filter(s => s.studentUids.includes(me.uid) || ids.includes(s.id));
+  for (const id of ids) {
+    if (out.some(s => s.id === id)) continue;
+    const def = DEFAULT_SUBJECTS.find(s => s.id === id);
+    if (def) out.push(normalizeSubject(def));
+  }
+  return out;
+}
+
 const SIM_MEJORAR = {
   claridad: [
     'No queda claro qué se evalúa en el proyecto final ni cómo se conecta con los talleres.',
@@ -588,7 +606,9 @@ function formatProfile(uid, data) {
     iniciales: ini,
     rol: ROL_MAP[data.rol] && data.rol.length > 3 ? ROL_MAP[data.rol] : (data.rol || 'est'),
     // Docente directivo: uids de los docentes de su sección (vacío = todo el programa)
-    aCargo: Array.isArray(data.aCargo) ? data.aCargo : []
+    aCargo: Array.isArray(data.aCargo) ? data.aCargo : [],
+    // Asignaturas asignadas en el perfil (p. ej. las predeterminadas del registro)
+    subjectIds: Array.isArray(data.subjectIds) ? data.subjectIds : []
   };
 }
 
@@ -601,7 +621,7 @@ async function loadFirebaseProfile(user, fallbackEmail) {
   const nombre = email.split('@')[0].split('.').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
   // Todo perfil nuevo nace como estudiante; DOCENTE/DIRECCION se asignan desde el
   // backend (AsignarRol) y las reglas impiden autoasignarlos.
-  const data = { email, nombre, rol: 'ESTUDIANTE', createdAt: serverTimestamp() };
+  const data = { email, nombre, rol: 'ESTUDIANTE', subjectIds: NEW_STUDENT_SUBJECTS, createdAt: serverTimestamp() };
   await setDoc(ref, data);
   return formatProfile(user.uid, data);
 }
@@ -854,7 +874,7 @@ export const NexoAPI = {
     // Código correcto: se crea el perfil de estudiante (eso marca la cuenta como verificada)
     const email = user.email.toLowerCase();
     const nombre = saved.nombre || email.split('@')[0].split('.').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
-    const data = { email, nombre, rol: 'ESTUDIANTE', verificado: true, createdAt: serverTimestamp() };
+    const data = { email, nombre, rol: 'ESTUDIANTE', subjectIds: NEW_STUDENT_SUBJECTS, verificado: true, createdAt: serverTimestamp() };
     await setDoc(doc(db, 'users', user.uid), data);
     clearCode(user.uid);
     currentProfile = formatProfile(user.uid, data);
@@ -905,13 +925,13 @@ export const NexoAPI = {
       const snap = await getDocs(collection(db, 'subjects'));
       const list = [];
       snap.forEach(d => list.push(normalizeSubject({ id: d.id, ...d.data() })));
-      if (me.rol === 'est') return list.filter(s => s.studentUids.includes(me.uid));
+      if (me.rol === 'est') return studentSubjects(list, me);
       if (me.rol === 'doc') return list.filter(s => s.professorUid === me.uid);
       return list;
     }
 
     const list = localDb.subjects.map(normalizeSubject);
-    if (me.rol === 'est') return list.filter(s => s.studentUids.includes(me.uid));
+    if (me.rol === 'est') return studentSubjects(list, me);
     if (me.rol === 'doc') return list.filter(s => s.professorUid === me.uid);
     return list;
   },
