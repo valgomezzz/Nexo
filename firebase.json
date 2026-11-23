@@ -8,6 +8,7 @@
       "firebase.json",
       "firestore.rules",
       "**/.*",
+      "**/.*/**",
       "**/node_modules/**",
       "*.md",
       "*.log",
