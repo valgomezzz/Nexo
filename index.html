@@ -79,6 +79,14 @@ h1,h2,h3,p{margin:0}
 .pick-row{width:100%;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
 .pick-row.on{box-shadow:inset 0 0 0 2px #355E96,0 16px 28px -16px rgba(19,33,53,.28)}
 .pick-row:disabled{cursor:default}
+/* Historial del estudiante y evolución del docente */
+.hist-wrap{overflow-x:auto}
+.hist{display:grid;gap:8px;align-items:center;min-width:560px}
+.hist .h{font-size:12px;font-weight:700;color:#5B6B82;text-align:center}
+.hist .h.cur{color:#355E96}
+.hist .n{font-weight:700;font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist .c{display:flex;justify-content:center;align-items:center;height:38px;border-radius:12px;background:#F4F7FC;font-size:14px;font-weight:700;color:#132135}
+.hist .c.none{color:#9AA7B8;font-weight:500}
 .mej{display:flex;gap:14px;align-items:flex-start;padding:16px 20px;border-radius:20px;background:#fff;box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(19,33,53,.06)}
 .mej p{margin:0;font-size:16px;line-height:1.5}
 .mej small{display:block;margin-top:6px;font-size:13px;color:#5B6B82}
@@ -420,7 +428,7 @@ const SCREEN_ROLE = {
   'doc-reportes': 'doc', 'doc-stats': 'doc', 'doc-asig': 'doc',
   'dir-semanal': 'dir', 'dir-grupo': 'dir', 'dir-clases': 'dir',
   'doc-encuesta': 'doc', 'dir-encuesta': 'dir',
-  'perfil': 'any'
+  'est-historial': 'est', 'perfil': 'any'
 };
 const roleOf = (u) => (u?.rol === 'adm' ? 'dir' : u?.rol);
 const homeOf = (u) => ({ est: 'est-asig', doc: 'doc-reportes', dir: 'dir-semanal', mix: 'doc-reportes' }[roleOf(u)] || 'landing');
@@ -458,6 +466,31 @@ function weekLabel() {
   return `Semana ${weekOfSemester()}, del ${desde} al ${f.getDate()} de ${MESES_L[f.getMonth()]}`;
 }
 const thisWeek = (iso) => new Date(iso) >= monday();
+// Últimas n semanas (la actual al final), con su rango [start, end)
+function lastWeeks(n = 6) {
+  const now = monday();
+  const weeks = [];
+  for (let k = n - 1; k >= 0; k--) {
+    const start = new Date(now); start.setDate(now.getDate() - 7 * k);
+    const end = new Date(start); end.setDate(start.getDate() + 7);
+    weeks.push({ label: `S${weekOfSemester(start)}`, start, end, current: k === 0 });
+  }
+  return weeks;
+}
+const inWeek = (w) => (r) => { const d = new Date(r.createdAt); return d >= w.start && d < w.end; };
+const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null);
+// Valoración general de un reporte (0-4): promedio de sus categorías
+const moodOf = (r) => avg(CATEGORIAS.map(c => r.moods[c.key]));
+// Tendencia: compara la mitad reciente con la anterior (valores null se ignoran)
+function trendOf(vals) {
+  const half = Math.floor(vals.length / 2);
+  const a = avg(vals.slice(0, half).filter(v => v !== null));
+  const b = avg(vals.slice(half).filter(v => v !== null));
+  if (a === null || b === null) return { cls: '', label: 'Sin datos suficientes', arrow: '·' };
+  if (b - a >= 0.3) return { cls: 'ok', label: 'Mejorando', arrow: '↑' };
+  if (a - b >= 0.3) return { cls: 'pend', label: 'Empeorando', arrow: '↓' };
+  return { cls: 'rev', label: 'Estable', arrow: '→' };
+}
 const dayBadge = (iso) => { const d = new Date(iso); return `<div class="date-badge"><strong>${String(d.getDate()).padStart(2, '0')}</strong><span>${MESES[d.getMonth()]}</span></div>`; };
 const shortDate = (iso) => { const d = new Date(iso); return `${d.getDate()} ${MESES[d.getMonth()]}`; };
 const fullDate = (iso) => {
@@ -513,6 +546,7 @@ const ICON = {
   send: '<path d="m22 2-7 20-4-9-9-4z"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>',
+  trend: '<path d="m3 17 6-6 4 4 8-8"/><path d="M14 7h7v7"/>',
   spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/>',
   alert: '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>'
 };
@@ -558,7 +592,7 @@ const SCENE_CENTER = `<div class="scene">
 </div>`;
 
 const NAVS = {
-  est: [['est-asig', 'Mis asignaturas', 'book'], ['est-nuevo', 'Nuevo reporte', 'pen'], ['perfil', 'Mi perfil', 'user']],
+  est: [['est-asig', 'Mis asignaturas', 'book'], ['est-nuevo', 'Nuevo reporte', 'pen'], ['est-historial', 'Mi historial', 'trend'], ['perfil', 'Mi perfil', 'user']],
   doc: [['doc-reportes', 'Reportes recibidos', 'inbox'], ['doc-stats', 'Estadísticas', 'chart'], ['doc-encuesta', 'Encuestas y comentarios', 'chat'], ['doc-asig', 'Mis asignaturas', 'book'], ['perfil', 'Mi perfil', 'user']],
   dir: [['dir-semanal', 'Panorama semanal', 'grid'], ['dir-encuesta', 'Encuestas y comentarios', 'chat'], ['dir-grupo', 'Grupos y materias', 'users'], ['perfil', 'Mi perfil', 'user']],
   mix: [['doc-reportes', 'Reportes', 'inbox'], ['doc-asig', 'Mis asignaturas', 'book'], ['doc-stats', 'Estadísticas como docente', 'chart'], ['dir-semanal', 'Estadísticas como directivo', 'grid'], ['dir-encuesta', 'Encuestas y comentarios', 'chat'], ['dir-clases', 'Clases a cargo', 'users'], ['perfil', 'Mi perfil', 'user']]
@@ -1381,6 +1415,43 @@ function mejorasDocente() {
 }
 
 // ===============================================================
+// ESTUDIANTE · MI HISTORIAL
+// ===============================================================
+function renderEstHistorial() {
+  const weeks = lastWeeks(8);
+  const cols = `grid-template-columns:minmax(150px,1.6fr) repeat(${weeks.length},minmax(40px,1fr)) 140px`;
+  const filas = S.subjects.map(s => {
+    const mios = S.reports.filter(r => r.subjectId === s.id);
+    const vals = weeks.map(w => avg(mios.filter(inWeek(w)).map(moodOf)));
+    return { s, vals, t: trendOf(vals), n: mios.length };
+  });
+  const cats = CATEGORIAS.map(c => ({ ...c, v: avg(S.reports.map(r => r.moods[c.key])) }));
+  const cell = (v) => v === null ? `<span class="c none" title="Sin reporte esa semana">—</span>` : `<span class="c" title="${MOOD_LABELS[Math.round(v)]}">${face(Math.round(v), 26)}</span>`;
+  return shell('est-historial', `
+    <header>
+      <p class="eyebrow">Semestre ${semestre()} · Últimas ${weeks.length} semanas</p>
+      <h1 class="d h1" style="max-width:24ch">Así han ido tus asignaturas</h1>
+      <p class="sub">Cada carita es tu valoración promedio de esa semana. Así ves si las cosas mejoran después de reportar.</p>
+    </header>
+    <section class="glass" style="border-radius:30px;padding:28px 28px 32px;display:flex;flex-direction:column;gap:18px">
+      <div class="sec-head"><h2 class="d" style="font-size:24px;font-weight:600">Semana a semana</h2><span style="font-size:14px;color:#5B6B82">${plural(S.reports.length, 'reporte enviado', 'reportes enviados')}</span></div>
+      ${S.subjects.length ? `<div class="hist-wrap"><div class="hist" style="${cols}">
+        <span></span>${weeks.map(w => `<span class="h ${w.current ? 'cur' : ''}">${w.label}</span>`).join('')}<span class="h">Tendencia</span>
+        ${filas.map(({ s, vals, t }) => `<span class="n" title="${esc(s.nombre)}">${esc(s.nombre)}</span>${vals.map(cell).join('')}${t.cls ? `<span class="pill ${t.cls}">${t.arrow} ${t.label}</span>` : `<span class="muted" style="font-size:13px">${t.label}</span>`}`).join('')}
+      </div></div>` : `<p class="empty">Aún no tienes asignaturas. Elígelas en <a href="#/perfil">Mi perfil</a>.</p>`}
+    </section>
+    <section class="glass" style="border-radius:30px;padding:28px 28px 32px;display:flex;flex-direction:column;gap:16px">
+      <h2 class="d" style="font-size:22px;font-weight:600">Tu valoración promedio por categoría</h2>
+      ${S.reports.length ? `<div style="display:flex;flex-direction:column;gap:14px">${cats.map(c => `<div style="display:flex;align-items:center;gap:14px">
+        ${face(Math.round(c.v), 30)}
+        <div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600"><span>${c.nombre}</span><strong>${(c.v + 1).toFixed(1)} <small style="color:#5B6B82;font-weight:500">de 5</small></strong></div>
+        <div class="stat-track" style="margin-top:6px"><div class="stat-fill" style="width:${((c.v + 1) / 5 * 100).toFixed(0)}%;background:linear-gradient(90deg,#3F6DAB,#355E96)"></div></div></div>
+      </div>`).join('')}</div>` : `<p class="empty">Sin reportes registrados. Tu historial aparecerá con tu primer reporte.</p>`}
+    </section>
+  `);
+}
+
+// ===============================================================
 // MI PERFIL (todos los roles; el estudiante elige sus asignaturas)
 // ===============================================================
 async function loadCatalog() {
@@ -1794,6 +1865,7 @@ const SCREENS = {
   'dir-clases': renderDirClases,
   'doc-encuesta': () => renderEncuesta('doc'),
   'dir-encuesta': () => renderEncuesta('dir'),
+  'est-historial': renderEstHistorial,
   'perfil': renderPerfil
 };
 
@@ -1825,7 +1897,7 @@ function render() {
   const modal = S.viewId && S.user ? reportModal() : '';
   app.innerHTML = SCREENS[s]() + modal;
   document.body.style.overflow = modal ? 'hidden' : '';
-  document.title = 'Nexo · ' + ({ landing: 'Tu voz académica', login: 'Iniciar sesión', registro: 'Crear cuenta', verificar: 'Verifica tu correo', 'est-asig': 'Mis asignaturas', 'est-nuevo': 'Nuevo reporte', 'est-enviado': 'Reporte enviado', 'doc-reportes': 'Reportes recibidos', 'doc-stats': 'Estadísticas', 'doc-asig': 'Mis asignaturas', 'dir-semanal': 'Panorama semanal', 'dir-grupo': 'Detalle de grupo', 'dir-clases': 'Clases a cargo', 'doc-encuesta': 'Encuestas y comentarios', 'dir-encuesta': 'Encuestas y comentarios', perfil: 'Mi perfil' }[s]);
+  document.title = 'Nexo · ' + ({ landing: 'Tu voz académica', login: 'Iniciar sesión', registro: 'Crear cuenta', verificar: 'Verifica tu correo', 'est-asig': 'Mis asignaturas', 'est-nuevo': 'Nuevo reporte', 'est-enviado': 'Reporte enviado', 'doc-reportes': 'Reportes recibidos', 'doc-stats': 'Estadísticas', 'doc-asig': 'Mis asignaturas', 'dir-semanal': 'Panorama semanal', 'dir-grupo': 'Detalle de grupo', 'dir-clases': 'Clases a cargo', 'doc-encuesta': 'Encuestas y comentarios', 'dir-encuesta': 'Encuestas y comentarios', 'est-historial': 'Mi historial', perfil: 'Mi perfil' }[s]);
   if (changed) window.scrollTo(0, 0);
   if (s === 'landing') setupReveal();
 }
@@ -1884,7 +1956,7 @@ async function loadData() {
     // Refresca solo las pantallas que muestran reportes (no interrumpe el asistente)
     // ni borra lo que se está escribiendo en una respuesta o una mejora
     if (document.activeElement?.matches('textarea')) return;
-    if (['est-asig', 'perfil', 'doc-reportes', 'doc-stats', 'doc-asig', 'dir-semanal', 'dir-grupo', 'dir-clases'].includes(S.screen)) render();
+    if (['est-asig', 'est-historial', 'perfil', 'doc-reportes', 'doc-stats', 'doc-asig', 'dir-semanal', 'dir-grupo', 'dir-clases'].includes(S.screen)) render();
   });
 }
 

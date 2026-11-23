@@ -516,7 +516,7 @@ function simularReportes() {
       const dias = Math.floor(rnd() * 70);
       const createdAt = new Date(Date.now() - 86400000 * dias - Math.floor(rnd() * 36000000)).toISOString();
       const estado = ['pend', 'rev', 'ok'][pesos(dias > 21 ? [1, 2, 7] : dias > 7 ? [3, 3.5, 3.5] : [6, 3, 1])];
-      const propio = DEMO_EST_SUBJECTS.includes(g.id) && k === 0;
+      const propio = DEMO_EST_SUBJECTS.includes(g.id) && k < 6;
       reports.push({
         id: `sim-${++id}`,
         studentUid: propio ? 'demo-est-01' : `sim-est-${Math.floor(rnd() * 400)}`,
@@ -533,7 +533,7 @@ function simularReportes() {
 }
 
 // v5: formulario con tipos de respuesta (sí/no, opciones, escala) y simulación grande
-const STORAGE_KEY = 'nexo_local_db_v5';
+const STORAGE_KEY = 'nexo_local_db_v6';
 function loadLocalDb() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
