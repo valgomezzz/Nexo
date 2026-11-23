@@ -1,138 +1,237 @@
 <p align="center">
-  <img src="docs/img/nexo-banner-3d.gif" width="100%" alt="Logo 3D giratorio de Nexo">
+  <img src="docs/img/nexo-banner-3d.gif" width="100%" alt="Nexo">
 </p>
 
-<h1 align="center">📋 Nexo</h1>
+<h1 align="center">Nexo</h1>
 
 <p align="center">
-  Plataforma web donde los estudiantes reportan problemas en sus asignaturas y los docentes les dan seguimiento de forma clara y ordenada.
+  Plataforma de retroalimentación académica de la Pontificia Universidad Javeriana.<br>
+  Los estudiantes reportan cómo les va en cada asignatura y los docentes responden y actúan a tiempo.
 </p>
 
 <p align="center">
-  🔗 <b>URL pública:</b> <a href="https://nexo-7a24e.web.app">https://nexo-7a24e.web.app</a> · 🏷️ <b>Release 1 · tag v0.1</b>
+  <a href="https://nexo-7a24e.web.app"><b>nexo-7a24e.web.app</b></a> ·
+  <a href="https://www.figma.com/design/nNU1yd0nPgQySvt6AanQet/Nexo">Prototipo en Figma</a> ·
+  Release <b>v1.0</b>
 </p>
 
-----
+---
 
-## ✨ Funcionalidades
+## Contenido
 
-- 📝 **Gestión de reportes (HU-03):** lista con fecha, asignatura, título, estado y opción para cambiar el estado.
-- 📊 **Resumen consolidado (HU-04):** contadores de reportes totales, pendientes, en revisión y atendidos, con filtros por asignatura y categoría.
-- 🧭 **Navegación:** Dashboard, Reportes, Asignaturas y Perfil.
+- [Qué es Nexo](#qué-es-nexo)
+- [Funcionalidades](#funcionalidades)
+- [Novedades de la v1.0](#novedades-de-la-v10)
+- [Stack](#stack)
+- [Arquitectura](#arquitectura)
+- [Cómo correrlo](#cómo-correrlo)
+- [Despliegue](#despliegue)
+- [Modelo de datos](#modelo-de-datos)
+- [API del backend Java](#api-del-backend-java)
+- [Historias de usuario](#historias-de-usuario)
+- [Estructura del repositorio](#estructura-del-repositorio)
 
-## 🎨 Diseño
+---
 
-- Prototipo en [Figma](https://www.figma.com/design/nNU1yd0nPgQySvt6AanQet/Nexo)
-- UI Kit propio con paleta de colores, tipografía y componentes reutilizables
+## Qué es Nexo
 
-## 🛠️ Tecnologías
+En la mayoría de cursos, el docente se entera de que algo no funciona cuando ya pasó el parcial. Nexo acorta ese ciclo: cada semana el estudiante califica su asignatura por categorías (claridad, explicaciones, evaluación y acompañamiento), el docente recibe el reporte, responde y publica los cambios que hizo, y la dirección del programa ve dónde se concentran las dificultades.
 
-| Frontend | Backend | Base de datos y autenticación | Diseño |
-|---|---|---|---|
-| HTML5 | Java 17 | Firebase Authentication | Figma |
-| CSS3 (animaciones, 3D, glassmorphism, Grid, Flexbox) | Maven | Cloud Firestore (tiempo real con `onSnapshot`) | UI Kit propio |
-| JavaScript vanilla (ES Modules) | API REST (`/api/health`, `/auth/login`, `/subjects`, `/reports`) | Firebase Hosting | Google Fonts (Fraunces y Source Sans 3) |
-| Fetch API + AbortController | Autenticación con ID token de Firebase (Bearer) | Firebase Web SDK 10.12.2 | Íconos y logo en SVG |
-| IntersectionObserver y localStorage | | localStorage como modo demo sin conexión | |
+El ciclo completo:
 
-## 🚀 Cómo ejecutarlo
+```
+Estudiante reporta  →  Docente revisa y responde  →  Docente publica la mejora  →  Estudiante ve el cambio
+```
+
+## Funcionalidades
+
+### Estudiante
+- Registro con correo `@javeriana.edu.co` y verificación por código enviado al correo.
+- Reporte semanal guiado en 7 pasos: asignatura, una pantalla por cada una de las 4 categorías, preguntas sobre la materia y comentarios finales.
+- Seguimiento del estado de cada reporte (*Pendiente → En revisión → Atendido*) y la respuesta del docente.
+- **Mi historial**: valoración de cada asignatura semana a semana y su tendencia.
+- **Mi perfil**: datos de la cuenta y selección de las asignaturas que cursa.
+- Cada estudiante nuevo empieza con 3 asignaturas asignadas para poder reportar desde el primer día.
+
+### Docente
+- Bandeja de reportes de sus asignaturas, con filtros por estado y asignatura.
+- Cambio de estado y **respuesta escrita** al estudiante desde el detalle del reporte.
+- Estadísticas: totales por estado, categoría que más preocupa, valoración promedio, reportes por semana y **evolución por categoría**.
+- Encuestas y comentarios: resultados por pregunta, comparación entre grupos y comentarios anónimos con búsqueda y temas detectados.
+- Publicación de **mejoras** en sus asignaturas, que ven sus estudiantes.
+
+### Dirección de programa
+- Panorama semanal del programa con ranking de urgencia por asignatura.
+- Detalle de cada grupo con la trazabilidad de sus reportes y contacto directo con el docente.
+- Encuestas y comentarios de todo el programa.
+- El rol **docente directivo** combina las vistas de docente (sus clases) y de dirección (su sección).
+
+## Novedades de la v1.0
+
+Ajustes hechos después de la validación con usuarios.
+
+| # | Cambio | Qué resuelve |
+|---|---|---|
+| 1 | **Respuesta del docente** en cada reporte. Al responder, el reporte pasa a *En revisión*. | El cambio de estado no le decía al estudiante qué iba a pasar con lo que reportó. |
+| 2 | **Mi perfil** con selección de asignaturas. | Los estudiantes no tenían cómo ver sus datos ni ajustar sus materias. |
+| 3 | **"Lo que cambió gracias a tus reportes"**: el docente publica las mejoras aplicadas. | El estudiante no veía resultados de reportar, lo que bajaba la participación. |
+| 4 | **Mi historial** semanal del estudiante. | No había forma de ver si una asignatura mejoraba con el tiempo. |
+| 5 | **Evolución por categoría** en las estadísticas del docente. | Los promedios del semestre escondían si una categoría iba subiendo o bajando. |
+
+Además, los estudiantes nuevos reciben 3 asignaturas por defecto al registrarse.
+
+## Stack
+
+| Capa | Tecnología |
+|---|---|
+| Frontend | HTML5, CSS3 y JavaScript (ES Modules), sin frameworks ni paso de build |
+| Autenticación | Firebase Authentication (correo y contraseña, dominio institucional) |
+| Base de datos | Cloud Firestore, con actualización en tiempo real (`onSnapshot`) y reglas de seguridad por rol |
+| Correo | EmailJS para el código de verificación del registro |
+| Hosting | Firebase Hosting |
+| Backend (opcional) | Java 17, Maven, Firebase Admin SDK y Gson |
+| Diseño | Figma con UI Kit propio. Tipografías Fraunces y Source Sans 3 |
+
+## Arquitectura
+
+```
+┌────────────────────────────┐
+│  Navegador                 │
+│  index.html  (interfaz)    │
+│  nexo-api.js (datos)  ─────┼──► 1. Backend Java   localhost:8080/api  (si está corriendo)
+└────────────────────────────┘    2. Firebase       Auth + Firestore    (app publicada)
+                                  3. Modo demo      datos simulados     (?demo o sin Firebase)
+```
+
+`nexo-api.js` elige la fuente de datos en ese orden y normaliza las respuestas, así que la interfaz recibe siempre la misma forma de datos sin importar de dónde vienen.
+
+La seguridad no depende del cliente: `firestore.rules` valida el dominio del correo, impide que un usuario se asigne un rol, exige que el reporte nazca *Pendiente* con al menos 20 caracteres, restringe quién puede cambiar estados y prohíbe borrar reportes.
+
+## Cómo correrlo
 
 ### Requisitos
+- [Node.js](https://nodejs.org/) 18 o superior
+- Firebase CLI: `npm install -g firebase-tools`
+- Opcional, para el backend: Java 17 y Maven 3.9 o superior
 
-- [Node.js](https://nodejs.org/) 18 o superior (incluye `npm`)
-- [Git](https://git-scm.com/)
+### 1. Clonar
+```bash
+git clone https://github.com/valgomezzz/Nexo.git
+cd Nexo
+```
 
-### Pasos
-
-**Frontend con Firebase real** (desde la raíz del proyecto):
+### 2. Levantar el frontend
 ```bash
 firebase serve --only hosting
 ```
-y abrir `http://localhost:5000`
+Abrir `http://localhost:5000`. Por defecto usa el proyecto Firebase configurado en `firebase-config.js`.
 
-**Backend Java opcional** (desde `backend/`):
-```bash
-mvn compile exec:java
-```
-
-## 📌 Estado del proyecto
-
-**Release 1 (v0.1)**
-
-- [x] Prototipos en Figma
-- [x] UI Kit (colores, tipografía y componentes)
-- [x] Navegación entre 10 pantallas
-- [x] Gestión de reportes y resumen consolidado (HU-03, HU-04)
-- [x] Frontend desplegado en URL pública ([nexo-7a24e.web.app](https://nexo-7a24e.web.app))
-- [x] Conexión con Firebase Authentication y Cloud Firestore
-- [x] Backend REST en Java 17 con Firebase Admin SDK (opcional)
-- [ ] Validación con usuarios reales (12 al 25 de octubre)
-
-**Próximos pasos:** Release 2 (25 de octubre) con ajustes post-validación y consolidación de persistencia.
-
----
-
-# 📖 Documentación técnica
-
-Interfaz web (HTML + JavaScript) conectada a **Firebase** (Authentication y Cloud Firestore), con un backend opcional en **Java 17 + Firebase Admin SDK**.
-
-## 🛠️ Estructura
-
-### 🌐 Frontend
-- [`Nexo.html`](Nexo.html) / [`index.html`](index.html): aplicación con las **10 pantallas** (landing, login y paneles de estudiante, docente y dirección).
-- [`nexo-api.js`](nexo-api.js): capa de datos. Usa el backend Java si está corriendo en `http://localhost:8080/api`; si no, se conecta directo a Firestore. Normaliza los datos para que la interfaz reciba siempre la misma forma.
-- [`firebase-config.js`](firebase-config.js): configuración del proyecto Firebase (`nexo-7a24e`).
-- [`firestore.rules`](firestore.rules): reglas de seguridad de Cloud Firestore.
-- [`firebase.json`](firebase.json) / [`.firebaserc`](.firebaserc): configuración de Firebase Hosting.
-
-### ☕ Backend en Java ([`backend/`](backend))
-- [`pom.xml`](backend/pom.xml): Maven con Java 17, `firebase-admin` y `gson`.
-- [`NexoServer.java`](backend/src/main/java/co/edu/javeriana/nexo/NexoServer.java): servidor HTTP (`http://localhost:8080`).
-- [`NexoApi.java`](backend/src/main/java/co/edu/javeriana/nexo/NexoApi.java): rutas REST.
-- [`model/`](backend/src/main/java/co/edu/javeriana/nexo/model) y [`service/`](backend/src/main/java/co/edu/javeriana/nexo/service): dominio y lógica (autenticación, asignaturas, reportes y estadísticas).
-- [`AsignarRol.java`](backend/src/main/java/co/edu/javeriana/nexo/AsignarRol.java): utilidad para asignar los roles DOCENTE / DIRECCION.
-
-## 📡 Endpoints de la API Java
-
-| Método | Endpoint | Descripción | Criterio |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/health` | Estado del backend y de Firebase | Salud de la API |
-| `GET` | `/api/me` | Usuario en sesión | **HU-01** |
-| `GET` | `/api/subjects` | Asignaturas inscritas o a cargo | **HU-02** / **HU-03** |
-| `GET` | `/api/reports` | Reportes según el rol | **HU-03** |
-| `POST` | `/api/reports` | Crear reporte (mensaje de mínimo 20 caracteres) | **HU-02** |
-| `PATCH` | `/api/reports/{id}` | Cambiar estado (`pend`, `rev`, `ok`) | **HU-03** |
-| `GET` | `/api/stats` | Métricas consolidadas | **HU-04** |
-
-Con Firebase activo, las rutas protegidas requieren el ID token de Firebase (`Authorization: Bearer <token>`).
-
-## 📱 Pantallas (10)
-
-1. **Landing:** logo 3D giratorio y "Así funciona" en 3 pasos que aparecen al hacer scroll.
-2. **Iniciar sesión:** correo institucional `@javeriana.edu.co`; el rol se toma del perfil en Firestore.
-3. **Estudiante · Mis asignaturas:** asignaturas de la semana por reportar y reportes recientes con su estado.
-4. **Estudiante · Nuevo reporte:** asistente de 5 pasos (asignatura, metodología, contenido, ritmo con escala de 5 caritas y mensaje).
-5. **Estudiante · Reporte enviado:** comprobante con valoraciones, fecha y estado.
-6. **Docente · Reportes recibidos:** filtros por estado y asignatura, y cambio de estado desde cada reporte (HU-03).
-7. **Docente · Estadísticas:** totales, categorías, valoración promedio, reportes por semana y urgencia por asignatura (HU-04).
-8. **Docente · Mis asignaturas:** asignaturas a cargo con sus pendientes.
-9. **Dirección · Panorama semanal:** consolidado del programa y ranking de urgencia.
-10. **Dirección · Detalle de grupo:** trazabilidad de los reportes de un grupo.
-
-Cualquier reporte se puede abrir en una ventana de **solo lectura** con su detalle completo y su seguimiento.
-
-## 👥 Cuentas de prueba (modo demo local)
-
-Cuando Firebase no está configurado, la app funciona con datos de demostración y acepta cualquier contraseña con estas cuentas:
+### Modo demo (sin cuenta ni conexión a Firebase)
+Abrir `http://localhost:5000/?demo`. Carga una simulación con 12 grupos, 6 docentes y cientos de reportes, y acepta cualquier contraseña:
 
 | Rol | Correo |
-| :--- | :--- |
+|---|---|
 | Estudiante | `estudiante@javeriana.edu.co` |
 | Docente | `profesor@javeriana.edu.co` |
 | Dirección | `direccion@javeriana.edu.co` |
+| Docente directivo | `jefe@javeriana.edu.co` |
 
-En la app publicada se usan las cuentas reales de Firebase Authentication.
+Los cambios del modo demo se guardan en el `localStorage` del navegador.
+
+### 3. Backend Java (opcional)
+```bash
+cd backend
+mvn compile exec:java
+```
+Queda en `http://localhost:8080/api` (salud: `/api/health`). Si existe `backend/serviceAccountKey.json`, se conecta a Firestore; si no, funciona con datos locales. El frontend lo detecta solo cuando corre en `localhost`.
+
+### Asignar roles
+Toda cuenta nueva es de estudiante. Los roles de docente o dirección se asignan con el Admin SDK, porque las reglas no permiten que un usuario cambie su propio rol:
+
+```bash
+cd backend
+mvn compile exec:java -Dexec.mainClass=co.edu.javeriana.nexo.AsignarRol \
+  -Dexec.args="correo@javeriana.edu.co DOCENTE"
+```
+Roles válidos: `ESTUDIANTE`, `DOCENTE`, `DIRECCION` y `ADMIN`.
+
+## Despliegue
+
+```bash
+firebase login
+firebase deploy --only hosting,firestore:rules
+```
+
+- `hosting` publica la interfaz en `https://nexo-7a24e.web.app`. Qué archivos se excluyen se define en `firebase.json`: backend, documentación y carpetas ocultas.
+- `firestore:rules` publica `firestore.rules`. Hay que incluirlo siempre que cambien las reglas.
+- Después de desplegar, conviene una recarga forzada (Cmd/Ctrl + Shift + R) para descartar la versión en caché.
+
+## Modelo de datos
+
+Colecciones en Cloud Firestore:
+
+| Colección | Campos principales | Quién escribe |
+|---|---|---|
+| `users/{uid}` | `email`, `nombre`, `rol`, `subjectIds`, `aCargo`, `createdAt` | El propio usuario, sin poder cambiar `rol` ni `email` |
+| `subjects/{id}` | `nombre`, `abreviatura`, `grupo`, `professorUid`, `professorNombre`, `studentUids` | Dirección o administrador |
+| `reports/{id}` | `studentUid`, `subjectId`, `professorUid`, `respuestas`, `moods`, `categoria`, `detalle`, `estado`, `historial`, `respuesta`, `createdAt`, `updatedAt` | Lo crea el estudiante; estado y respuesta, el docente a cargo o la dirección. No se borra |
+| `mejoras/{id}` | `subjectId`, `professorUid`, `professorNombre`, `texto`, `createdAt` | Docente, solo a su nombre |
+
+Las asignaturas de un estudiante son la unión de las que lo incluyen en `studentUids` (inscripción oficial) y las de `subjectIds` en su perfil (elegidas por él o asignadas al registrarse).
+
+## API del backend Java
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| `GET` | `/api/health` | Estado del backend y de la conexión con Firebase |
+| `POST` | `/api/auth/login` | Inicio de sesión en modo local |
+| `GET` | `/api/me` | Usuario en sesión |
+| `GET` | `/api/subjects` | Asignaturas inscritas o a cargo |
+| `GET` | `/api/reports` | Reportes visibles según el rol |
+| `POST` | `/api/reports` | Crear reporte |
+| `PATCH` | `/api/reports/{id}` | Cambiar estado (`pend`, `rev`, `ok`) |
+| `GET` | `/api/stats` | Métricas consolidadas |
+
+Con Firebase activo, las rutas protegidas exigen `Authorization: Bearer <ID token de Firebase>`.
+
+## Historias de usuario
+
+| HU | Historia | Estado |
+|---|---|---|
+| HU-01 | Registro y autenticación institucional con roles | Completa |
+| HU-02 | Creación de reportes de dificultades académicas | Completa |
+| HU-03 | Gestión y seguimiento de reportes por el docente | Completa, con respuesta escrita desde la v1.0 |
+| HU-04 | Resumen consolidado y métricas por asignatura | Completa, con evolución por categoría desde la v1.0 |
+| HU-05 | Modelo de datos con integridad, auditoría y trazabilidad | Completa (reglas de Firestore e historial de estados) |
+
+El detalle y los criterios de aceptación están en [`readme_Nexo.md`](readme_Nexo.md).
+
+## Estructura del repositorio
+
+```
+Nexo/
+├── index.html / Nexo.html   Aplicación (17 pantallas). Hosting sirve Nexo.html; ambos son idénticos
+├── nexo-api.js              Capa de datos: backend Java, Firestore o modo demo
+├── firebase-config.js       Configuración de Firebase, URL del backend y EmailJS
+├── firestore.rules          Reglas de seguridad de Firestore
+├── firebase.json            Configuración de Hosting
+├── backend/                 API REST en Java 17
+│   └── src/main/java/co/edu/javeriana/nexo/
+│       ├── NexoServer.java  Servidor HTTP
+│       ├── NexoApi.java     Rutas
+│       ├── AsignarRol.java  Asignación de roles
+│       ├── model/           Usuario, Asignatura, Reporte, Rol, Estado
+│       └── service/         Autenticación, asignaturas, reportes y estadísticas
+└── docs/img/                Recursos gráficos
+```
+
+## Historial de versiones
+
+| Versión | Contenido |
+|---|---|
+| v0.1 | MVP: registro, reportes, panel docente, métricas, panel de dirección y despliegue en Firebase |
+| v1.0 | Ajustes post-validación: respuesta del docente, perfil, mejoras publicadas, historial del estudiante y evolución por categoría |
 
 ---
 
-<p align="center">Proyecto universitario · MVP 2026-2</p>
+<p align="center">Proyecto universitario · Pontificia Universidad Javeriana · 2026-2</p>
