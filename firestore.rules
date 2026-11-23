@@ -84,6 +84,20 @@ service cloud.firestore {
     }
 
     // ===============================================================
+    // MEJORAS PUBLICADAS POR LOS DOCENTES ("Lo que cambió gracias a tus reportes")
+    // ===============================================================
+    match /mejoras/{mejoraId} {
+      allow read: if isAuthenticated();
+      // Solo docentes, a su propio nombre y con un texto mínimo
+      allow create: if isDocente() &&
+        request.resource.data.professorUid == request.auth.uid &&
+        request.resource.data.subjectId is string &&
+        request.resource.data.texto is string &&
+        request.resource.data.texto.size() >= 10;
+      allow update, delete: if false;
+    }
+
+    // ===============================================================
     // HU-02, HU-03, HU-04 & HU-05: COLECCIÓN DE REPORTES DE DIFICULTADES
     // ===============================================================
     match /reports/{reportId} {

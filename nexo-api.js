@@ -352,6 +352,20 @@ export function normalizeReport(r) {
 
 const byDateDesc = (a, b) => new Date(b.createdAt) - new Date(a.createdAt);
 
+/** Mejora publicada por un docente en una asignatura ("Lo que cambió gracias a tus reportes"). */
+export function normalizeMejora(m) {
+  return {
+    id: m.id,
+    subjectId: m.subjectId || '',
+    asignatura: m.subjectNombre || 'Asignatura',
+    grupo: m.grupo || 'Grupo 1',
+    professorUid: m.professorUid || '',
+    profesor: m.professorNombre || 'Docente',
+    texto: m.texto || '',
+    createdAt: toIso(m.createdAt)
+  };
+}
+
 // ===============================================================
 // DATOS LOCALES DE DEMOSTRACIÓN (solo sin Firebase)
 // ===============================================================
@@ -525,7 +539,18 @@ function loadLocalDb() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch (e) {}
-  return { subjects: DEFAULT_SUBJECTS, reports: simularReportes() };
+  return { subjects: DEFAULT_SUBJECTS, reports: simularReportes(), mejoras: simularMejoras(), perfiles: {} };
+}
+
+function simularMejoras() {
+  const hace = (dias) => new Date(Date.now() - dias * 86400000).toISOString();
+  const g = (id) => SIM_GRUPOS.find(x => x.id === id);
+  const m = (id, dias, texto, n) => ({ id: `mej-${n}`, subjectId: id, subjectNombre: g(id).nombre, grupo: g(id).grupo, professorUid: g(id).prof[0], professorNombre: g(id).prof[1], texto, createdAt: hace(dias) });
+  return [
+    m('bases-g1', 3, 'Publiqué la rúbrica del proyecto final en la plataforma, con los criterios de cada entrega.', 1),
+    m('estructuras-g1', 9, 'Desde esta semana subo las diapositivas un día antes de clase y dejo 15 minutos al final para resolver dudas.', 2),
+    m('calculo-g1', 12, 'Abrimos asesorías los martes y jueves de 4 a 5 p. m. para repasar los ejercicios de los talleres.', 3)
+  ];
 }
 function saveLocalDb(data) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
@@ -1125,6 +1150,51 @@ export const NexoAPI = {
     }
     me.subjectIds = clean;
     return clean;
+  },
+
+  // -------------------------------------------------------------
+  // Mejoras publicadas por los docentes
+  // -------------------------------------------------------------
+  async mejoras() {
+    const me = currentProfile;
+    if (!me) return [];
+    let list = [];
+    if (useFirestore()) {
+      try {
+        const snap = await getDocs(collection(db, 'mejoras'));
+        snap.forEach(d => list.push(normalizeMejora({ id: d.id, ...d.data() })));
+      } catch (e) {
+        console.warn('[Nexo] Mejoras:', e.message);
+      }
+    } else {
+      list = (localDb.mejoras || []).map(normalizeMejora);
+    }
+    if (me.rol === 'est') {
+      const mias = new Set((await this.subjects()).map(s => s.id));
+      list = list.filter(m => mias.has(m.subjectId));
+    } else if (me.rol === 'doc') {
+      list = list.filter(m => m.professorUid === me.uid);
+    }
+    return list.sort(byDateDesc);
+  },
+
+  async publishMejora(subjectId, texto) {
+    const me = currentProfile;
+    const clean = String(texto || '').trim();
+    if (clean.length < 10) throw new Error('Describe la mejora en al menos 10 caracteres.');
+    const subj = (await this.subjects()).find(s => s.id === subjectId);
+    if (!subj) throw new Error('Selecciona una de tus asignaturas.');
+    if (subj.professorUid !== me.uid) throw new Error('Solo puedes publicar mejoras en tus asignaturas.');
+    const data = { subjectId: subj.id, subjectNombre: subj.nombre, grupo: subj.grupo, professorUid: me.uid, professorNombre: me.nombre, texto: clean };
+
+    if (useFirestore()) {
+      const ref = await addDoc(collection(db, 'mejoras'), { ...data, createdAt: serverTimestamp() });
+      return normalizeMejora({ id: ref.id, ...data, createdAt: new Date().toISOString() });
+    }
+    const local = { id: 'mej-' + Date.now(), ...data, createdAt: new Date().toISOString() };
+    localDb.mejoras = [local, ...(localDb.mejoras || [])];
+    saveLocalDb(localDb);
+    return normalizeMejora(local);
   },
 
   async setStatus(reportId, newStatus) {
