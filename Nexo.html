@@ -75,6 +75,7 @@ h1,h2,h3,p{margin:0}
 .row.click{cursor:pointer}
 .sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:18px}
 .empty{padding:36px 20px;text-align:center;color:#5B6B82;font-size:16px}
+.ok-badge{background:#E1F1E5;color:#2A6A3D}
 
 /* ---------- Docente / Dirección ---------- */
 .date-badge{display:flex;flex-direction:column;align-items:center;justify-content:center;width:58px;height:58px;border-radius:18px;background:linear-gradient(145deg,#fff,#E7EEF8);border:1.5px solid #DCE5F2;box-shadow:inset 0 1px 0 #fff,0 6px 14px -6px rgba(53,94,150,.25);color:#355E96;flex:none}
@@ -369,7 +370,7 @@ button.kpi{cursor:pointer;transition:transform .2s}button.kpi:hover{transform:tr
 <div id="toasts" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { NexoAPI, EST_LABELS, MOOD_LABELS, CATEGORIAS, LIKERT_LABELS, CONTEXTO, PREGUNTAS, promedioCategoria, puntaje, textoRespuesta, esAlerta, alertasDe, resumenPregunta, favorableCategoria, TEMAS, temasDe, sinTildes, DEMO_MODE } from './nexo-api.js?v=2026-11-08e';
+import { NexoAPI, EST_LABELS, MOOD_LABELS, CATEGORIAS, LIKERT_LABELS, CONTEXTO, PREGUNTAS, promedioCategoria, puntaje, textoRespuesta, esAlerta, alertasDe, resumenPregunta, favorableCategoria, TEMAS, temasDe, sinTildes, DEMO_MODE } from './nexo-api.js?v=2026-11-22a';
 
 // ===============================================================
 // ESTADO DE LA APLICACIÓN
@@ -392,7 +393,9 @@ const S = {
   viewId: null, // reporte abierto en la ventana de detalle
   dir: { subjectId: null },
   // Pantalla de encuestas: pestaña y filtros
-  res: { tab: 'preguntas', subject: 'todos', docente: 'todos', tipo: 'todos', tema: null, q: '', alertas: false, limit: 30 }
+  res: { tab: 'preguntas', subject: 'todos', docente: 'todos', tipo: 'todos', tema: null, q: '', alertas: false, limit: 30 },
+  // Respuesta del docente que se está escribiendo en la ventana de detalle
+  reply: { id: null, text: '', sending: false }
 };
 
 function readPref(k, def) { try { return localStorage.getItem(k) ?? def; } catch (e) { return def; } }
@@ -804,7 +807,7 @@ function renderEstAsig() {
 
   const mine = S.reports.slice(0, 6).map(r => `<li class="row lift viewable" data-act="view-report" data-id="${esc(r.id)}" tabindex="0" role="button" aria-label="Ver detalle del reporte de ${esc(r.asignatura)}" style="box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(19,33,53,.06)">
       ${dayBadge(r.createdAt)}
-      <div style="flex:1 1 220px;min-width:0"><div style="font-weight:700;font-size:16px">${esc(r.titulo)}</div><div style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:#355E96">${esc(r.asignatura)}</span><span class="tag-badge">${esc(r.categoria)}</span></div></div>
+      <div style="flex:1 1 220px;min-width:0"><div style="font-weight:700;font-size:16px">${esc(r.titulo)}</div><div style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:#355E96">${esc(r.asignatura)}</span><span class="tag-badge">${esc(r.categoria)}</span>${r.respuesta ? `<span class="tag-badge ok-badge">${icon('chat', 12)}&nbsp;Tu docente respondió</span>` : ''}</div></div>
       ${statusPill(r.estado)}
       <span class="view-hint">Ver detalle${icon('right', 16, 'stroke-width="2.5"')}</span>
     </li>`).join('');
@@ -1016,6 +1019,31 @@ function alertaBox(r) {
   return `<div class="alert-box" role="note">${icon('alert', 20)}<span>Requiere atención: ${al.map(p => `${esc(p.corto)} → “${esc(textoRespuesta(p, r.respuestas[p.id]))}”`).join('; ')}.</span></div>`;
 }
 
+// Respuesta del docente: la ve el estudiante y la escribe el docente a cargo
+function respuestaBloque(r) {
+  const esEst = roleOf(S.user) === 'est';
+  const puede = ['doc', 'mix'].includes(roleOf(S.user)) && r.professorUid === S.user.uid;
+  if (r.respuesta) {
+    return `<section>
+      <h3>${esEst ? 'Respuesta de tu docente' : puede ? 'Tu respuesta' : 'Respuesta del docente'}</h3>
+      <p class="msg" style="border-left-color:#6DAF7E">${esc(r.respuesta.texto)}</p>
+      <p style="margin:8px 0 0;font-size:13px;color:#5B6B82">${esc(r.respuesta.nombre)} · ${fullDate(r.respuesta.fecha)}</p>
+    </section>`;
+  }
+  if (!puede) return esEst ? `<section><h3>Respuesta de tu docente</h3><p style="margin:0;color:#5B6B82;font-size:15px">Tu docente aún no ha respondido. Te avisaremos aquí cuando lo haga.</p></section>` : '';
+  const P = S.reply;
+  return `<section>
+    <h3>Responder al estudiante</h3>
+    <form id="replyForm" style="display:flex;flex-direction:column;gap:12px">
+      <textarea class="field" rows="4" id="replyText" aria-label="Respuesta para el estudiante" placeholder="Por ejemplo: gracias por contarlo, desde la próxima clase dejaré tiempo para resolver dudas.">${esc(P.id === r.id ? P.text : '')}</textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="font-size:13px;color:#5B6B82;max-width:40ch">El estudiante verá tu respuesta en su seguimiento. Si el reporte está pendiente, pasa a “En revisión”.</span>
+        <button class="btn p" type="submit" ${P.sending ? 'disabled' : ''}>${icon('send', 16)}${P.sending ? 'Enviando…' : 'Enviar respuesta'}</button>
+      </div>
+    </form>
+  </section>`;
+}
+
 function reportModal() {
   const r = S.reports.find(x => x.id === S.viewId) || (S.lastReport?.id === S.viewId ? S.lastReport : null);
   if (!r) return '';
@@ -1066,6 +1094,7 @@ function reportModal() {
         <h3>Seguimiento</h3>
         <div class="track3">${pasos}</div>
       </section>
+      ${respuestaBloque(r)}
       <div style="display:flex;justify-content:flex-end"><button class="btn" data-act="close-report">Cerrar</button></div>
     </div>
   </div>`;
@@ -1088,7 +1117,7 @@ function renderDocReportes() {
       ${dayBadge(r.createdAt)}
       <div style="flex:1;min-width:0">
         <div style="font-weight:700;font-size:17px;color:#132135">${esc(r.titulo)}</div>
-        <div style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:#355E96">${esc(r.asignatura)}</span><span class="tag-badge">${esc(r.categoria)}</span><span style="font-size:13px;color:#5B6B82">${esc(r.grupo)}</span><span class="view-hint">Ver detalle${icon('right', 14, 'stroke-width="2.5"')}</span></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:#355E96">${esc(r.asignatura)}</span><span class="tag-badge">${esc(r.categoria)}</span>${r.respuesta ? `<span class="tag-badge ok-badge">Respondido</span>` : ''}<span style="font-size:13px;color:#5B6B82">${esc(r.grupo)}</span><span class="view-hint">Ver detalle${icon('right', 14, 'stroke-width="2.5"')}</span></div>
       </div>
       ${statusControl(r)}
     </div>
@@ -1098,7 +1127,7 @@ function renderDocReportes() {
     <header>
       <p class="eyebrow">${weekLabel()} · Semestre ${semestre()}</p>
       <h1 class="d h1" style="max-width:26ch">Hola, ${esc(u.primerNombre)}. ${all.pend ? `Tienes ${plural(all.pend, 'reporte pendiente', 'reportes pendientes')}.` : 'Estás al día con tus reportes.'}</h1>
-      <p class="sub">Cambia el estado de cada reporte para que el estudiante sepa que lo leíste.</p>
+      <p class="sub">Abre un reporte para responderle al estudiante o cambia su estado para que sepa que lo leíste.</p>
     </header>
     ${all.pend ? `<section class="banner" style="padding:30px 36px">
       <div class="orbit" style="width:260px;height:260px;right:-40px;top:-90px;border:1px dashed rgba(255,255,255,.3);animation-duration:28s"><i style="background:#E6B979"></i></div>
@@ -1734,6 +1763,8 @@ async function loadData() {
   S.unsubscribe = NexoAPI.subscribeReports((list) => {
     S.reports = list;
     // Refresca solo las pantallas que muestran reportes (no interrumpe el asistente)
+    // ni borra lo que se está escribiendo en una respuesta o una mejora
+    if (document.activeElement?.matches('textarea')) return;
     if (['est-asig', 'doc-reportes', 'doc-stats', 'doc-asig', 'dir-semanal', 'dir-grupo', 'dir-clases'].includes(S.screen)) render();
   });
 }
@@ -1754,6 +1785,7 @@ async function endSession() {
   S.lastReport = null;
   S.doc = { estado: 'todos', subject: 'todos', menuId: null };
   S.viewId = null;
+  S.reply = { id: null, text: '', sending: false };
   S.login = { ...S.login, pass: '', error: '', loading: false };
   S.register = { nombre: '', email: '', pass: '', pass2: '', error: '', loading: false };
   S.verify = { email: null, code: '', error: '', info: '', loading: false, sending: false, until: 0 };
@@ -1999,6 +2031,7 @@ document.addEventListener('input', (e) => {
     if (box) box.innerHTML = comentariosLista(S.screen === 'doc-encuesta' ? 'doc' : 'dir');
     return;
   }
+  if (t.id === 'replyText') { S.reply.id = S.viewId; S.reply.text = t.value; return; }
   if (t.id === 'regNombre') S.register.nombre = t.value;
   if (t.id === 'regEmail') S.register.email = t.value;
   if (t.id === 'regPass') S.register.pass = t.value;
@@ -2063,6 +2096,35 @@ async function enterApp(user, greeting) {
 }
 
 document.addEventListener('submit', async (e) => {
+  // Respuesta del docente a un reporte
+  if (e.target.id === 'replyForm') {
+    e.preventDefault();
+    const P = S.reply;
+    const id = S.viewId;
+    if (P.sending || !id) return;
+    P.sending = true;
+    render();
+    try {
+      const resp = await NexoAPI.replyReport(id, P.id === id ? P.text : '');
+      const rep = S.reports.find(r => r.id === id);
+      if (rep) {
+        rep.respuesta = resp;
+        if (rep.estado === 'pend') {
+          rep.estado = 'rev';
+          rep.historial = [...(rep.historial || []), { estado: 'rev', fecha: new Date().toISOString() }];
+          await NexoAPI.setStatus(id, 'rev').catch(() => {});
+        }
+      }
+      S.reply = { id: null, text: '', sending: false };
+      toast('Respuesta enviada al estudiante.');
+    } catch (err) {
+      P.sending = false;
+      toast(err.message, true);
+    }
+    render();
+    return;
+  }
+
   if (e.target.id === 'registerForm') {
     e.preventDefault();
     const R = S.register;

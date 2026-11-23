@@ -341,6 +341,10 @@ export function normalizeReport(r) {
         return { estado: ['pend', 'rev', 'ok'].includes(e) ? e : (EST_MAP[e.toUpperCase()] || 'pend'), fecha: toIso(h?.fecha) };
       })
       .sort((a, b) => new Date(a.fecha) - new Date(b.fecha)),
+    // Respuesta escrita por el docente (null si aún no responde)
+    respuesta: r.respuesta && r.respuesta.texto
+      ? { texto: String(r.respuesta.texto), nombre: r.respuesta.nombre || 'Docente', fecha: toIso(r.respuesta.fecha) }
+      : null,
     createdAt: toIso(r.createdAt),
     updatedAt: toIso(r.updatedAt || r.createdAt)
   };
@@ -1067,6 +1071,25 @@ export const NexoAPI = {
       try { callback(await this.reports()); } catch (e) {}
     }, 4000);
     return () => clearInterval(timer);
+  },
+
+  /** El docente responde un reporte; el estudiante ve la respuesta en su seguimiento. */
+  async replyReport(reportId, texto) {
+    const me = currentProfile;
+    const clean = String(texto || '').trim();
+    if (clean.length < 10) throw new Error('Escribe una respuesta de al menos 10 caracteres.');
+    const respuesta = { texto: clean, por: me.uid, nombre: me.nombre, fecha: new Date().toISOString() };
+
+    if (useFirestore()) {
+      await updateDoc(doc(db, 'reports', reportId), { respuesta, updatedAt: serverTimestamp() });
+    } else {
+      const rep = localDb.reports.find(r => r.id === reportId);
+      if (!rep) throw new Error('No se encontró el reporte.');
+      rep.respuesta = respuesta;
+      rep.updatedAt = respuesta.fecha;
+      saveLocalDb(localDb);
+    }
+    return { texto: clean, nombre: me.nombre, fecha: respuesta.fecha };
   },
 
   async setStatus(reportId, newStatus) {
